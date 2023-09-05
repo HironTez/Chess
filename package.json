@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "npm run build & npm run start",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "typescript": "^5.2.2"
+  }
+}
