@@ -26,7 +26,7 @@ export class Pawn extends Piece {
       (capture
         ? movingDiagonally && distance === 1
         : movingVertically &&
-          (distance === 1 || (!this.moved && distance === 2))) &&
+          (distance === 1 || (distance === 2 && !this.moved))) &&
       (this.color === Color.White ? movingUp : !movingUp)
     );
   }

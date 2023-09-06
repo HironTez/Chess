@@ -11,3 +11,6 @@ export const arrayConstructor = <T>(
   Array.from({ length }, (_v, k) =>
     isFunction(constructor) ? constructor(k) : constructor
   );
+
+export const isInLimit = (min: number, value: number, max: number) =>
+  min <= value && value <= max;

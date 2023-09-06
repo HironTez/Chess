@@ -1,4 +1,4 @@
-import { Position } from "./position";
+import { Position, AxisValue } from "./position";
 import { arrayConstructor } from "../tools";
 
 export const getDiff = (position1: Position, position2: Position) => {
@@ -52,8 +52,12 @@ export const getWay = (position1: Position, position2: Position) => {
       Math.abs(xDiff || yDiff) - 1,
       (i) =>
         new Position({
-          x: xDiff ? (xDiff > 0 ? i + 1 : -i - 1) : position1.get().x,
-          y: yDiff ? (yDiff > 0 ? i + 1 : -i - 1) : position2.get().y,
+          x: xDiff
+            ? ((xDiff > 0 ? i + 1 : -i - 1) as AxisValue)
+            : position1.get().x,
+          y: yDiff
+            ? ((yDiff > 0 ? i + 1 : -i - 1) as AxisValue)
+            : position2.get().y,
         })
     );
   }

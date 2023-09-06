@@ -1,10 +1,22 @@
 import { Color, King, Piece, Type } from "./pieces";
+import { PointT, Position, AxisValue } from "./position/position";
+import { cloneDeep, isInLimit } from "./tools";
 
-import { Position } from "./position/position";
-import { cloneDeep } from "./tools";
 import { getWay } from "./position/tools";
 
 type CheckAction = (king: King) => void;
+
+type PositionString = `${"a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"}${
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"}`;
+
+type PositionInput = Position | PointT | PositionString;
 
 export class Board {
   constructor(
@@ -21,13 +33,33 @@ export class Board {
     this.onBoardChange = onBoardChange;
   }
 
-  movePiece(startPosition: Position, endPosition: Position) {
-    const piece = this.pieceAt(startPosition);
-    if (piece && this.canPieceMove(piece, endPosition)) {
-      this.removePiece(endPosition);
-      piece.move(endPosition);
+  movePiece(startPosition: PositionInput, endPosition: PositionInput) {
+    const start = this.parsePosition(startPosition);
+    const end = this.parsePosition(endPosition);
+    if (!start || !end) return;
+
+    const piece = this.pieceAt(start);
+    if (piece && this.canPieceMove(piece, end)) {
+      this.removePiece(end);
+      piece.move(end);
 
       this.moveEventHandler();
+    }
+  }
+
+  private parsePosition(position: PositionInput) {
+    if (Position.isPosition(position)) {
+      return position;
+    } else if (typeof position === "string") {
+      const x = position.charCodeAt(0) - 97;
+      const y = position.charCodeAt(1) - 49;
+      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
+        return new Position({ x: x as AxisValue, y: y as AxisValue });
+      } else {
+        return false;
+      }
+    } else {
+      return new Position(position);
     }
   }
 

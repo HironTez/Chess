@@ -1,11 +1,17 @@
 import { getDiff } from "./tools";
 
+export type AxisValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
 export type PointT = {
-  x: number;
-  y: number;
+  x: AxisValue;
+  y: AxisValue;
 };
 
 export class Position {
+  static isPosition(position: unknown): position is Position {
+    return position instanceof Position;
+  }
+
   constructor(point: PointT) {
     this.set(point);
   }
@@ -18,7 +24,7 @@ export class Position {
   }
 
   set(position: PointT | Position) {
-    if (position instanceof Position) {
+    if (Position.isPosition(position)) {
       const point = position.get();
       this.x = point.x;
       this.y = point.y;
@@ -29,7 +35,7 @@ export class Position {
   }
 
   distanceTo(position: PointT | Position) {
-    if (position instanceof Position) {
+    if (Position.isPosition(position)) {
       position = position.get();
     }
 
@@ -37,7 +43,7 @@ export class Position {
   }
 
   chebyshevDistanceTo(position: PointT | Position) {
-    if (!(position instanceof Position)) {
+    if (!Position.isPosition(position)) {
       position = new Position(position);
     }
 
@@ -45,6 +51,6 @@ export class Position {
     return Math.max(xDiff, yDiff);
   }
 
-  private x: number;
-  private y: number;
+  private x: AxisValue;
+  private y: AxisValue;
 }

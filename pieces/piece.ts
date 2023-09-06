@@ -1,21 +1,23 @@
-import { Position } from "../position/position";
+import { PointT, Position } from "../position/position";
 
 export enum Color {
-  White,
-  Black,
+  White = "white",
+  Black = "black",
 }
 
 export enum Type {
-  Pawn,
-  Rock,
-  Bishop,
-  Queen,
-  King,
+  Pawn = "pawn",
+  Rock = "rock",
+  Bishop = "bishop",
+  Queen = "queen",
+  King = "king",
 }
 
 export abstract class Piece {
-  constructor(position: Position, color: Color) {
-    this.position = position;
+  constructor(position: Position | PointT, color: Color) {
+    this.position = Position.isPosition(position)
+      ? position
+      : new Position(position);
     this.color = color;
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
   }
