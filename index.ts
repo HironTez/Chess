@@ -48,6 +48,5 @@ const board = new Board(
 
 board.movePiece(new Position({ x: 0, y: 1 }), new Position({ x: 0, y: 2 }));
 
-// TODO: pawn first move 2 squares
 // TODO: en passant
 // TODO: castling

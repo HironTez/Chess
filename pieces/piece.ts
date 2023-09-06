@@ -22,6 +22,7 @@ export abstract class Piece {
 
   move(position: Position) {
     this.position.set(position);
+    this.moved = true;
   }
 
   isAt(position: Position) {
@@ -36,6 +37,7 @@ export abstract class Piece {
     return this.canMove(position);
   }
 
+  protected moved: boolean = false;
   readonly position: Position;
   readonly color: Color;
   readonly type: Type;

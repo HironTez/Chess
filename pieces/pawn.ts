@@ -23,8 +23,10 @@ export class Pawn extends Piece {
     const movingUp = isMovingUp(this.position, position);
 
     return (
-      distance === 1 &&
-      (capture ? movingDiagonally : movingVertically) &&
+      (capture
+        ? movingDiagonally && distance === 1
+        : movingVertically &&
+          (distance === 1 || (!this.moved && distance === 2))) &&
       (this.color === Color.White ? movingUp : !movingUp)
     );
   }
