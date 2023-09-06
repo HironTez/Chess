@@ -49,6 +49,5 @@ const board = new Board(
 board.movePiece({ x: 0, y: 1 }, { x: 0, y: 2 });
 board.movePiece({ x: 0, y: 2 }, { x: 0, y: 3 });
 
-// TODO: move ordering
 // TODO: en passant
 // TODO: castling

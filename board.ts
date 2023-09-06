@@ -39,11 +39,15 @@ export class Board {
     if (!start || !end) return;
 
     const piece = this.pieceAt(start);
-    if (piece && this.canPieceMove(piece, end)) {
+    if (
+      piece &&
+      piece.color === this.currentMove &&
+      this.canPieceMove(piece, end)
+    ) {
       this.removePiece(end);
       piece.move(end);
 
-      this.moveEventHandler();
+      this.moveEventHandler(piece);
     }
   }
 
@@ -63,7 +67,9 @@ export class Board {
     }
   }
 
-  private moveEventHandler() {
+  private moveEventHandler(piece: Piece) {
+    this.currentMove = piece.oppositeColor;
+
     this.onBoardChange(this.pieces);
 
     const whiteKing = this.getKing(Color.White);
@@ -89,15 +95,6 @@ export class Board {
       if (newCheckMate) this.onCheckMate(kingInCheckMate);
     }
   }
-
-  private check: boolean;
-  private checkmate: boolean;
-  private pieces: Array<Piece>;
-
-  private onCheck: CheckAction;
-  private onCheckMate: CheckAction;
-  private onCheckResolve: () => void;
-  private onBoardChange: (pieces: Array<Piece>) => void;
 
   private isMoveValid(piece: Piece, position: Position) {
     const target = this.pieceAt(position);
@@ -240,4 +237,14 @@ export class Board {
   private removePiece(position: Position) {
     this.pieces = this.pieces.filter((piece) => !piece.isAt(position));
   }
+
+  private check: boolean;
+  private checkmate: boolean;
+  private pieces: Array<Piece>;
+  private currentMove: Color = Color.White;
+
+  private onCheck: CheckAction;
+  private onCheckMate: CheckAction;
+  private onCheckResolve: () => void;
+  private onBoardChange: (pieces: Array<Piece>) => void;
 }
