@@ -14,5 +14,5 @@ export class Knight extends Piece {
     return distance === 3 && movingVertically && movingHorizontally;
   }
 
-  type = Type.Pawn;
+  type = Type.Knight;
 }

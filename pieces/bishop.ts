@@ -9,5 +9,5 @@ export class Bishop extends Piece {
     return movingDiagonally;
   }
 
-  type = Type.Pawn;
+  type = Type.Bishop;
 }

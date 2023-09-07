@@ -8,5 +8,5 @@ export class King extends Piece {
     return distance === 1;
   }
 
-  type = Type.Pawn;
+  type = Type.King;
 }

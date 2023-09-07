@@ -15,5 +15,5 @@ export class Queen extends Piece {
     return movingVertically || movingHorizontally || movingDiagonally;
   }
 
-  type = Type.Pawn;
+  type = Type.Queen;
 }

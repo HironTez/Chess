@@ -1,5 +1,5 @@
+import { AxisValue, PointT, Position } from "./position/position";
 import { Color, King, Piece, Type } from "./pieces";
-import { PointT, Position, AxisValue } from "./position/position";
 import { cloneDeep, isInLimit } from "./tools";
 
 import { getWay } from "./position/tools";
@@ -113,6 +113,11 @@ export class Board {
   }
 
   private canPieceMove(piece: Piece, position: Position) {
+    console.log(
+      "🚀 ~ file: board.ts:116 ~ Board ~ canPieceMove ~ piece:",
+      piece,
+      position
+    );
     const way = getWay(piece.position, position);
 
     for (const position of way) {
@@ -123,7 +128,6 @@ export class Board {
     const targetIsEnemy = target?.color === piece.oppositeColor;
     const canMove = piece.canMove(position);
     const canCapture = piece.canCapture(position);
-    console.log(targetIsEnemy);
 
     return targetIsEnemy ? canCapture : canMove;
   }
@@ -181,13 +185,13 @@ export class Board {
 
     const enemiesCheckingKing = this.piecesCheckingKing(king);
     for (const enemy of enemiesCheckingKing) {
-      const canCaptureEnemy = this.isMoveValid(piece, enemy.position);
+      const canCaptureEnemy = this.canPieceMove(piece, enemy.position);
       if (canCaptureEnemy) {
-        const willCancelCheck = this.isCheckResolvedByMove(
+        const willResolveCheck = this.willMoveResolveCheck(
           piece,
           enemy.position
         );
-        if (willCancelCheck) {
+        if (willResolveCheck) {
           return false;
         }
       }
@@ -195,7 +199,7 @@ export class Board {
       const enemyWay = getWay(enemy.position, king.position);
       for (const position of enemyWay) {
         const canCover = this.isMoveValid(piece, position);
-        const willCancelCheck = this.isCheckResolvedByMove(piece, position);
+        const willCancelCheck = this.willMoveResolveCheck(piece, position);
 
         if (canCover && willCancelCheck) {
           return false;
@@ -206,7 +210,7 @@ export class Board {
     return true;
   }
 
-  private isCheckResolvedByMove(piece: Piece, position: Position): boolean {
+  private willMoveResolveCheck(piece: Piece, position: Position): boolean {
     const piecesCopy = cloneDeep(this.pieces);
 
     piece.move(position);

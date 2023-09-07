@@ -8,6 +8,7 @@ export enum Color {
 export enum Type {
   Pawn = "pawn",
   Rock = "rock",
+  Knight = "knight",
   Bishop = "bishop",
   Queen = "queen",
   King = "king",

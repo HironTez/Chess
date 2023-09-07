@@ -1,4 +1,5 @@
-import { Position, AxisValue } from "./position";
+import { AxisValue, Position } from "./position";
+
 import { arrayConstructor } from "../tools";
 
 export const getDiff = (position1: Position, position2: Position) => {
