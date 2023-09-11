@@ -36,17 +36,19 @@ const board = new Board(
     new King({ x: 2, y: 5 }, Color.White),
     new Queen({ x: 1, y: 5 }, Color.White),
   ],
-  () => {
-    console.log("check");
-  },
-  () => {
-    console.log("checkmate");
-  },
-  () => {
-    console.log("check resolved");
-  },
-  (pieces) => {
-    console.log(pieces);
+  {
+    onCheck: () => {
+      console.log("check");
+    },
+    onCheckMate: () => {
+      console.log("checkmate");
+    },
+    onCheckResolve: () => {
+      console.log("check resolved");
+    },
+    onBoardChange: (pieces) => {
+      console.log(pieces);
+    },
   }
 );
 

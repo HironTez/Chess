@@ -26,16 +26,18 @@ enum CheckStatus {
 export class Board {
   constructor(
     pieces: Piece[],
-    onCheck: CheckAction,
-    onCheckMate: CheckAction,
-    onCheckResolve: () => void,
-    onBoardChange: (pieces: Piece[]) => void
+    options: {
+      onCheck: CheckAction;
+      onCheckMate: CheckAction;
+      onCheckResolve: () => void;
+      onBoardChange: (pieces: Piece[]) => void;
+    }
   ) {
     this.pieces = pieces;
-    this.onCheck = onCheck;
-    this.onCheckMate = onCheckMate;
-    this.onCheckResolve = onCheckResolve;
-    this.onBoardChange = onBoardChange;
+    this.onCheck = options.onCheck;
+    this.onCheckMate = options.onCheckMate;
+    this.onCheckResolve = options.onCheckResolve;
+    this.onBoardChange = options.onBoardChange;
   }
 
   movePiece(startPosition: PositionInput, endPosition: PositionInput) {
