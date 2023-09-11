@@ -40,9 +40,12 @@ export abstract class Piece {
     return this.canMove(position);
   }
 
+  public active: boolean = true;
+
+  abstract readonly type: Type;
+
   protected moved: boolean = false;
   readonly position: Position;
   readonly color: Color;
-  readonly type: Type;
   readonly oppositeColor: Color;
 }

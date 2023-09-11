@@ -18,6 +18,11 @@ type PositionString = `${"a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"}${
 
 type PositionInput = Position | PointT | PositionString;
 
+enum CheckStatus {
+  Check = "check",
+  Checkmate = "checkmate",
+}
+
 export class Board {
   constructor(
     pieces: Piece[],
@@ -38,7 +43,7 @@ export class Board {
     const end = this.parsePosition(endPosition);
     if (!start || !end) return;
 
-    const piece = this.pieceAt(start);
+    const piece = this.getPieceAt(start);
     if (
       piece &&
       piece.color === this.currentMove &&
@@ -76,95 +81,83 @@ export class Board {
     const blackKing = this.getKing(Color.Black);
     if (!whiteKing || !blackKing) return;
 
-    const isWhiteKingInCheck = this.isKingInCheck(whiteKing);
-    const isBlackKingInCheck = this.isKingInCheck(blackKing);
-    const newCheck = isWhiteKingInCheck || isBlackKingInCheck;
-    const isWhiteKingInCheckMate = this.isKingInCheckmate(whiteKing);
-    const isBlackKingInCheckMate = this.isKingInCheckmate(blackKing);
-    const newCheckMate = isWhiteKingInCheckMate || isBlackKingInCheckMate;
+    for (const king of [whiteKing, blackKing]) {
+      const checkStatus = this.isKingInCheckOrCheckmate(king);
+      const isInCheck = checkStatus === CheckStatus.Check;
+      const isInCheckmate = checkStatus === CheckStatus.Checkmate;
+      if (this.check !== isInCheck) {
+        if (isInCheck) {
+          this.check = king.color;
 
-    if (this.check !== newCheck) {
-      const kingInCheck = isWhiteKingInCheck ? whiteKing : blackKing;
-      if (newCheck) this.onCheck(kingInCheck);
-      else this.onCheckResolve();
+          this.onCheck(king);
+        } else {
+          this.check = false;
 
-      this.check = newCheck;
-    }
-    if (this.checkmate !== newCheckMate) {
-      const kingInCheckMate = isWhiteKingInCheckMate ? whiteKing : blackKing;
-      if (newCheckMate) this.onCheckMate(kingInCheckMate);
+          this.onCheckResolve();
+        }
+      }
+      if (this.checkmate !== isInCheckmate) {
+        if (isInCheckmate) {
+          this.checkmate = king.color;
+
+          this.onCheckMate(king);
+        } else {
+          this.checkmate = false;
+        }
+      }
     }
   }
 
   private isMoveValid(piece: Piece, position: Position) {
-    const target = this.pieceAt(position);
-    const moving = !!piece.position.distanceTo(position);
-    const canDefendKing = this.canDefendKing(piece);
-    const coversKing = this.coversKing(piece, target);
+    const isMoving = !!piece.position.distanceTo(position);
 
-    if (
-      !moving ||
-      ((this.check || coversKing) && !canDefendKing) ||
-      this.checkmate
-    )
+    if (!isMoving || this.checkmate) {
       return false;
+    }
 
-    return this.canPieceMove(piece, position);
+    const canMove = this.canPieceMove(piece, position);
+
+    if (canMove && this.check) {
+      const canDefendKing = this.canPieceDefendKing(piece);
+
+      if (!canDefendKing) {
+        return false;
+      }
+    }
+
+    return canMove;
   }
 
   private canPieceMove(piece: Piece, position: Position) {
-    console.log(
-      "🚀 ~ file: board.ts:116 ~ Board ~ canPieceMove ~ piece:",
-      piece,
-      position
-    );
     const way = getWay(piece.position, position);
 
     for (const position of way) {
-      if (this.pieceAt(position)) return false;
+      if (this.getPieceAt(position)) return false;
     }
 
-    const target = this.pieceAt(position);
+    const target = this.getPieceAt(position);
     const targetIsEnemy = target?.color === piece.oppositeColor;
     const canMove = piece.canMove(position);
     const canCapture = piece.canCapture(position);
-
-    return targetIsEnemy ? canCapture : canMove;
-  }
-
-  private coversKing(piece: Piece, target: Piece | undefined) {
-    const king = this.getKing(piece.color);
-    if (!king) return false;
-
-    const enemiesCheckingKing = this.piecesCheckingKing(king);
-    for (const enemy of enemiesCheckingKing) {
-      if (target && enemy.isAt(target.position)) {
-        continue;
-      }
-
-      const enemyWayToKing = getWay(enemy.position, king.position);
-
-      for (const position of enemyWayToKing) {
-        if (piece.isAt(position)) {
-          return true;
-        }
-      }
+    if (targetIsEnemy ? canCapture : canMove) {
+      const willBeCheck = this.willBeCheck(piece, position);
+      return !willBeCheck;
     }
 
     return false;
   }
 
-  private isKingInCheckmate(king: King) {
+  private isKingInCheckOrCheckmate(king: King) {
     const isInCheck = this.isKingInCheck(king);
     if (isInCheck) {
       const team = this.getPiecesByColor(king.color);
       for (const teammate of team) {
-        if (this.canDefendKing(teammate)) {
-          return false;
+        if (this.canPieceDefendKing(teammate)) {
+          return CheckStatus.Check;
         }
       }
 
-      return true;
+      return CheckStatus.Checkmate;
     }
 
     return false;
@@ -179,7 +172,7 @@ export class Board {
     return enemies.filter((enemy) => this.canPieceMove(enemy, king.position));
   }
 
-  private canDefendKing(piece: Piece) {
+  private canPieceDefendKing(piece: Piece) {
     const king = this.getKing(piece.color);
     if (!king) return false;
 
@@ -187,19 +180,18 @@ export class Board {
     for (const enemy of enemiesCheckingKing) {
       const canCaptureEnemy = this.canPieceMove(piece, enemy.position);
       if (canCaptureEnemy) {
-        const willResolveCheck = this.willMoveResolveCheck(
-          piece,
-          enemy.position
-        );
-        if (willResolveCheck) {
+        const willBeCheck = this.willBeCheck(piece, enemy.position);
+        if (willBeCheck) {
           return false;
         }
+      } else {
+        return false;
       }
 
       const enemyWay = getWay(enemy.position, king.position);
       for (const position of enemyWay) {
         const canCover = this.isMoveValid(piece, position);
-        const willCancelCheck = this.willMoveResolveCheck(piece, position);
+        const willCancelCheck = this.willBeCheck(piece, position);
 
         if (canCover && willCancelCheck) {
           return false;
@@ -210,31 +202,33 @@ export class Board {
     return true;
   }
 
-  private willMoveResolveCheck(piece: Piece, position: Position): boolean {
-    const piecesCopy = cloneDeep(this.pieces);
+  private willBeCheck(piece: Piece, position: Position): boolean {
+    const target = this.getPieceAt(position);
+    const previousPosition = piece.position.get();
 
-    piece.move(position);
-    this.removePiece(position);
-
+    piece.position.set(position);
+    if (target) target.active = false;
     const king = this.getKing(piece.color);
-    const isInCheck = king && this.isKingInCheck(king);
+    const isInCheck = !!king && this.isKingInCheck(king);
 
-    this.pieces = piecesCopy;
+    piece.position.set(previousPosition);
+    if (target) target.active = true;
 
-    return !isInCheck;
+    return isInCheck;
   }
 
-  private pieceAt(position: Position) {
-    return this.pieces.find((piece) => piece.isAt(position));
+  private getPieceAt(position: Position) {
+    return this.pieces.find((piece) => piece.isAt(position) && piece.active);
   }
 
   private getPiecesByColor(color: Color) {
-    return this.pieces.filter((piece) => piece.color === color);
+    return this.pieces.filter((piece) => piece.color === color && piece.active);
   }
 
   private getKing(color: Color) {
     return this.pieces.find(
-      (piece) => piece.type === Type.King && piece.color === color
+      (piece) =>
+        piece.type === Type.King && piece.color === color && piece.active
     ) as King | undefined;
   }
 
@@ -242,8 +236,8 @@ export class Board {
     this.pieces = this.pieces.filter((piece) => !piece.isAt(position));
   }
 
-  private check: boolean;
-  private checkmate: boolean;
+  private check: Color | false = false;
+  private checkmate: Color | false = false;
   private pieces: Array<Piece>;
   private currentMove: Color = Color.White;
 

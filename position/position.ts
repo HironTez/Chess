@@ -13,7 +13,8 @@ export class Position {
   }
 
   constructor(point: PointT) {
-    this.set(point);
+    this.x = point.x;
+    this.y = point.y;
   }
 
   get() {
@@ -25,13 +26,11 @@ export class Position {
 
   set(position: PointT | Position) {
     if (Position.isPosition(position)) {
-      const point = position.get();
-      this.x = point.x;
-      this.y = point.y;
-    } else {
-      this.x = position.x;
-      this.y = position.y;
+      position = position.get();
     }
+
+    this.x = position.x;
+    this.y = position.y;
   }
 
   distanceTo(position: PointT | Position) {
@@ -48,7 +47,7 @@ export class Position {
     }
 
     const { xDiff, yDiff } = getDiff(this, position);
-    return Math.max(xDiff, yDiff);
+    return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
   private x: AxisValue;

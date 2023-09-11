@@ -33,9 +33,8 @@ const board = new Board(
     // new King({ x: 4, y: 5 }, Color.Black),
 
     new King({ x: 0, y: 7 }, Color.Black),
-    new King({ x: 7, y: 0 }, Color.White),
+    new King({ x: 2, y: 5 }, Color.White),
     new Queen({ x: 1, y: 5 }, Color.White),
-    // new
   ],
   () => {
     console.log("check");
