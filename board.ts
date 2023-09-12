@@ -2,7 +2,7 @@ import { AxisValue, PointT, Position } from "./position/position";
 import { Color, King, Piece, Type } from "./pieces";
 import { cloneDeep, isInLimit } from "./tools";
 
-import { getWay } from "./position/tools";
+import { getSurroundingPositions, getWay } from "./position/tools";
 
 type CheckAction = (king: King) => void;
 
@@ -46,11 +46,7 @@ export class Board {
     if (!start || !end) return;
 
     const piece = this.getPieceAt(start);
-    if (
-      piece &&
-      piece.color === this.currentMove &&
-      this.canPieceMove(piece, end)
-    ) {
+    if (piece && this.isMoveValid(piece, end)) {
       this.removePiece(end);
       piece.move(end);
 
@@ -84,7 +80,7 @@ export class Board {
     if (!whiteKing || !blackKing) return;
 
     for (const king of [whiteKing, blackKing]) {
-      const checkStatus = this.isKingInCheckOrCheckmate(king);
+      const checkStatus = this.getCheckStatus(king);
       const isInCheck = checkStatus === CheckStatus.Check;
       const isInCheckmate = checkStatus === CheckStatus.Checkmate;
       if (this.check !== isInCheck) {
@@ -111,22 +107,17 @@ export class Board {
   }
 
   private isMoveValid(piece: Piece, position: Position) {
-    const isMoving = !!piece.position.distanceTo(position);
+    const isTurnRight = piece.color === this.currentMove;
+    if (!isTurnRight) {
+      return false;
+    }
 
+    const isMoving = !!piece.position.distanceTo(position);
     if (!isMoving || this.checkmate) {
       return false;
     }
 
     const canMove = this.canPieceMove(piece, position);
-
-    if (canMove && this.check) {
-      const canDefendKing = this.canPieceDefendKing(piece);
-
-      if (!canDefendKing) {
-        return false;
-      }
-    }
-
     return canMove;
   }
 
@@ -149,12 +140,21 @@ export class Board {
     return false;
   }
 
-  private isKingInCheckOrCheckmate(king: King) {
+  private getCheckStatus(king: King) {
     const isInCheck = this.isKingInCheck(king);
     if (isInCheck) {
       const team = this.getPiecesByColor(king.color);
       for (const teammate of team) {
-        if (this.canPieceDefendKing(teammate)) {
+        const canDefendKing = this.canPieceDefendKing(teammate);
+        if (canDefendKing) {
+          return CheckStatus.Check;
+        }
+      }
+
+      const surroundingPositions = getSurroundingPositions(king.position);
+      for (const position of surroundingPositions) {
+        const canEscape = this.canPieceMove(king, position);
+        if (canEscape) {
           return CheckStatus.Check;
         }
       }
@@ -192,7 +192,7 @@ export class Board {
 
       const enemyWay = getWay(enemy.position, king.position);
       for (const position of enemyWay) {
-        const canCover = this.isMoveValid(piece, position);
+        const canCover = this.canPieceMove(piece, position);
         const willCancelCheck = this.willBeCheck(piece, position);
 
         if (canCover && willCancelCheck) {

@@ -1,6 +1,5 @@
 import { AxisValue, Position } from "./position";
-
-import { arrayConstructor } from "../tools";
+import { arrayConstructor, isInLimit } from "../tools";
 
 export const getDiff = (position1: Position, position2: Position) => {
   const point1 = position1.get();
@@ -63,4 +62,26 @@ export const getWay = (position1: Position, position2: Position) => {
     );
   }
   return [];
+};
+
+export const getSurroundingPositions = (position: Position) => {
+  const point = position.get();
+
+  const surroundingPositions: Position[] = [];
+
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (i === 0 && j === 0) continue;
+
+      const x = point.x + i;
+      const y = point.y + j;
+      if (!isInLimit(0, x, 7) || !isInLimit(0, y, 7)) continue;
+
+      surroundingPositions.push(
+        new Position({ x: x as AxisValue, y: y as AxisValue })
+      );
+    }
+  }
+
+  return surroundingPositions;
 };

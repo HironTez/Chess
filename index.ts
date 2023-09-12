@@ -33,21 +33,21 @@ const board = new Board(
     // new King({ x: 4, y: 5 }, Color.Black),
 
     new King({ x: 0, y: 7 }, Color.Black),
-    new King({ x: 2, y: 5 }, Color.White),
     new Queen({ x: 1, y: 5 }, Color.White),
+    new King({ x: 2, y: 5 }, Color.White),
   ],
   {
-    onCheck: () => {
-      console.log("check");
+    onCheck: (king) => {
+      console.log("check", king.color);
     },
-    onCheckMate: () => {
-      console.log("checkmate");
+    onCheckMate: (king) => {
+      console.log("checkmate", king.color);
     },
     onCheckResolve: () => {
       console.log("check resolved");
     },
     onBoardChange: (pieces) => {
-      console.log(pieces);
+      // console.log(pieces);
     },
   }
 );
@@ -55,6 +55,5 @@ const board = new Board(
 board.movePiece({ x: 1, y: 5 }, { x: 1, y: 6 });
 
 // TODO: Fix multiple checking of same moves
-// TODO: check if king can escape check
 // TODO: en passant
 // TODO: castling
