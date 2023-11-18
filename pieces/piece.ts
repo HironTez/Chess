@@ -23,22 +23,59 @@ export abstract class Piece {
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
   }
 
-  move(position: Position) {
+  move(position: Position, pieces: Piece[]) {
+    this.onMove(position);
+
     this.position.set(position);
     this.moved = true;
   }
 
-  isAt(position: Position) {
+  isAt(position: Position | PointT) {
     const thisPoint = this.position.get();
-    const point = position.get();
+    const point = position instanceof Position ? position.get() : position;
     return thisPoint.x === point.x && thisPoint.y === point.y;
   }
 
-  abstract canMove(position: Position): boolean;
+  isMoveValid(
+    position: Position,
+    lastMoved: Piece | null,
+    willBeCheck: (piece: Piece, position: Position) => boolean,
+    pieces: Piece[]
+  ) {
+    const target = pieces.find((piece) => piece.isAt(position));
+    const targetIsEnemy = target?.color === this.oppositeColor;
 
-  canCapture(position: Position) {
-    return this.canMove(position);
+    if (target && targetIsEnemy) {
+      return this.canCapture(position, lastMoved, target, willBeCheck, pieces);
+    } else if (!target) {
+      return this.canMove(position, lastMoved, willBeCheck, pieces);
+    }
+
+    return false;
   }
+
+  isMoved() {
+    return this.moved;
+  }
+
+  protected abstract canMove(
+    position: Position,
+    lastMoved: Piece | null,
+    willBeCheck: (piece: Piece, position: Position) => boolean,
+    pieces: Piece[]
+  ): boolean;
+
+  protected canCapture(
+    position: Position,
+    lastMoved: Piece | null,
+    target: Piece,
+    willBeCheck: (piece: Piece, position: Position) => boolean,
+    pieces: Piece[]
+  ): boolean {
+    return this.canMove(position, lastMoved, willBeCheck, pieces);
+  }
+
+  protected onMove(position: Position) {}
 
   public active: boolean = true;
 

@@ -11,5 +11,5 @@ export class Rock extends Piece {
     return movingVertically || movingHorizontally;
   }
 
-  type = Type.Rock;
+  readonly type = Type.Rock;
 }

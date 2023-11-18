@@ -1,8 +1,8 @@
 import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "./pieces";
+import { arrayConstructor, printBoard } from "./tools";
 
 import { AxisValue } from "./position/position";
 import { Board } from "./board";
-import { arrayConstructor } from "./tools";
 
 const board = new Board(
   [
@@ -33,8 +33,10 @@ const board = new Board(
     // new King({ x: 4, y: 5 }, Color.Black),
 
     new King({ x: 0, y: 7 }, Color.Black),
-    new Queen({ x: 1, y: 5 }, Color.White),
-    new King({ x: 2, y: 5 }, Color.White),
+    new King({ x: 4, y: 0 }, Color.White),
+
+    new Pawn({ x: 1, y: 6 }, Color.Black),
+    new Pawn({ x: 0, y: 4 }, Color.White),
   ],
   {
     onCheck: (king) => {
@@ -47,13 +49,13 @@ const board = new Board(
       console.log("check resolved");
     },
     onBoardChange: (pieces) => {
-      // console.log(pieces);
+      printBoard(pieces);
     },
   }
 );
 
-board.movePiece({ x: 1, y: 5 }, { x: 1, y: 6 });
+console.log(board.movePiece({ x: 1, y: 6 }, { x: 1, y: 4 }));
+console.log(board.movePiece({ x: 0, y: 4 }, { x: 1, y: 5 }));
 
-// TODO: Fix multiple checking of same moves
 // TODO: en passant
 // TODO: castling

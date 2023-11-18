@@ -1,6 +1,6 @@
 import { AxisValue, PointT, Position } from "./position/position";
 import { Color, King, Piece, Type } from "./pieces";
-import { cloneDeep, isInLimit } from "./tools";
+import { isInLimit } from "./tools";
 
 import { getSurroundingPositions, getWay } from "./position/tools";
 
@@ -43,15 +43,19 @@ export class Board {
   movePiece(startPosition: PositionInput, endPosition: PositionInput) {
     const start = this.parsePosition(startPosition);
     const end = this.parsePosition(endPosition);
-    if (!start || !end) return;
+    if (!start || !end) return false;
 
     const piece = this.getPieceAt(start);
     if (piece && this.isMoveValid(piece, end)) {
       this.removePiece(end);
-      piece.move(end);
+      piece.move(end, this.pieces);
 
       this.moveEventHandler(piece);
+
+      return true;
     }
+
+    return false;
   }
 
   private parsePosition(position: PositionInput) {
@@ -72,6 +76,7 @@ export class Board {
 
   private moveEventHandler(piece: Piece) {
     this.currentMove = piece.oppositeColor;
+    this.lastMoved = piece;
 
     this.onBoardChange(this.pieces);
 
@@ -125,16 +130,25 @@ export class Board {
     const way = getWay(piece.position, position);
 
     for (const position of way) {
-      if (this.getPieceAt(position)) return false;
+      const pieceOnWay = this.getPieceAt(position);
+      if (pieceOnWay) return false;
     }
 
     const target = this.getPieceAt(position);
     const targetIsEnemy = target?.color === piece.oppositeColor;
-    const canMove = piece.canMove(position);
-    const canCapture = piece.canCapture(position);
-    if (targetIsEnemy ? canCapture : canMove) {
-      const willBeCheck = this.willBeCheck(piece, position);
-      return !willBeCheck;
+    if (targetIsEnemy || !target) {
+      const canMove = piece.isMoveValid(
+        position,
+        this.lastMoved,
+        (piece, position) => {
+          return this.willBeCheck(piece, position);
+        },
+        this.pieces
+      );
+      if (canMove) {
+        const willBeCheck = this.willBeCheck(piece, position);
+        return !willBeCheck;
+      }
     }
 
     return false;
@@ -145,6 +159,8 @@ export class Board {
     if (isInCheck) {
       const team = this.getPiecesByColor(king.color);
       for (const teammate of team) {
+        if (teammate === king) continue;
+
         const canDefendKing = this.canPieceDefendKing(teammate);
         if (canDefendKing) {
           return CheckStatus.Check;
@@ -241,7 +257,8 @@ export class Board {
   private check: Color | false = false;
   private checkmate: Color | false = false;
   private pieces: Array<Piece>;
-  private currentMove: Color = Color.White;
+  private currentMove: Color = Color.Black;
+  private lastMoved: Piece | null = null;
 
   private onCheck: CheckAction;
   private onCheckMate: CheckAction;

@@ -9,5 +9,5 @@ export class Bishop extends Piece {
     return movingDiagonally;
   }
 
-  type = Type.Bishop;
+  readonly type = Type.Bishop;
 }
