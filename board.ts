@@ -1,22 +1,15 @@
-import { AxisValue, PointT, Position } from "./position/position";
+import {
+  AxisValue,
+  PointT,
+  Position,
+  PositionInput,
+} from "./position/position";
 import { Color, King, Pawn, Piece, Type } from "./pieces";
 import { isInLimit } from "./tools";
 
 import { getSurroundingPositions, getWay } from "./position/tools";
 
 type CheckAction = (king: King) => void;
-
-type PositionString = `${"a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"}${
-  | "1"
-  | "2"
-  | "3"
-  | "4"
-  | "5"
-  | "6"
-  | "7"
-  | "8"}`;
-
-type PositionInput = Position | PointT | PositionString;
 
 enum CheckStatus {
   Check = "check",
@@ -54,7 +47,10 @@ export class Board {
     return this.pieces;
   }
 
-  getPieceAt(position: Position) {
+  getPieceAt(positionInput: PositionInput) {
+    const position = Position.parsePosition(positionInput);
+    if (!position) return undefined;
+
     return this.pieces.find((piece) => piece.isAt(position) && piece.active);
   }
 
@@ -69,14 +65,15 @@ export class Board {
     ) as King | undefined;
   }
 
-  movePiece(
-    startPositionInput: PositionInput,
-    endPositionInput: PositionInput
-  ) {
-    const startPosition = this.parsePosition(startPositionInput);
-    const endPosition = this.parsePosition(endPositionInput);
+  move(startPositionInput: PositionInput, endPositionInput: PositionInput) {
+    const startPosition = Position.parsePosition(startPositionInput);
+    const endPosition = Position.parsePosition(endPositionInput);
     if (!startPosition || !endPosition) return false;
 
+    return this.movePiece(startPosition, endPosition);
+  }
+
+  private movePiece(startPosition: Position, endPosition: Position) {
     const piece = this.getPieceAt(startPosition);
     const isMoveValid = piece && this.isMoveValid(piece, endPosition);
     if (isMoveValid) {
@@ -107,22 +104,6 @@ export class Board {
     const targetOnSide = target.position.get().y === position.get().y;
 
     return isTargetJustMoved && isTargetOneSquareAway && targetOnSide;
-  }
-
-  private parsePosition(position: PositionInput) {
-    if (Position.isPosition(position)) {
-      return position;
-    } else if (typeof position === "string") {
-      const x = position.charCodeAt(0) - 97;
-      const y = position.charCodeAt(1) - 49;
-      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
-        return new Position({ x: x as AxisValue, y: y as AxisValue });
-      } else {
-        return false;
-      }
-    } else {
-      return new Position(position);
-    }
   }
 
   private moveEventHandler(piece: Piece) {

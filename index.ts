@@ -1,52 +1,46 @@
 import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "./pieces";
-import { arrayConstructor, printBoard } from "./tools";
+import { arrayConstructor, input, printBoard } from "./tools";
 
-import { AxisValue } from "./position/position";
+import { AxisValue, Position, PositionString } from "./position/position";
 import { Board } from "./board";
 
 const board = new Board(
   [
-    // ...arrayConstructor(
-    //   8,
-    //   (i: AxisValue) => new Pawn({ x: i, y: 1 }, Color.White)
-    // ),
-    // new Rock({ x: 0, y: 0 }, Color.White),
-    // new Rock({ x: 7, y: 0 }, Color.White),
-    // new Knight({ x: 1, y: 0 }, Color.White),
-    // new Knight({ x: 6, y: 0 }, Color.White),
-    // new Bishop({ x: 2, y: 0 }, Color.White),
-    // new Bishop({ x: 5, y: 0 }, Color.White),
-    // new Queen({ x: 3, y: 0 }, Color.White),
-    // new King({ x: 4, y: 0 }, Color.White),
+    ...arrayConstructor(
+      8,
+      (i) => new Pawn({ x: i as AxisValue, y: 1 }, Color.White)
+    ),
+    new Rock("A1", Color.White),
+    new Rock("H1", Color.White),
+    new Knight("B1", Color.White),
+    new Knight("G1", Color.White),
+    new Bishop("C1", Color.White),
+    new Bishop("F1", Color.White),
+    new Queen("D1", Color.White),
+    new King("E1", Color.White),
 
-    // ...arrayConstructor(
-    //   8,
-    //   (i: AxisValue) => new Pawn({ x: i, y: 6 }, Color.Black)
-    // ),
-    // new Rock({ x: 0, y: 5 }, Color.Black),
-    // new Rock({ x: 7, y: 5 }, Color.Black),
-    // new Knight({ x: 1, y: 5 }, Color.Black),
-    // new Knight({ x: 6, y: 5 }, Color.Black),
-    // new Bishop({ x: 2, y: 5 }, Color.Black),
-    // new Bishop({ x: 5, y: 5 }, Color.Black),
-    // new Queen({ x: 3, y: 5 }, Color.Black),
-    // new King({ x: 4, y: 5 }, Color.Black),
-
-    new King({ x: 4, y: 0 }, Color.White),
-    new King({ x: 4, y: 7 }, Color.Black),
-
-    new Pawn({ x: 0, y: 1 }, Color.White),
-    new Pawn({ x: 1, y: 3 }, Color.Black),
+    ...arrayConstructor(
+      8,
+      (i) => new Pawn({ x: i as AxisValue, y: 6 }, Color.Black)
+    ),
+    new Rock("A8", Color.Black),
+    new Rock("H8", Color.Black),
+    new Knight("B8", Color.Black),
+    new Knight("G8", Color.Black),
+    new Bishop("C8", Color.Black),
+    new Bishop("F8", Color.Black),
+    new Queen("D8", Color.Black),
+    new King("E8", Color.Black),
   ],
   {
     onCheck: (king) => {
-      console.log("check", king.color);
+      console.log(`${king.color} king is in check!`.toLocaleUpperCase());
     },
     onCheckMate: (king) => {
-      console.log("checkmate", king.color);
+      console.log(`${king.color} king is in checkmate!`.toLocaleUpperCase());
     },
     onCheckResolve: () => {
-      console.log("check resolved");
+      console.log("Check resolved");
     },
     onBoardChange: (pieces) => {
       printBoard(pieces);
@@ -54,7 +48,28 @@ const board = new Board(
   }
 );
 
-const pawnDoubleMoveSuccess = board.movePiece({ x: 0, y: 1 }, { x: 0, y: 3 });
-console.log("🚀 ~ pawnDoubleMoveSuccess:", pawnDoubleMoveSuccess);
-const enPassantSuccess = board.movePiece({ x: 1, y: 3 }, { x: 0, y: 2 });
-console.log("🚀 ~ enPassantSuccess:", enPassantSuccess);
+const main = async () => {
+  while (true) {
+    const moveInput = await input("Enter your move (example: a2 - a4): ");
+    const positions = moveInput.match(/([a-hA-H][1-8]).*([a-hA-H][1-8])/);
+    const startPositionParsed = positions?.at(1) as PositionString | undefined;
+    const endPositionParsed = positions?.at(2) as PositionString | undefined;
+    const startPosition =
+      startPositionParsed && Position.parsePosition(startPositionParsed);
+    const endPosition =
+      endPositionParsed && Position.parsePosition(endPositionParsed);
+
+    if (!startPosition || !endPosition) {
+      console.error("Invalid input! Try again.");
+      continue;
+    }
+
+    const moved = board.move(startPosition, endPosition);
+    if (!moved) {
+      console.error("Invalid move! Try again.");
+      continue;
+    }
+  }
+};
+
+main();

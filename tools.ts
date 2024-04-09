@@ -1,5 +1,19 @@
 import { AxisValue, Position } from "./position/position";
 import { Color, Piece, Type } from "./pieces";
+import readline from "node:readline";
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+export const input = (text: any) => {
+  return new Promise<string>((resolve) => {
+    rl.question(String(text), (input) => {
+      resolve(input);
+    });
+  });
+};
 
 export const cloneDeep = <T extends object>(obj: T) =>
   JSON.parse(JSON.stringify(obj)) as T;
@@ -56,4 +70,6 @@ export const printBoard = (pieces: Piece[]) => {
 
     console.log(line);
   }
+
+  console.log("   A B C D E F G H");
 };

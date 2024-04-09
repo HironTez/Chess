@@ -1,4 +1,4 @@
-import { PointT, Position } from "../position/position";
+import { PointT, Position, PositionInput } from "../position/position";
 
 export enum Color {
   White = "white",
@@ -15,10 +15,11 @@ export enum Type {
 }
 
 export abstract class Piece {
-  constructor(position: Position | PointT, color: Color) {
-    this.position = Position.isPosition(position)
-      ? position
-      : new Position(position);
+  constructor(positionInput: PositionInput, color: Color) {
+    const position =
+      Position.parsePosition(positionInput) ?? new Position({ x: 0, y: 0 });
+
+    this.position = position;
     this.color = color;
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
   }
