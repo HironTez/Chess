@@ -38,17 +38,31 @@ export class Board {
     this.onCheckMate = options.onCheckMate;
     this.onCheckResolve = options.onCheckResolve;
     this.onBoardChange = options.onBoardChange;
+
+    this.onBoardChange(this.pieces);
   }
 
-  movePiece(startPosition: PositionInput, endPosition: PositionInput) {
-    const start = this.parsePosition(startPosition);
-    const end = this.parsePosition(endPosition);
-    if (!start || !end) return false;
+  getCheck() {
+    return this.check;
+  }
 
-    const piece = this.getPieceAt(start);
-    if (piece && this.isMoveValid(piece, end)) {
-      this.removePiece(end);
-      piece.move(end, this.pieces);
+  getCheckmate() {
+    return this.checkmate;
+  }
+
+  movePiece(
+    startPositionInput: PositionInput,
+    endPositionInput: PositionInput
+  ) {
+    const startPosition = this.parsePosition(startPositionInput);
+    const endPosition = this.parsePosition(endPositionInput);
+    if (!startPosition || !endPosition) return false;
+
+    const piece = this.getPieceAt(startPosition);
+    const isMoveValid = piece && this.isMoveValid(piece, endPosition);
+    if (isMoveValid) {
+      this.removePieceAt(endPosition);
+      piece.move(endPosition, this.pieces);
 
       this.moveEventHandler(piece);
 
@@ -112,15 +126,13 @@ export class Board {
   }
 
   private isMoveValid(piece: Piece, position: Position) {
+    if (this.checkmate) return false;
+
     const isTurnRight = piece.color === this.currentMove;
-    if (!isTurnRight) {
-      return false;
-    }
+    if (!isTurnRight) return false;
 
     const isMoving = !!piece.position.distanceTo(position);
-    if (!isMoving || this.checkmate) {
-      return false;
-    }
+    if (!isMoving) return false;
 
     const canMove = this.canPieceMove(piece, position);
     return canMove;
@@ -140,9 +152,7 @@ export class Board {
       const canMove = piece.isMoveValid(
         position,
         this.lastMoved,
-        (piece, position) => {
-          return this.willBeCheck(piece, position);
-        },
+        this.willBeCheck,
         this.pieces
       );
       if (canMove) {
@@ -250,7 +260,7 @@ export class Board {
     ) as King | undefined;
   }
 
-  private removePiece(position: Position) {
+  private removePieceAt(position: Position) {
     this.pieces = this.pieces.filter((piece) => !piece.isAt(position));
   }
 

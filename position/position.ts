@@ -34,11 +34,12 @@ export class Position {
   }
 
   distanceTo(position: PointT | Position) {
-    if (Position.isPosition(position)) {
-      position = position.get();
+    if (!Position.isPosition(position)) {
+      position = new Position(position);
     }
 
-    return Math.sqrt(this.x * position.x + this.y * position.y);
+    const { xDiff, yDiff } = getDiff(this, position);
+    return Math.sqrt(xDiff ** 2 + yDiff ** 2);
   }
 
   chebyshevDistanceTo(position: PointT | Position) {

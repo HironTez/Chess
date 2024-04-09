@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "start:bun": "bun ./index.ts",
     "build": "tsc -p tsconfig.json",
     "dev": "npm run build & npm run start",
     "start": "node dist/index.js"

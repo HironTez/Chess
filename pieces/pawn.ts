@@ -46,13 +46,14 @@ export class Pawn extends Piece {
     const movingDiagonally = areAlignedDiagonally(this.position, position);
     const directionIsRight = this.directionIsRight(position);
     const targetIsEnemy = target?.color === this.oppositeColor;
-    const canCaptureEnemy = target
-      ? targetIsEnemy
-      : lastMoved instanceof Pawn
-      ? lastMoved.isJustDoubleMoved() &&
-        lastMoved.position.distanceTo(this.position) === 1 &&
-        lastMoved.position.get().y === this.position.get().y
-      : false;
+
+    const canCaptureEnemy =
+      targetIsEnemy ||
+      (lastMoved instanceof Pawn
+        ? lastMoved.isJustDoubleMoved() &&
+          lastMoved.position.distanceTo(this.position) === 1 &&
+          lastMoved.position.get().y === this.position.get().y
+        : false);
 
     return (
       movingDiagonally && directionIsRight && distanceIsRight && canCaptureEnemy

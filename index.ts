@@ -56,6 +56,3 @@ const board = new Board(
 
 console.log(board.movePiece({ x: 1, y: 6 }, { x: 1, y: 4 }));
 console.log(board.movePiece({ x: 0, y: 4 }, { x: 1, y: 5 }));
-
-// TODO: en passant
-// TODO: castling

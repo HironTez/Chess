@@ -23,7 +23,7 @@ export class King extends Piece {
 
   canMove(
     position: Position,
-    _: any,
+    _: unknown,
     willBeCheck: (piece: Piece, position: Position) => boolean,
     pieces: Piece[]
   ) {
