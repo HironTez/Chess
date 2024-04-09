@@ -53,10 +53,10 @@ export const getWay = (position1: Position, position2: Position) => {
       (i) =>
         new Position({
           x: xDiff
-            ? ((xDiff > 0 ? i + 1 : -i - 1) as AxisValue)
+            ? ((xDiff > 0 ? i + 2 : -i - 2) as AxisValue)
             : position1.get().x,
           y: yDiff
-            ? ((yDiff > 0 ? i + 1 : -i - 1) as AxisValue)
+            ? ((yDiff > 0 ? i + 2 : -i - 2) as AxisValue)
             : position2.get().y,
         })
     );

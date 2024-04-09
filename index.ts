@@ -32,11 +32,11 @@ const board = new Board(
     // new Queen({ x: 3, y: 5 }, Color.Black),
     // new King({ x: 4, y: 5 }, Color.Black),
 
-    new King({ x: 0, y: 7 }, Color.Black),
     new King({ x: 4, y: 0 }, Color.White),
+    new King({ x: 4, y: 7 }, Color.Black),
 
-    new Pawn({ x: 1, y: 6 }, Color.Black),
-    new Pawn({ x: 0, y: 4 }, Color.White),
+    new Pawn({ x: 0, y: 1 }, Color.White),
+    new Pawn({ x: 1, y: 3 }, Color.Black),
   ],
   {
     onCheck: (king) => {
@@ -54,5 +54,7 @@ const board = new Board(
   }
 );
 
-console.log(board.movePiece({ x: 1, y: 6 }, { x: 1, y: 4 }));
-console.log(board.movePiece({ x: 0, y: 4 }, { x: 1, y: 5 }));
+const pawnDoubleMoveSuccess = board.movePiece({ x: 0, y: 1 }, { x: 0, y: 3 });
+console.log("🚀 ~ pawnDoubleMoveSuccess:", pawnDoubleMoveSuccess);
+const enPassantSuccess = board.movePiece({ x: 1, y: 3 }, { x: 0, y: 2 });
+console.log("🚀 ~ enPassantSuccess:", enPassantSuccess);

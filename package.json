@@ -5,5 +5,8 @@
   },
   "dependencies": {
     "typescript": "^5.4.4"
+  },
+  "devDependencies": {
+    "bun-types": "^1.1.3"
   }
 }
