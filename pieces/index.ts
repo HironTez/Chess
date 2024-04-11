@@ -7,4 +7,4 @@ import { Pawn } from "./pawn";
 import { Queen } from "./queen";
 import { Rock } from "./rock";
 
-export { Color, Type, Piece, Pawn, Rock, Knight, Bishop, Queen, King };
+export { Bishop, Color, King, Knight, Pawn, Piece, Queen, Rock, Type };

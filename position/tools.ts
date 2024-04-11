@@ -1,5 +1,5 @@
-import { AxisValue, Position } from "./position";
 import { arrayConstructor, isInLimit } from "../tools";
+import { AxisValue, Position } from "./position";
 
 export const getDiff = (position1: Position, position2: Position) => {
   const point1 = position1.get();
@@ -14,7 +14,7 @@ export const getDiff = (position1: Position, position2: Position) => {
 
 export const areAlignedDiagonally = (
   position1: Position,
-  position2: Position
+  position2: Position,
 ) => {
   const { xDiff, yDiff } = getDiff(position1, position2);
   return Math.abs(xDiff) === Math.abs(yDiff);
@@ -22,7 +22,7 @@ export const areAlignedDiagonally = (
 
 export const areAlignedVertically = (
   position1: Position,
-  position2: Position
+  position2: Position,
 ) => {
   const { yDiff } = getDiff(position1, position2);
   return yDiff === 0;
@@ -30,7 +30,7 @@ export const areAlignedVertically = (
 
 export const areAlignedHorizontally = (
   position1: Position,
-  position2: Position
+  position2: Position,
 ) => {
   const { xDiff } = getDiff(position1, position2);
   return xDiff === 0;
@@ -58,7 +58,7 @@ export const getWay = (position1: Position, position2: Position) => {
           y: yDiff
             ? ((position1.get().y + (yDiff > 0 ? i + 1 : -i - 1)) as AxisValue)
             : position1.get().y,
-        })
+        }),
     );
   }
   return [];
@@ -78,7 +78,7 @@ export const getSurroundingPositions = (position: Position) => {
       if (!isInLimit(0, x, 7) || !isInLimit(0, y, 7)) continue;
 
       surroundingPositions.push(
-        new Position({ x: x as AxisValue, y: y as AxisValue })
+        new Position({ x: x as AxisValue, y: y as AxisValue }),
       );
     }
   }

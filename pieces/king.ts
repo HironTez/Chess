@@ -1,8 +1,6 @@
 import { Piece, Type } from "./piece";
 
-import { AxisValue, Position } from "../position/position";
-import { getDiff, getWay } from "../position/tools";
-import { isInLimit } from "../tools";
+import { Position } from "../position/position";
 
 export class King extends Piece {
   // if (distance === 2) {

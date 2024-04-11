@@ -14,7 +14,7 @@ const pieceSet = [
         x: i as AxisValue,
         y: pawnY as AxisValue,
       },
-      color
+      color,
     );
   }),
   new Rock({ x: 0, y }, color),

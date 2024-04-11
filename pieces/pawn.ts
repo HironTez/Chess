@@ -1,10 +1,9 @@
-import { Color, Piece, Type } from "./piece";
 import {
   areAlignedDiagonally,
   areAlignedHorizontally,
-  getDiff,
   isMovingUp,
 } from "../position/tools";
+import { Color, Piece, Type } from "./piece";
 
 import { Position } from "../position/position";
 
@@ -12,7 +11,7 @@ export class Pawn extends Piece {
   isMoveValid(
     position: Position,
     target: Piece | null,
-    lastMoved: Piece | null
+    lastMoved: Piece | null,
   ) {
     const canMove = this.canMove(position);
     const canCapture = this.canCapture(position, lastMoved, target);
@@ -36,7 +35,7 @@ export class Pawn extends Piece {
   protected canCapture(
     position: Position,
     lastMoved: Piece | null,
-    target: Piece | null
+    target: Piece | null,
   ) {
     const distance = this.position.chebyshevDistanceTo(position);
     const distanceIsRight = distance === 1;

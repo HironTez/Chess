@@ -1,5 +1,5 @@
-import { AxisValue, Position, PositionInput } from "../position/position";
 import { Color, King, Pawn, Piece, Queen, Rock, Type } from "../pieces";
+import { Position, PositionInput } from "../position/position";
 
 import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
 
@@ -56,7 +56,7 @@ export class Board {
   getKing(color: Color) {
     return this.pieces.find(
       (piece) =>
-        piece.type === Type.King && piece.color === color && piece.active
+        piece.type === Type.King && piece.color === color && piece.active,
     ) as King | undefined;
   }
 
@@ -78,7 +78,7 @@ export class Board {
     const isMoveValid = this.isMoveValid(
       piece,
       endPosition,
-      castlingRock?.position
+      castlingRock?.position,
     );
     if (isMoveValid) {
       const enemyPosition =
@@ -195,7 +195,7 @@ export class Board {
   private isMoveValid(
     piece: Piece,
     position: Position,
-    castlingRockPosition?: Position
+    castlingRockPosition?: Position,
   ) {
     if (this.checkmate || this.check) return false;
 
@@ -212,14 +212,14 @@ export class Board {
   private canPieceMove(
     piece: Piece,
     position: Position,
-    castlingRockPosition?: Position
+    castlingRockPosition?: Position,
   ) {
     const { xDiff } = getDiff(piece.position, position);
     const way = getWay(
       piece.position,
       castlingRockPosition && Math.abs(xDiff) === 2
         ? castlingRockPosition
-        : position
+        : position,
     );
 
     for (const pos of way) {
@@ -234,7 +234,7 @@ export class Board {
         position,
         target,
         this.lastMoved,
-        !!castlingRockPosition
+        !!castlingRockPosition,
       );
       if (canMove) {
         const willBeCheck = this.willBeCheck(piece, position);

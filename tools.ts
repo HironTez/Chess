@@ -1,6 +1,6 @@
-import { AxisValue, Position } from "./position/position";
-import { Color, Piece, Type } from "./pieces";
 import readline from "node:readline";
+import { Color, Piece, Type } from "./pieces";
+import { AxisValue, Position } from "./position/position";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -23,10 +23,10 @@ const isFunction = <F extends Function>(value: unknown | F): value is F =>
 
 export const arrayConstructor = <T>(
   length: number,
-  constructor: ((index: number) => T) | T
+  constructor: ((index: number) => T) | T,
 ): T[] =>
   Array.from({ length }, (_v, k) =>
-    isFunction(constructor) ? constructor(k) : constructor
+    isFunction(constructor) ? constructor(k) : constructor,
   );
 
 export const isInLimit = (min: number, value: number, max: number) =>
@@ -56,7 +56,7 @@ export const printBoard = (pieces: Piece[]) => {
     for (let j = 0; j <= 7; j++) {
       const piece = pieces.find((piece) => {
         return piece.isAt(
-          new Position({ x: j as AxisValue, y: i as AxisValue })
+          new Position({ x: j as AxisValue, y: i as AxisValue }),
         );
       });
 
