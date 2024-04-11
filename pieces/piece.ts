@@ -24,7 +24,7 @@ export abstract class Piece {
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
   }
 
-  move(position: Position, pieces: Piece[]) {
+  move(position: Position) {
     this.onMove(position);
 
     this.position.set(position);
@@ -39,17 +39,18 @@ export abstract class Piece {
 
   isMoveValid(
     position: Position,
+    target: Piece | null,
     lastMoved: Piece | null,
-    willBeCheck: (piece: Piece, position: Position) => boolean,
-    pieces: Piece[]
+    isCastlingPossible:
+      | ((piece: Piece, position: Position) => boolean)
+      | undefined
   ) {
-    const target = pieces.find((piece) => piece.isAt(position));
     const targetIsEnemy = target?.color === this.oppositeColor;
 
     if (target && targetIsEnemy) {
-      return this.canCapture(position, lastMoved, target, willBeCheck, pieces);
+      return this.canCapture(position, lastMoved, target);
     } else if (!target) {
-      return this.canMove(position, lastMoved, willBeCheck, pieces);
+      return this.canMove(position, lastMoved, isCastlingPossible);
     }
 
     return false;
@@ -62,18 +63,17 @@ export abstract class Piece {
   protected abstract canMove(
     position: Position,
     lastMoved: Piece | null,
-    willBeCheck: (piece: Piece, position: Position) => boolean,
-    pieces: Piece[]
+    isCastlingPossible:
+      | ((piece: Piece, position: Position) => boolean)
+      | undefined
   ): boolean;
 
   protected canCapture(
     position: Position,
     lastMoved: Piece | null,
-    target: Piece,
-    willBeCheck: (piece: Piece, position: Position) => boolean,
-    pieces: Piece[]
+    target: Piece
   ): boolean {
-    return this.canMove(position, lastMoved, willBeCheck, pieces);
+    return this.canMove(position, lastMoved, undefined);
   }
 
   protected onMove(position: Position) {}

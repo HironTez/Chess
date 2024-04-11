@@ -11,12 +11,9 @@ import { Position } from "../position/position";
 export class Pawn extends Piece {
   isMoveValid(
     position: Position,
-    lastMoved: Piece | null,
-    _: any,
-    pieces: Piece[]
+    target: Piece | null,
+    lastMoved: Piece | null
   ) {
-    const target = pieces.find((piece) => piece.isAt(position));
-
     const canMove = this.canMove(position);
     const canCapture = this.canCapture(position, lastMoved, target);
 
@@ -39,7 +36,7 @@ export class Pawn extends Piece {
   protected canCapture(
     position: Position,
     lastMoved: Piece | null,
-    target: Piece | undefined
+    target: Piece | null
   ) {
     const distance = this.position.chebyshevDistanceTo(position);
     const distanceIsRight = distance === 1;

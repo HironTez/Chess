@@ -1,13 +1,7 @@
-import {
-  AxisValue,
-  PointT,
-  Position,
-  PositionInput,
-} from "./position/position";
-import { Color, King, Pawn, Piece, Type } from "./pieces";
-import { isInLimit } from "./tools";
+import { Position, PositionInput } from "../position/position";
+import { Color, King, Pawn, Piece, Queen, Type } from "../pieces";
 
-import { getSurroundingPositions, getWay } from "./position/tools";
+import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
 
 type CheckAction = (king: King) => void;
 
@@ -16,16 +10,15 @@ enum CheckStatus {
   Checkmate = "checkmate",
 }
 
+export type BoardOptionsT = {
+  onCheck?: CheckAction;
+  onCheckMate?: CheckAction;
+  onCheckResolve?: () => void;
+  onBoardChange?: (pieces: Piece[]) => void;
+};
+
 export class Board {
-  constructor(
-    pieces: Piece[],
-    options?: {
-      onCheck?: CheckAction;
-      onCheckMate?: CheckAction;
-      onCheckResolve?: () => void;
-      onBoardChange?: (pieces: Piece[]) => void;
-    }
-  ) {
+  constructor(pieces: Piece[], options?: BoardOptionsT) {
     this.pieces = pieces;
     this.onCheck = options?.onCheck;
     this.onCheckMate = options?.onCheckMate;
@@ -49,9 +42,11 @@ export class Board {
 
   getPieceAt(positionInput: PositionInput) {
     const position = Position.parsePosition(positionInput);
-    if (!position) return undefined;
+    if (!position) return null;
 
-    return this.pieces.find((piece) => piece.isAt(position) && piece.active);
+    return (
+      this.pieces.find((piece) => piece.isAt(position) && piece.active) ?? null
+    );
   }
 
   getPiecesByColor(color: Color) {
@@ -75,7 +70,13 @@ export class Board {
 
   private movePiece(startPosition: Position, endPosition: Position) {
     const piece = this.getPieceAt(startPosition);
-    const isMoveValid = piece && this.isMoveValid(piece, endPosition);
+    if (!piece) return false;
+
+    const isMoveValid = this.isMoveValid(
+      piece,
+      endPosition,
+      (piece, position) => this.isCastlingPossible(piece, position)
+    );
     if (isMoveValid) {
       const enemyPosition =
         piece instanceof Pawn
@@ -85,7 +86,12 @@ export class Board {
           : endPosition;
 
       this.removePieceAt(enemyPosition);
-      piece.move(endPosition, this.pieces);
+      piece.move(endPosition);
+
+      if (this.isPromotionPossible(piece)) {
+        this.removePieceAt(piece.position);
+        this.pieces.push(new Queen(piece.position, piece.color));
+      }
 
       this.moveEventHandler(piece);
 
@@ -104,6 +110,41 @@ export class Board {
     const targetOnSide = target.position.get().y === position.get().y;
 
     return isTargetJustMoved && isTargetOneSquareAway && targetOnSide;
+  }
+
+  private isPromotionPossible(piece: Piece) {
+    if (piece instanceof Pawn) {
+      if (
+        (piece.color === Color.White && piece.position.get().y === 7) ||
+        (piece.color === Color.Black && piece.position.get().y === 0)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private isCastlingPossible(piece: Piece, position: Position) {
+    if (piece instanceof King) {
+      if (!piece.isMoved()) {
+        const distance = piece.position.chebyshevDistanceTo(position);
+
+        if (distance === 2) {
+          const { yDiff } = getDiff(piece.position, position);
+          if (!yDiff) {
+            const { x, y } = position.get();
+            const rockPosX = x < 4 ? 0 : 7;
+            const rock = this.getPieceAt({ x: rockPosX, y });
+            const rockIsMoved = rock?.isMoved() === true;
+
+            return !rockIsMoved;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   private moveEventHandler(piece: Piece) {
@@ -143,7 +184,11 @@ export class Board {
     }
   }
 
-  private isMoveValid(piece: Piece, position: Position) {
+  private isMoveValid(
+    piece: Piece,
+    position: Position,
+    isCastlingPossible: (piece: Piece, position: Position) => boolean
+  ) {
     if (this.checkmate) return false;
 
     const isTurnRight = piece.color === this.currentMove;
@@ -152,11 +197,15 @@ export class Board {
     const isMoving = !!piece.position.distanceTo(position);
     if (!isMoving) return false;
 
-    const canMove = this.canPieceMove(piece, position);
+    const canMove = this.canPieceMove(piece, position, isCastlingPossible);
     return canMove;
   }
 
-  private canPieceMove(piece: Piece, position: Position) {
+  private canPieceMove(
+    piece: Piece,
+    position: Position,
+    isCastlingPossible?: (piece: Piece, position: Position) => boolean
+  ) {
     const way = getWay(piece.position, position);
 
     for (const position of way) {
@@ -169,9 +218,9 @@ export class Board {
     if (targetIsEnemy || !target) {
       const canMove = piece.isMoveValid(
         position,
+        target,
         this.lastMoved,
-        this.willBeCheck,
-        this.pieces
+        isCastlingPossible
       );
       if (canMove) {
         const willBeCheck = this.willBeCheck(piece, position);
