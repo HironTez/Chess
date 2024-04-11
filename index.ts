@@ -44,4 +44,5 @@ const main = async () => {
 
 main();
 
+// TODO: Stalemate
 // TODO: pawn promotion variants

@@ -15,16 +15,10 @@ export class King extends Piece {
   //   }
   // }
 
-  canMove(
-    position: Position,
-    _: unknown,
-    isCastlingPossible:
-      | ((piece: Piece, position: Position) => boolean)
-      | undefined
-  ) {
+  canMove(position: Position, _: unknown, isCastlingPossible: boolean) {
     const distance = this.position.chebyshevDistanceTo(position);
 
-    return distance === (isCastlingPossible?.(this, position) ? 2 : 1);
+    return distance === (isCastlingPossible ? 2 : 1);
   }
 
   // private getRockToCastle(position: Position) {

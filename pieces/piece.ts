@@ -41,9 +41,7 @@ export abstract class Piece {
     position: Position,
     target: Piece | null,
     lastMoved: Piece | null,
-    isCastlingPossible:
-      | ((piece: Piece, position: Position) => boolean)
-      | undefined
+    isCastlingPossible: boolean
   ) {
     const targetIsEnemy = target?.color === this.oppositeColor;
 
@@ -63,9 +61,7 @@ export abstract class Piece {
   protected abstract canMove(
     position: Position,
     lastMoved: Piece | null,
-    isCastlingPossible:
-      | ((piece: Piece, position: Position) => boolean)
-      | undefined
+    isCastlingPossible: boolean
   ): boolean;
 
   protected canCapture(
@@ -73,7 +69,7 @@ export abstract class Piece {
     lastMoved: Piece | null,
     target: Piece
   ): boolean {
-    return this.canMove(position, lastMoved, undefined);
+    return this.canMove(position, lastMoved, false);
   }
 
   protected onMove(position: Position) {}

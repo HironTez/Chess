@@ -126,7 +126,7 @@ test("Castling kingside", () => {
 
   const castled = board.move("E1", "G1");
   const king = board.getPieceAt("G1");
-  const rock = board.getPieceAt("H1");
+  const rock = board.getPieceAt("F1");
 
   expect(castled).toBeTrue();
   expect(king).toBeInstanceOf(King);
@@ -142,9 +142,63 @@ test("Castling queenside", () => {
 
   const castled = board.move("E1", "C1");
   const kingPosition = board.getPieceAt("C1");
-  const rockPosition = board.getPieceAt("A1");
+  const rockPosition = board.getPieceAt("D1");
 
   expect(castled).toBeTrue();
+  expect(kingPosition).toBeInstanceOf(King);
+  expect(rockPosition).toBeInstanceOf(Rock);
+});
+
+test("Castling through check", () => {
+  const board = new Board([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Rock("A1", Color.White),
+    new Rock("D8", Color.Black),
+  ]);
+
+  const castled = board.move("E1", "C1");
+  const kingPosition = board.getPieceAt("E1");
+  const rockPosition = board.getPieceAt("A1");
+
+  expect(castled).toBeFalse();
+  expect(kingPosition).toBeInstanceOf(King);
+  expect(rockPosition).toBeInstanceOf(Rock);
+});
+
+test("Castling to checked square", () => {
+  const board = new Board([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Rock("A1", Color.White),
+    new Rock("C8", Color.Black),
+  ]);
+
+  const castled = board.move("E1", "C1");
+  const kingPosition = board.getPieceAt("E1");
+  const rockPosition = board.getPieceAt("A1");
+
+  expect(castled).toBeFalse();
+  expect(kingPosition).toBeInstanceOf(King);
+  expect(rockPosition).toBeInstanceOf(Rock);
+});
+
+test("Castling when check", () => {
+  const board = new Board([
+    new King("E1", Color.Black),
+    new King("F8", Color.White),
+    new Rock("A1", Color.Black),
+    new Rock("D8", Color.White),
+  ]);
+
+  const checked = board.move("D8", "E8");
+  const castled = board.move("E1", "C1");
+  const kingPosition = board.getPieceAt("E1");
+  const rockPosition = board.getPieceAt("A1");
+
+  expect(checked).toBeTrue();
+  expect(board.getCheck()).toBe(Color.Black);
+  expect(castled).toBeFalse();
   expect(kingPosition).toBeInstanceOf(King);
   expect(rockPosition).toBeInstanceOf(Rock);
 });

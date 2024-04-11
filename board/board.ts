@@ -1,5 +1,5 @@
-import { Position, PositionInput } from "../position/position";
-import { Color, King, Pawn, Piece, Queen, Type } from "../pieces";
+import { AxisValue, Position, PositionInput } from "../position/position";
+import { Color, King, Pawn, Piece, Queen, Rock, Type } from "../pieces";
 
 import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
 
@@ -72,10 +72,13 @@ export class Board {
     const piece = this.getPieceAt(startPosition);
     if (!piece) return false;
 
+    const { rock: castlingRock, newPosition: newRockPosition } =
+      this.getCastlingRock(piece, endPosition);
+
     const isMoveValid = this.isMoveValid(
       piece,
       endPosition,
-      (piece, position) => this.isCastlingPossible(piece, position)
+      castlingRock?.position
     );
     if (isMoveValid) {
       const enemyPosition =
@@ -91,6 +94,10 @@ export class Board {
       if (this.isPromotionPossible(piece)) {
         this.removePieceAt(piece.position);
         this.pieces.push(new Queen(piece.position, piece.color));
+      }
+
+      if (castlingRock) {
+        castlingRock.move(newRockPosition);
       }
 
       this.moveEventHandler(piece);
@@ -125,26 +132,27 @@ export class Board {
     return false;
   }
 
-  private isCastlingPossible(piece: Piece, position: Position) {
+  private getCastlingRock(piece: Piece, position: Position) {
     if (piece instanceof King) {
       if (!piece.isMoved()) {
-        const distance = piece.position.chebyshevDistanceTo(position);
-
-        if (distance === 2) {
-          const { yDiff } = getDiff(piece.position, position);
-          if (!yDiff) {
-            const { x, y } = position.get();
-            const rockPosX = x < 4 ? 0 : 7;
-            const rock = this.getPieceAt({ x: rockPosX, y });
-            const rockIsMoved = rock?.isMoved() === true;
-
-            return !rockIsMoved;
+        const { xDiff, yDiff } = getDiff(piece.position, position);
+        if (Math.abs(xDiff) === 2 && !yDiff) {
+          const { x, y } = position.get();
+          const rockPosX = x < 4 ? 0 : 7;
+          const newRockPosX = x < 4 ? 3 : 5;
+          const rock = this.getPieceAt({ x: rockPosX, y });
+          if (rock instanceof Rock) {
+            const rockIsMoved = rock?.isMoved();
+            return {
+              rock: rockIsMoved ? null : rock,
+              newPosition: new Position({ x: newRockPosX, y }),
+            };
           }
         }
       }
     }
 
-    return false;
+    return {};
   }
 
   private moveEventHandler(piece: Piece) {
@@ -187,9 +195,9 @@ export class Board {
   private isMoveValid(
     piece: Piece,
     position: Position,
-    isCastlingPossible: (piece: Piece, position: Position) => boolean
+    castlingRockPosition?: Position
   ) {
-    if (this.checkmate) return false;
+    if (this.checkmate || this.check) return false;
 
     const isTurnRight = piece.color === this.currentMove;
     if (!isTurnRight) return false;
@@ -197,19 +205,25 @@ export class Board {
     const isMoving = !!piece.position.distanceTo(position);
     if (!isMoving) return false;
 
-    const canMove = this.canPieceMove(piece, position, isCastlingPossible);
+    const canMove = this.canPieceMove(piece, position, castlingRockPosition);
     return canMove;
   }
 
   private canPieceMove(
     piece: Piece,
     position: Position,
-    isCastlingPossible?: (piece: Piece, position: Position) => boolean
+    castlingRockPosition?: Position
   ) {
-    const way = getWay(piece.position, position);
+    const { xDiff } = getDiff(piece.position, position);
+    const way = getWay(
+      piece.position,
+      castlingRockPosition && Math.abs(xDiff) === 2
+        ? castlingRockPosition
+        : position
+    );
 
-    for (const position of way) {
-      const pieceOnWay = this.getPieceAt(position);
+    for (const pos of way) {
+      const pieceOnWay = this.getPieceAt(pos);
       if (pieceOnWay) return false;
     }
 
@@ -220,10 +234,18 @@ export class Board {
         position,
         target,
         this.lastMoved,
-        isCastlingPossible
+        !!castlingRockPosition
       );
       if (canMove) {
         const willBeCheck = this.willBeCheck(piece, position);
+
+        if (castlingRockPosition) {
+          for (const pos of way) {
+            const isPosOnCheck = this.willBeCheck(piece, pos);
+            if (isPosOnCheck) return false;
+          }
+        }
+
         return !willBeCheck;
       }
     }
