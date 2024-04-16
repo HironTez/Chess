@@ -55,17 +55,16 @@ export class Board {
     const position = new Position(positionInput);
     if (!position) return undefined;
 
-    return this.pieces.find((piece) => piece.isAt(position) && piece.active);
+    return this.pieces.find((piece) => piece.isAt(position));
   }
 
   getPiecesByColor(color: Color) {
-    return this.pieces.filter((piece) => piece.color === color && piece.active);
+    return this.pieces.filter((piece) => piece.color === color);
   }
 
   getKing(color: Color) {
     return this.pieces.find(
-      (piece) =>
-        piece.type === Type.King && piece.color === color && piece.active,
+      (piece) => piece.type === Type.King && piece.color === color,
     ) as King | undefined;
   }
 
@@ -192,6 +191,7 @@ export class Board {
       }
       if (!!this.checkmate !== isInCheckmate) {
         if (isInCheckmate) {
+          this.check = king.color;
           this.checkmate = king.color;
 
           this.onCheckMate?.(king);
@@ -273,7 +273,7 @@ export class Board {
   }
 
   private getCheckStatus(king: King) {
-    const isInCheck = this.isKingInCheck(king);
+    const isInCheck = this.isKingInCheck(king, undefined);
     if (isInCheck) {
       const team = this.getPiecesByColor(king.color);
       for (const teammate of team) {
@@ -311,20 +311,23 @@ export class Board {
     return false;
   }
 
-  private isKingInCheck(king: King) {
-    return this.piecesCheckingKing(king).length > 0;
+  private isKingInCheck(king: King, ignorePiece: Piece | undefined) {
+    return this.piecesCheckingKing(king, ignorePiece).length > 0;
   }
 
-  private piecesCheckingKing(king: King) {
+  private piecesCheckingKing(king: King, ignorePiece: Piece | undefined) {
     const enemies = this.getPiecesByColor(king.oppositeColor);
-    return enemies.filter((enemy) => this.canPieceMove(enemy, king.position));
+    return enemies.filter(
+      (enemy) =>
+        this.canPieceMove(enemy, king.position) && enemy !== ignorePiece,
+    );
   }
 
   private canPieceDefendKing(piece: Piece) {
     const king = this.getKing(piece.color);
     if (!king) return false;
 
-    const enemiesCheckingKing = this.piecesCheckingKing(king);
+    const enemiesCheckingKing = this.piecesCheckingKing(king, undefined);
     for (const enemy of enemiesCheckingKing) {
       const canCaptureEnemy = this.canPieceMove(piece, enemy.position);
       if (canCaptureEnemy) {
@@ -355,12 +358,10 @@ export class Board {
     const previousPosition = piece.position.get();
 
     piece.position.set(position);
-    if (target) target.active = false;
     const king = this.getKing(piece.color);
-    const isInCheck = !!king && this.isKingInCheck(king);
+    const isInCheck = !!king && this.isKingInCheck(king, target);
 
     piece.position.set(previousPosition);
-    if (target) target.active = true;
 
     return isInCheck;
   }

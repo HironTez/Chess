@@ -76,8 +76,6 @@ export abstract class Piece {
 
   protected onMove(position: Position) {}
 
-  public active: boolean = true;
-
   abstract readonly type: Type;
 
   protected moved: boolean = false;
