@@ -16,7 +16,7 @@ test("queen possible positions", () => {
   expect(queen).toBeDefined();
   const possibleMoves = queen.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
-  const { x, y } = queen.position.get();
+  const { x, y } = queen.position;
 
   const expectedPositions = [];
   for (let i = 0; i <= 7; i++) {

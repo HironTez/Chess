@@ -16,7 +16,7 @@ test("bishop possible positions", () => {
   expect(bishop).toBeDefined();
   const possibleMoves = bishop.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
-  const { x, y } = bishop.position.get();
+  const { x, y } = bishop.position;
 
   const expectedPositions = [];
   for (let i = 0; i <= 7; i++) {

@@ -15,7 +15,7 @@ test("rock possible positions", () => {
   expect(rock).toBeDefined();
   const possibleMoves = rock.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
-  const { x, y } = rock.position.get();
+  const { x, y } = rock.position;
 
   const expectedPositions = [];
   for (let i = 0; i <= 7; i++) {

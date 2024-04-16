@@ -22,49 +22,48 @@ export type BoardOptionsT = {
 
 export class Board {
   constructor(pieces: Piece[], options?: BoardOptionsT) {
-    this.pieces = pieces;
+    this._pieces = pieces;
     this.onCheck = options?.onCheck;
     this.onCheckMate = options?.onCheckMate;
     this.onCheckResolve = options?.onCheckResolve;
     this.onStalemate = options?.onStalemate;
     this.onBoardChange = options?.onBoardChange;
 
-    this.onBoardChange?.(this.pieces);
+    this.onBoardChange?.(this._pieces);
   }
 
-  getCheck() {
-    return this.check;
+  get check() {
+    return this._check;
   }
-
-  getCheckmate() {
-    return this.checkmate;
+  get checkmate() {
+    return this._checkmate;
   }
-
-  getStalemate() {
-    return this.stalemate;
+  get stalemate() {
+    return this._stalemate;
   }
-
-  getPieces() {
-    return this.pieces;
+  get pieces() {
+    return this._pieces;
   }
-
-  getLastMovedPiece() {
-    return this.lastMoved;
+  get currentMove() {
+    return this._currentMove;
+  }
+  get lastMovedPiece() {
+    return this._lastMovedPiece;
   }
 
   getPieceAt(positionInput: PositionInput) {
     const position = new Position(positionInput);
     if (!position) return undefined;
 
-    return this.pieces.find((piece) => piece.isAt(position));
+    return this._pieces.find((piece) => piece.isAt(position));
   }
 
   getPiecesByColor(color: Color) {
-    return this.pieces.filter((piece) => piece.color === color);
+    return this._pieces.filter((piece) => piece.color === color);
   }
 
   getKing(color: Color) {
-    return this.pieces.find(
+    return this._pieces.find(
       (piece) => piece.type === Type.King && piece.color === color,
     ) as King | undefined;
   }
@@ -93,7 +92,7 @@ export class Board {
       const enemyPosition =
         piece instanceof Pawn
           ? this.isEnPassantPossible(startPosition)
-            ? this.lastMoved!.position
+            ? this._lastMovedPiece!.position
             : endPosition
           : endPosition;
 
@@ -102,7 +101,7 @@ export class Board {
 
       if (this.isPromotionPossible(piece)) {
         this.removePieceAt(piece.position);
-        this.pieces.push(new Queen(piece.position, piece.color));
+        this._pieces.push(new Queen(piece.position, piece.color));
       }
 
       if (castlingRock) {
@@ -118,12 +117,12 @@ export class Board {
   }
 
   private isEnPassantPossible(position: Position) {
-    const target = this.lastMoved;
+    const target = this._lastMovedPiece;
     if (!(target instanceof Pawn)) return false;
 
     const isTargetJustMoved = target.isJustDoubleMoved();
     const isTargetOneSquareAway = target.position.distanceTo(position) === 1;
-    const targetOnSide = target.position.get().y === position.get().y;
+    const targetOnSide = target.position.y === position.y;
 
     return isTargetJustMoved && isTargetOneSquareAway && targetOnSide;
   }
@@ -131,8 +130,8 @@ export class Board {
   private isPromotionPossible(piece: Piece) {
     if (piece instanceof Pawn) {
       if (
-        (piece.color === Color.White && piece.position.get().y === 7) ||
-        (piece.color === Color.Black && piece.position.get().y === 0)
+        (piece.color === Color.White && piece.position.y === 7) ||
+        (piece.color === Color.Black && piece.position.y === 0)
       ) {
         return true;
       }
@@ -146,7 +145,7 @@ export class Board {
       if (!piece.isMoved()) {
         const { xDiff, yDiff } = getDiff(piece.position, position);
         if (Math.abs(xDiff) === 2 && !yDiff) {
-          const { x, y } = position.get();
+          const { x, y } = position;
           const rockPosX = x < 4 ? 0 : 7;
           const newRockPosX = x < 4 ? 3 : 5;
           const rock = this.getPieceAt({ x: rockPosX, y });
@@ -165,52 +164,52 @@ export class Board {
   }
 
   private moveEventHandler(piece: Piece) {
-    this.currentMove = piece.oppositeColor;
-    this.lastMoved = piece;
+    this._currentMove = piece.oppositeColor;
+    this._lastMovedPiece = piece;
 
-    this.onBoardChange?.(this.pieces);
+    this.onBoardChange?.(this._pieces);
 
-    const king = this.getKing(this.currentMove);
+    const king = this.getKing(this._currentMove);
     if (!king) return;
 
     const checkStatus = this.getCheckStatus(king);
     const isInCheck = checkStatus === CheckStatus.Check;
     const isInCheckmate = checkStatus === CheckStatus.Checkmate;
     const isInStalemate = checkStatus === CheckStatus.Stalemate;
-    if (this.check !== king.oppositeColor && !!this.check !== isInCheck) {
+    if (this._check !== king.oppositeColor && !!this._check !== isInCheck) {
       if (isInCheck) {
-        this.check = king.color;
+        this._check = king.color;
 
         this.onCheck?.(king);
       } else {
-        this.check = undefined;
+        this._check = undefined;
 
         this.onCheckResolve?.();
       }
     }
     if (
-      this.checkmate !== king.oppositeColor &&
-      !!this.checkmate !== isInCheckmate
+      this._checkmate !== king.oppositeColor &&
+      !!this._checkmate !== isInCheckmate
     ) {
       if (isInCheckmate) {
-        this.check = king.color;
-        this.checkmate = king.color;
+        this._check = king.color;
+        this._checkmate = king.color;
 
         this.onCheckMate?.(king);
       } else {
-        this.checkmate = undefined;
+        this._checkmate = undefined;
       }
     }
     if (
-      this.stalemate !== king.oppositeColor &&
-      !!this.stalemate !== isInStalemate
+      this._stalemate !== king.oppositeColor &&
+      !!this._stalemate !== isInStalemate
     ) {
       if (isInStalemate) {
-        this.stalemate = king.color;
+        this._stalemate = king.color;
 
         this.onStalemate?.(king);
       } else {
-        this.stalemate = undefined;
+        this._stalemate = undefined;
       }
     }
   }
@@ -220,16 +219,16 @@ export class Board {
     position: Position,
     castlingRockPosition?: Position,
   ) {
-    if (this.checkmate || this.check) return false;
+    if (this._checkmate || this._check) return false;
 
-    const isTurnRight = piece.color === this.currentMove;
+    const isTurnRight = piece.color === this._currentMove;
     if (!isTurnRight) return false;
 
     const isMoving = !!piece.position.distanceTo(position);
     if (!isMoving) return false;
 
-    const pos = position.get();
-    if (!isInLimit(0, pos.x, 7) || !isInLimit(0, pos.y, 7)) return false;
+    if (!isInLimit(0, position.x, 7) || !isInLimit(0, position.y, 7))
+      return false;
 
     const canMove = this.canPieceMove(piece, position, castlingRockPosition);
     return canMove;
@@ -259,7 +258,7 @@ export class Board {
       const canMove = piece.isMoveValid(
         position,
         target ?? null,
-        this.lastMoved,
+        this._lastMovedPiece,
         !!castlingRockPosition,
       );
       if (canMove) {
@@ -362,7 +361,7 @@ export class Board {
 
   private willBeCheck(piece: Piece, position: Position): boolean {
     const target = this.getPieceAt(position);
-    const previousPosition = piece.position.get();
+    const previousPosition = new Position(piece.position);
 
     piece.position.set(position);
     const king = this.getKing(piece.color);
@@ -374,7 +373,7 @@ export class Board {
   }
 
   private removePieceAt(position: Position) {
-    this.pieces = this.pieces.filter((piece) => !piece.isAt(position));
+    this._pieces = this._pieces.filter((piece) => !piece.isAt(position));
   }
 
   private getPossibleMoves(piece: Piece) {
@@ -382,12 +381,12 @@ export class Board {
     return positions.filter((position) => this.isMoveValid(piece, position));
   }
 
-  private check: Color | undefined = undefined;
-  private checkmate: Color | undefined = undefined;
-  private stalemate: Color | undefined = undefined;
-  private pieces: Array<Piece>;
-  private currentMove: Color = Color.White;
-  private lastMoved: Piece | null = null;
+  private _check: Color | undefined = undefined;
+  private _checkmate: Color | undefined = undefined;
+  private _stalemate: Color | undefined = undefined;
+  private _pieces: Array<Piece>;
+  private _currentMove: Color = Color.White;
+  private _lastMovedPiece: Piece | null = null;
 
   private onCheck: CheckAction | undefined;
   private onCheckMate: CheckAction | undefined;

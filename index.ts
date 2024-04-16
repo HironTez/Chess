@@ -41,6 +41,9 @@ const main = async () => {
       console.error("Invalid move! Try again.");
       continue;
     }
+
+    const x = board.getPieceAt("a1");
+    if (x) x.position.set("a5");
   }
 };
 

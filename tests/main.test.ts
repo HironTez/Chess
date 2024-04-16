@@ -196,7 +196,7 @@ test("Castling when check", () => {
   const rockPosition = board.getPieceAt("A1");
 
   expect(checked).toBeTrue();
-  expect(board.getCheck()).toBe(Color.Black);
+  expect(board.check).toBe(Color.Black);
   expect(castled).toBeFalse();
   expect(kingPosition).toBeInstanceOf(King);
   expect(rockPosition).toBeInstanceOf(Rock);
@@ -274,8 +274,8 @@ test("Should detect check", () => {
   const rockMoved = board.move("A1", "A8");
 
   expect(rockMoved).toBeTrue();
-  expect(board.getCheck()).toBe(Color.Black);
-  expect(board.getCheckmate()).toBeUndefined();
+  expect(board.check).toBe(Color.Black);
+  expect(board.checkmate).toBeUndefined();
 });
 
 test("Should detect checkmate", () => {
@@ -289,8 +289,8 @@ test("Should detect checkmate", () => {
   const rockMoved = board.move("A1", "A8");
 
   expect(rockMoved).toBeTrue();
-  expect(board.getCheck()).toBe(Color.Black);
-  expect(board.getCheckmate()).toBe(Color.Black);
+  expect(board.check).toBe(Color.Black);
+  expect(board.checkmate).toBe(Color.Black);
 });
 
 test("Should detect stalemate", () => {
@@ -303,7 +303,7 @@ test("Should detect stalemate", () => {
   const queenMoved = board.move("B1", "B6");
 
   expect(queenMoved).toBeTrue();
-  expect(board.getCheck()).toBeUndefined();
-  expect(board.getCheckmate()).toBeUndefined();
-  expect(board.getStalemate()).toBe(Color.Black);
+  expect(board.check).toBeUndefined();
+  expect(board.checkmate).toBeUndefined();
+  expect(board.stalemate).toBe(Color.Black);
 });

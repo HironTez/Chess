@@ -4,7 +4,7 @@ import { Position } from "../position/position";
 
 export class King extends Piece {
   getPossibleMoves() {
-    const { x, y } = this.position.get();
+    const { x, y } = this.position;
     return [
       new Position({ x, y: y + 1 }),
       new Position({ x: x + 1, y: y + 1 }),

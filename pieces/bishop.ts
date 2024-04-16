@@ -8,7 +8,7 @@ export class Bishop extends Piece {
   getPossibleMoves() {
     const possibleMoves = [];
 
-    const { x, y } = this.position.get();
+    const { x, y } = this.position;
     for (let i = 0; i <= 7; i++) {
       if (i !== x) {
         const points = [

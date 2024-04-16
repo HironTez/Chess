@@ -20,7 +20,7 @@ export class Pawn extends Piece {
   }
 
   getPossibleMoves() {
-    const { x, y } = this.position.get();
+    const { x, y } = this.position;
     const possibleMoves = [];
 
     for (let newX = x - 1; newX <= x + 1; newX++) {
@@ -73,7 +73,7 @@ export class Pawn extends Piece {
       (lastMoved instanceof Pawn
         ? lastMoved.isJustDoubleMoved() &&
           lastMoved.position.distanceTo(this.position) === 1 &&
-          lastMoved.position.get().y === this.position.get().y
+          lastMoved.position.y === this.position.y
         : false);
 
     return (

@@ -29,18 +29,17 @@ export class Position {
     this.set(position);
   }
 
-  get() {
-    return {
-      x: this.x,
-      y: this.y,
-    };
+  get x() {
+    return this._x;
+  }
+  get y() {
+    return this._y;
   }
 
   set(position: PositionInput | string) {
     if (Position.isPosition(position)) {
-      const { x, y } = position.get();
-      this.x = x;
-      this.y = y;
+      this._x = position.x;
+      this._y = position.y;
     } else if (typeof position === "string") {
       const xChar = position.charCodeAt(0);
       const yChar = position.charCodeAt(1);
@@ -48,40 +47,40 @@ export class Position {
       const y = yChar - 49;
 
       if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
       } else {
-        this.x = NaN;
-        this.y = NaN;
+        this._x = NaN;
+        this._y = NaN;
       }
     } else {
-      this.x = position.x;
-      this.y = position.y;
+      this._x = position.x;
+      this._y = position.y;
     }
   }
 
-  distanceTo(position: PointT | Position) {
-    if (!Position.isPosition(position)) {
-      position = new Position(position);
-    }
+  distanceTo(positionInput: PointT | Position) {
+    const position = Position.isPosition(positionInput)
+      ? positionInput
+      : new Position(positionInput);
 
     const { xDiff, yDiff } = getDiff(this, position);
     return Math.sqrt(xDiff ** 2 + yDiff ** 2);
   }
 
-  chebyshevDistanceTo(position: PointT | Position) {
-    if (!Position.isPosition(position)) {
-      position = new Position(position);
-    }
+  chebyshevDistanceTo(positionInput: PointT | Position) {
+    const position = Position.isPosition(positionInput)
+      ? positionInput
+      : new Position(positionInput);
 
     const { xDiff, yDiff } = getDiff(this, position);
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
   isValid() {
-    return Number.isInteger(this.x) && Number.isInteger(this.y);
+    return Number.isInteger(this._x) && Number.isInteger(this._y);
   }
 
-  private x = NaN;
-  private y = NaN;
+  private _x = NaN;
+  private _y = NaN;
 }

@@ -2,10 +2,8 @@ import { arrayConstructor, isInLimit } from "../tools";
 import { Position } from "./position";
 
 export const getDiff = (position1: Position, position2: Position) => {
-  const point1 = position1.get();
-  const point2 = position2.get();
-  const xDiff = point2.x - point1.x;
-  const yDiff = point2.y - point1.y;
+  const xDiff = position2.x - position1.x;
+  const yDiff = position2.y - position1.y;
   return {
     xDiff,
     yDiff,
@@ -52,12 +50,8 @@ export const getWay = (position1: Position, position2: Position) => {
       Math.abs(xDiff || yDiff) - 1,
       (i) =>
         new Position({
-          x: xDiff
-            ? position1.get().x + (xDiff > 0 ? i + 1 : -i - 1)
-            : position1.get().x,
-          y: yDiff
-            ? position1.get().y + (yDiff > 0 ? i + 1 : -i - 1)
-            : position1.get().y,
+          x: xDiff ? position1.x + (xDiff > 0 ? i + 1 : -i - 1) : position1.x,
+          y: yDiff ? position1.y + (yDiff > 0 ? i + 1 : -i - 1) : position1.y,
         }),
     );
   }
@@ -65,16 +59,14 @@ export const getWay = (position1: Position, position2: Position) => {
 };
 
 export const getSurroundingPositions = (position: Position) => {
-  const point = position.get();
-
   const surroundingPositions: Position[] = [];
 
   for (let i = -1; i <= 1; i++) {
     for (let j = -1; j <= 1; j++) {
       if (i === 0 && j === 0) continue;
 
-      const x = point.x + i;
-      const y = point.y + j;
+      const x = position.x + i;
+      const y = position.y + j;
       if (!isInLimit(0, x, 7) || !isInLimit(0, y, 7)) continue;
 
       surroundingPositions.push(new Position({ x: x, y: y }));
