@@ -8,12 +8,14 @@ type CheckAction = (king: King) => void;
 enum CheckStatus {
   Check = "check",
   Checkmate = "checkmate",
+  Stalemate = "stalemate",
 }
 
 export type BoardOptionsT = {
   onCheck?: CheckAction;
   onCheckMate?: CheckAction;
   onCheckResolve?: () => void;
+  onStalemate?: CheckAction;
   onBoardChange?: (pieces: Piece[]) => void;
 };
 
@@ -23,6 +25,7 @@ export class Board {
     this.onCheck = options?.onCheck;
     this.onCheckMate = options?.onCheckMate;
     this.onCheckResolve = options?.onCheckResolve;
+    this.onStalemate = options?.onStalemate;
     this.onBoardChange = options?.onBoardChange;
 
     this.onBoardChange?.(this.pieces);
@@ -36,17 +39,23 @@ export class Board {
     return this.checkmate;
   }
 
+  getStalemate() {
+    return this.stalemate;
+  }
+
   getPieces() {
     return this.pieces;
   }
 
-  getPieceAt(positionInput: PositionInput) {
-    const position = Position.parsePosition(positionInput);
-    if (!position) return null;
+  getLastMovedPiece() {
+    return this.lastMoved;
+  }
 
-    return (
-      this.pieces.find((piece) => piece.isAt(position) && piece.active) ?? null
-    );
+  getPieceAt(positionInput: PositionInput) {
+    const position = new Position(positionInput);
+    if (!position) return undefined;
+
+    return this.pieces.find((piece) => piece.isAt(position) && piece.active);
   }
 
   getPiecesByColor(color: Color) {
@@ -61,8 +70,8 @@ export class Board {
   }
 
   move(startPositionInput: PositionInput, endPositionInput: PositionInput) {
-    const startPosition = Position.parsePosition(startPositionInput);
-    const endPosition = Position.parsePosition(endPositionInput);
+    const startPosition = new Position(startPositionInput);
+    const endPosition = new Position(endPositionInput);
     if (!startPosition || !endPosition) return false;
 
     return this.movePiece(startPosition, endPosition);
@@ -169,24 +178,34 @@ export class Board {
       const checkStatus = this.getCheckStatus(king);
       const isInCheck = checkStatus === CheckStatus.Check;
       const isInCheckmate = checkStatus === CheckStatus.Checkmate;
-      if (this.check !== isInCheck) {
+      const isInStalemate = checkStatus === CheckStatus.Stalemate;
+      if (!!this.check !== isInCheck) {
         if (isInCheck) {
           this.check = king.color;
 
           this.onCheck?.(king);
         } else {
-          this.check = false;
+          this.check = undefined;
 
           this.onCheckResolve?.();
         }
       }
-      if (this.checkmate !== isInCheckmate) {
+      if (!!this.checkmate !== isInCheckmate) {
         if (isInCheckmate) {
           this.checkmate = king.color;
 
           this.onCheckMate?.(king);
         } else {
-          this.checkmate = false;
+          this.checkmate = undefined;
+        }
+      }
+      if (!!this.stalemate !== isInStalemate) {
+        if (isInStalemate) {
+          this.stalemate = king.color;
+
+          this.onStalemate?.(king);
+        } else {
+          this.stalemate = undefined;
         }
       }
     }
@@ -232,7 +251,7 @@ export class Board {
     if (targetIsEnemy || !target) {
       const canMove = piece.isMoveValid(
         position,
-        target,
+        target ?? null,
         this.lastMoved,
         !!castlingRockPosition,
       );
@@ -275,6 +294,18 @@ export class Board {
       }
 
       return CheckStatus.Checkmate;
+    }
+
+    const teamPieces = this.getPiecesByColor(king.color);
+    if (teamPieces.length > 0) {
+      for (const piece of teamPieces) {
+        const possibleMoves = this.getPossibleMoves(piece);
+        if (possibleMoves.length > 0) {
+          return false;
+        }
+      }
+
+      return CheckStatus.Stalemate;
     }
 
     return false;
@@ -338,8 +369,14 @@ export class Board {
     this.pieces = this.pieces.filter((piece) => !piece.isAt(position));
   }
 
-  private check: Color | false = false;
-  private checkmate: Color | false = false;
+  private getPossibleMoves(piece: Piece) {
+    const positions = piece.getPossibleMoves();
+    return positions.filter((position) => this.isMoveValid(piece, position));
+  }
+
+  private check: Color | undefined = undefined;
+  private checkmate: Color | undefined = undefined;
+  private stalemate: Color | undefined = undefined;
   private pieces: Array<Piece>;
   private currentMove: Color = Color.White;
   private lastMoved: Piece | null = null;
@@ -347,5 +384,6 @@ export class Board {
   private onCheck: CheckAction | undefined;
   private onCheckMate: CheckAction | undefined;
   private onCheckResolve: (() => void) | undefined;
+  private onStalemate: CheckAction | undefined;
   private onBoardChange: ((pieces: Array<Piece>) => void) | undefined;
 }

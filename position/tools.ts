@@ -1,5 +1,5 @@
 import { arrayConstructor, isInLimit } from "../tools";
-import { AxisValue, Position } from "./position";
+import { Position } from "./position";
 
 export const getDiff = (position1: Position, position2: Position) => {
   const point1 = position1.get();
@@ -53,10 +53,10 @@ export const getWay = (position1: Position, position2: Position) => {
       (i) =>
         new Position({
           x: xDiff
-            ? ((position1.get().x + (xDiff > 0 ? i + 1 : -i - 1)) as AxisValue)
+            ? position1.get().x + (xDiff > 0 ? i + 1 : -i - 1)
             : position1.get().x,
           y: yDiff
-            ? ((position1.get().y + (yDiff > 0 ? i + 1 : -i - 1)) as AxisValue)
+            ? position1.get().y + (yDiff > 0 ? i + 1 : -i - 1)
             : position1.get().y,
         }),
     );
@@ -77,9 +77,7 @@ export const getSurroundingPositions = (position: Position) => {
       const y = point.y + j;
       if (!isInLimit(0, x, 7) || !isInLimit(0, y, 7)) continue;
 
-      surroundingPositions.push(
-        new Position({ x: x as AxisValue, y: y as AxisValue }),
-      );
+      surroundingPositions.push(new Position({ x: x, y: y }));
     }
   }
 

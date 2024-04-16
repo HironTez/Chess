@@ -1,8 +1,7 @@
 import { expect, test } from "bun:test";
-import { Board } from "../board/board";
+import { Board } from "../board";
 import { PreparedBoard } from "../board/preparedBoard";
 import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "../pieces";
-import { AxisValue } from "../position/position";
 
 test("Should expect a turn from a different color after move", () => {
   const board = new Board([
@@ -36,7 +35,7 @@ test("En passant", () => {
 
   expect(pawnDoubleMoved).toBeTrue();
   expect(enPassantSuccess).toBeTrue();
-  expect(capturedPiece).toBeNull();
+  expect(capturedPiece).toBeUndefined();
 
   const board2 = new Board([
     new King("E1", Color.White),
@@ -222,14 +221,14 @@ test("Board should start with correct piece placement", () => {
   const board = new PreparedBoard();
 
   [
-    { y: 0 as AxisValue, color: Color.White },
-    { y: 7 as AxisValue, color: Color.Black },
+    { y: 0, color: Color.White },
+    { y: 7, color: Color.Black },
   ].forEach(({ y, color }) => {
     for (let i = 0; i < 8; i++) {
       const pawnY = color === Color.White ? y + 1 : y - 1;
       const pawn = board.getPieceAt({
-        x: i as AxisValue,
-        y: pawnY as AxisValue,
+        x: i,
+        y: pawnY,
       });
 
       expect(pawn).toBeInstanceOf(Pawn);
@@ -263,4 +262,48 @@ test("Board should start with correct piece placement", () => {
     expect(queen).toHaveProperty("color", color);
     expect(king).toHaveProperty("color", color);
   });
+});
+
+test("Should detect check", () => {
+  const board = new Board([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Rock("A1", Color.White),
+  ]);
+
+  const rockMoved = board.move("A1", "A8");
+
+  expect(rockMoved).toBeTrue();
+  expect(board.getCheck()).toBe(Color.Black);
+  expect(board.getCheckmate()).toBeUndefined();
+});
+
+test("Should detect checkmate", () => {
+  const board = new Board([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Rock("A1", Color.White),
+    new Rock("H7", Color.White),
+  ]);
+
+  const rockMoved = board.move("A1", "A8");
+
+  expect(rockMoved).toBeTrue();
+  expect(board.getCheck()).toBe(Color.Black);
+  expect(board.getCheckmate()).toBe(Color.Black);
+});
+
+test("Should detect stalemate", () => {
+  const board = new Board([
+    new King("E1", Color.White),
+    new King("A8", Color.Black),
+    new Queen("B1", Color.White),
+  ]);
+
+  const queenMoved = board.move("B1", "B6");
+
+  expect(queenMoved).toBeTrue();
+  expect(board.getCheck()).toBeUndefined();
+  expect(board.getCheckmate()).toBeUndefined();
+  expect(board.getStalemate()).toBe(Color.Black);
 });

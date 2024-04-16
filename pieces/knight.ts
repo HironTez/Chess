@@ -7,6 +7,20 @@ import {
 } from "../position/tools";
 
 export class Knight extends Piece {
+  getPossibleMoves() {
+    const { x, y } = this.position.get();
+    return [
+      new Position({ x: x + 2, y: y + 1 }),
+      new Position({ x: x + 1, y: y + 2 }),
+      new Position({ x: x + 2, y: y - 1 }),
+      new Position({ x: x + 1, y: y - 2 }),
+      new Position({ x: x - 2, y: y - 1 }),
+      new Position({ x: x - 1, y: y - 2 }),
+      new Position({ x: x - 2, y: y + 1 }),
+      new Position({ x: x - 1, y: y + 2 }),
+    ];
+  }
+
   canMove(position: Position) {
     const distance = this.position.distanceTo(position);
     const movingVertically = areAlignedHorizontally(this.position, position);

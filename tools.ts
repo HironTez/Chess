@@ -1,6 +1,6 @@
 import readline from "node:readline";
 import { Color, Piece, Type } from "./pieces";
-import { AxisValue, Position } from "./position/position";
+import { Position } from "./position/position";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -55,9 +55,7 @@ export const printBoard = (pieces: Piece[]) => {
 
     for (let j = 0; j <= 7; j++) {
       const piece = pieces.find((piece) => {
-        return piece.isAt(
-          new Position({ x: j as AxisValue, y: i as AxisValue }),
-        );
+        return piece.isAt(new Position({ x: j, y: i }));
       });
 
       const symbol = piece && pieceSymbol(piece);

@@ -1,11 +1,9 @@
 import { isInLimit } from "../tools";
 import { getDiff } from "./tools";
 
-export type AxisValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-
 export type PointT = {
-  x: AxisValue;
-  y: AxisValue;
+  x: number;
+  y: number;
 };
 
 export type PositionString = `${
@@ -27,30 +25,8 @@ export class Position {
     return position instanceof Position;
   }
 
-  static parsePosition(position: PositionInput | string) {
-    if (this.isPosition(position)) {
-      return position;
-    }
-
-    if (typeof position === "string") {
-      const xChar = position.charCodeAt(0);
-      const yChar = position.charCodeAt(1);
-      const x = xChar >= 97 ? xChar - 97 : xChar - 65;
-      const y = yChar - 49;
-
-      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
-        return new Position({ x: x as AxisValue, y: y as AxisValue });
-      } else {
-        return undefined;
-      }
-    }
-
-    return new Position(position);
-  }
-
-  constructor(point: PointT) {
-    this.x = point.x;
-    this.y = point.y;
+  constructor(position: PositionInput | string) {
+    this.set(position);
   }
 
   get() {
@@ -60,13 +36,28 @@ export class Position {
     };
   }
 
-  set(position: PointT | Position) {
+  set(position: PositionInput | string) {
     if (Position.isPosition(position)) {
-      position = position.get();
-    }
+      const { x, y } = position.get();
+      this.x = x;
+      this.y = y;
+    } else if (typeof position === "string") {
+      const xChar = position.charCodeAt(0);
+      const yChar = position.charCodeAt(1);
+      const x = xChar >= 97 ? xChar - 97 : xChar - 65;
+      const y = yChar - 49;
 
-    this.x = position.x;
-    this.y = position.y;
+      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
+        this.x = x;
+        this.y = y;
+      } else {
+        this.x = NaN;
+        this.y = NaN;
+      }
+    } else {
+      this.x = position.x;
+      this.y = position.y;
+    }
   }
 
   distanceTo(position: PointT | Position) {
@@ -87,6 +78,10 @@ export class Position {
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
-  private x: AxisValue;
-  private y: AxisValue;
+  isValid() {
+    return Number.isInteger(this.x) && Number.isInteger(this.y);
+  }
+
+  private x = NaN;
+  private y = NaN;
 }

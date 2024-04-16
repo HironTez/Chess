@@ -19,6 +19,31 @@ export class Pawn extends Piece {
     return canCapture || (!target && canMove);
   }
 
+  getPossibleMoves() {
+    const { x, y } = this.position.get();
+    const possibleMoves = [];
+
+    for (let newX = x - 1; newX <= x + 1; newX++) {
+      possibleMoves.push(
+        new Position({
+          x: newX,
+          y: y + (this.color === Color.White ? 1 : -1),
+        }),
+      );
+    }
+
+    if (!this.moved) {
+      possibleMoves.push(
+        new Position({
+          x,
+          y: y + (this.color === Color.White ? 2 : -2),
+        }),
+      );
+    }
+
+    return possibleMoves;
+  }
+
   isJustDoubleMoved() {
     return this.justDoubleMoved;
   }

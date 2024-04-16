@@ -17,7 +17,7 @@ export enum Type {
 export abstract class Piece {
   constructor(positionInput: PositionInput, color: Color) {
     const position =
-      Position.parsePosition(positionInput) ?? new Position({ x: 0, y: 0 });
+      new Position(positionInput) ?? new Position({ x: 0, y: 0 });
 
     this.position = position;
     this.color = color;
@@ -57,6 +57,8 @@ export abstract class Piece {
   isMoved() {
     return this.moved;
   }
+
+  abstract getPossibleMoves(): Position[];
 
   protected abstract canMove(
     position: Position,

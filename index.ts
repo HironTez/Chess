@@ -13,6 +13,9 @@ const board = new PreparedBoard({
   onCheckResolve: () => {
     console.log("Check resolved");
   },
+  onStalemate: (king) => {
+    console.log(`${king.color} king is in stalemate!`.toLocaleUpperCase());
+  },
   onBoardChange: (pieces) => {
     printBoard(pieces);
   },
@@ -25,11 +28,10 @@ const main = async () => {
     const startPositionParsed = positions?.at(1) as PositionString | undefined;
     const endPositionParsed = positions?.at(2) as PositionString | undefined;
     const startPosition =
-      startPositionParsed && Position.parsePosition(startPositionParsed);
-    const endPosition =
-      endPositionParsed && Position.parsePosition(endPositionParsed);
+      startPositionParsed && new Position(startPositionParsed);
+    const endPosition = endPositionParsed && new Position(endPositionParsed);
 
-    if (!startPosition || !endPosition) {
+    if (!startPosition?.isValid() || !endPosition?.isValid()) {
       console.error("Invalid input! Try again.");
       continue;
     }
@@ -46,3 +48,4 @@ main();
 
 // TODO: Stalemate
 // TODO: pawn promotion variants
+// TODO: get possible moves of piece

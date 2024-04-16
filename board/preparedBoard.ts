@@ -1,18 +1,17 @@
 import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "../pieces";
-import { AxisValue } from "../position/position";
 import { arrayConstructor } from "../tools";
 import { Board, BoardOptionsT } from "./board";
 
 const pieceSet = [
-  { y: 0 as AxisValue, color: Color.White },
-  { y: 7 as AxisValue, color: Color.Black },
+  { y: 0, color: Color.White },
+  { y: 7, color: Color.Black },
 ].flatMap(({ y, color }) => [
   ...arrayConstructor(8, (i) => {
     const pawnY = color === Color.White ? y + 1 : y - 1;
     return new Pawn(
       {
-        x: i as AxisValue,
-        y: pawnY as AxisValue,
+        x: i,
+        y: pawnY,
       },
       color,
     );
