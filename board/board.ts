@@ -2,6 +2,7 @@ import { Color, King, Pawn, Piece, Queen, Rock, Type } from "../pieces";
 import { Position, PositionInput } from "../position/position";
 
 import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
+import { isInLimit } from "../tools";
 
 type CheckAction = (king: King) => void;
 
@@ -169,44 +170,47 @@ export class Board {
 
     this.onBoardChange?.(this.pieces);
 
-    const whiteKing = this.getKing(Color.White);
-    const blackKing = this.getKing(Color.Black);
-    if (!whiteKing || !blackKing) return;
+    const king = this.getKing(this.currentMove);
+    if (!king) return;
 
-    for (const king of [whiteKing, blackKing]) {
-      const checkStatus = this.getCheckStatus(king);
-      const isInCheck = checkStatus === CheckStatus.Check;
-      const isInCheckmate = checkStatus === CheckStatus.Checkmate;
-      const isInStalemate = checkStatus === CheckStatus.Stalemate;
-      if (!!this.check !== isInCheck) {
-        if (isInCheck) {
-          this.check = king.color;
+    const checkStatus = this.getCheckStatus(king);
+    const isInCheck = checkStatus === CheckStatus.Check;
+    const isInCheckmate = checkStatus === CheckStatus.Checkmate;
+    const isInStalemate = checkStatus === CheckStatus.Stalemate;
+    if (this.check !== king.oppositeColor && !!this.check !== isInCheck) {
+      if (isInCheck) {
+        this.check = king.color;
 
-          this.onCheck?.(king);
-        } else {
-          this.check = undefined;
+        this.onCheck?.(king);
+      } else {
+        this.check = undefined;
 
-          this.onCheckResolve?.();
-        }
+        this.onCheckResolve?.();
       }
-      if (!!this.checkmate !== isInCheckmate) {
-        if (isInCheckmate) {
-          this.check = king.color;
-          this.checkmate = king.color;
+    }
+    if (
+      this.checkmate !== king.oppositeColor &&
+      !!this.checkmate !== isInCheckmate
+    ) {
+      if (isInCheckmate) {
+        this.check = king.color;
+        this.checkmate = king.color;
 
-          this.onCheckMate?.(king);
-        } else {
-          this.checkmate = undefined;
-        }
+        this.onCheckMate?.(king);
+      } else {
+        this.checkmate = undefined;
       }
-      if (!!this.stalemate !== isInStalemate) {
-        if (isInStalemate) {
-          this.stalemate = king.color;
+    }
+    if (
+      this.stalemate !== king.oppositeColor &&
+      !!this.stalemate !== isInStalemate
+    ) {
+      if (isInStalemate) {
+        this.stalemate = king.color;
 
-          this.onStalemate?.(king);
-        } else {
-          this.stalemate = undefined;
-        }
+        this.onStalemate?.(king);
+      } else {
+        this.stalemate = undefined;
       }
     }
   }
@@ -223,6 +227,9 @@ export class Board {
 
     const isMoving = !!piece.position.distanceTo(position);
     if (!isMoving) return false;
+
+    const pos = position.get();
+    if (!isInLimit(0, pos.x, 7) || !isInLimit(0, pos.y, 7)) return false;
 
     const canMove = this.canPieceMove(piece, position, castlingRockPosition);
     return canMove;
@@ -301,14 +308,14 @@ export class Board {
       for (const piece of teamPieces) {
         const possibleMoves = this.getPossibleMoves(piece);
         if (possibleMoves.length > 0) {
-          return false;
+          return undefined;
         }
       }
 
       return CheckStatus.Stalemate;
     }
 
-    return false;
+    return undefined;
   }
 
   private isKingInCheck(king: King, ignorePiece: Piece | undefined) {
