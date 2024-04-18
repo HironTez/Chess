@@ -1,7 +1,16 @@
 import { expect, test } from "bun:test";
 import { Board } from "../board";
 import { PreparedBoard } from "../board/preparedBoard";
-import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "../pieces";
+import {
+  Bishop,
+  Color,
+  King,
+  Knight,
+  Pawn,
+  Queen,
+  Rock,
+  Type,
+} from "../pieces";
 
 test("Should expect a turn from a different color after move", () => {
   const board = new Board([
@@ -128,8 +137,8 @@ test("Castling kingside", () => {
   const rock = board.getPieceAt("F1");
 
   expect(castled).toBeTrue();
-  expect(king).toBeInstanceOf(King);
-  expect(rock).toBeInstanceOf(Rock);
+  expect(king).toHaveProperty("type", Type.King);
+  expect(rock).toHaveProperty("type", Type.Rock);
 });
 
 test("Castling queenside", () => {
@@ -144,8 +153,8 @@ test("Castling queenside", () => {
   const rockPosition = board.getPieceAt("D1");
 
   expect(castled).toBeTrue();
-  expect(kingPosition).toBeInstanceOf(King);
-  expect(rockPosition).toBeInstanceOf(Rock);
+  expect(kingPosition).toHaveProperty("type", Type.King);
+  expect(rockPosition).toHaveProperty("type", Type.Rock);
 });
 
 test("Castling through check", () => {
@@ -161,8 +170,8 @@ test("Castling through check", () => {
   const rockPosition = board.getPieceAt("A1");
 
   expect(castled).toBeFalse();
-  expect(kingPosition).toBeInstanceOf(King);
-  expect(rockPosition).toBeInstanceOf(Rock);
+  expect(kingPosition).toHaveProperty("type", Type.King);
+  expect(rockPosition).toHaveProperty("type", Type.Rock);
 });
 
 test("Castling to checked square", () => {
@@ -178,8 +187,8 @@ test("Castling to checked square", () => {
   const rockPosition = board.getPieceAt("A1");
 
   expect(castled).toBeFalse();
-  expect(kingPosition).toBeInstanceOf(King);
-  expect(rockPosition).toBeInstanceOf(Rock);
+  expect(kingPosition).toHaveProperty("type", Type.King);
+  expect(rockPosition).toHaveProperty("type", Type.Rock);
 });
 
 test("Castling when check", () => {
@@ -198,8 +207,8 @@ test("Castling when check", () => {
   expect(checked).toBeTrue();
   expect(board.check).toBe(Color.Black);
   expect(castled).toBeFalse();
-  expect(kingPosition).toBeInstanceOf(King);
-  expect(rockPosition).toBeInstanceOf(Rock);
+  expect(kingPosition).toHaveProperty("type", Type.King);
+  expect(rockPosition).toHaveProperty("type", Type.Rock);
 });
 
 test("Pawn promotion on reaching last rank", () => {
@@ -214,7 +223,7 @@ test("Pawn promotion on reaching last rank", () => {
   const promotedPiece = board.getPieceAt("A8");
 
   expect(pawnMoved).toBeTrue();
-  expect(promotedPiece).toBeInstanceOf(Queen);
+  expect(promotedPiece).toHaveProperty("type", Type.Queen);
 });
 
 test("Board should start with correct piece placement", () => {
@@ -231,7 +240,7 @@ test("Board should start with correct piece placement", () => {
         y: pawnY,
       });
 
-      expect(pawn).toBeInstanceOf(Pawn);
+      expect(pawn).toHaveProperty("type", Type.Pawn);
       expect(pawn).toHaveProperty("color", color);
     }
 
@@ -244,14 +253,14 @@ test("Board should start with correct piece placement", () => {
     const queen = board.getPieceAt({ x: 3, y });
     const king = board.getPieceAt({ x: 4, y });
 
-    expect(rock1).toBeInstanceOf(Rock);
-    expect(rock2).toBeInstanceOf(Rock);
-    expect(knight1).toBeInstanceOf(Knight);
-    expect(knight2).toBeInstanceOf(Knight);
-    expect(bishop1).toBeInstanceOf(Bishop);
-    expect(bishop2).toBeInstanceOf(Bishop);
-    expect(queen).toBeInstanceOf(Queen);
-    expect(king).toBeInstanceOf(King);
+    expect(rock1).toHaveProperty("type", Type.Rock);
+    expect(rock2).toHaveProperty("type", Type.Rock);
+    expect(knight1).toHaveProperty("type", Type.Knight);
+    expect(knight2).toHaveProperty("type", Type.Knight);
+    expect(bishop1).toHaveProperty("type", Type.Bishop);
+    expect(bishop2).toHaveProperty("type", Type.Bishop);
+    expect(queen).toHaveProperty("type", Type.Queen);
+    expect(king).toHaveProperty("type", Type.King);
 
     expect(rock1).toHaveProperty("color", color);
     expect(rock2).toHaveProperty("color", color);

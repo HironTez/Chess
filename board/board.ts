@@ -1,10 +1,11 @@
 import { Color, King, Pawn, Piece, Queen, Rock, Type } from "../pieces";
+import { ReadonlyPiece } from "../pieces/piece";
 import { Position, PositionInput } from "../position/position";
 
 import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
 import { isInLimit } from "../tools";
 
-type CheckAction = (king: King) => void;
+type CheckAction = (king: ReadonlyPiece) => void;
 
 enum CheckStatus {
   Check = "check",
@@ -17,7 +18,7 @@ export type BoardOptionsT = {
   onCheckMate?: CheckAction;
   onCheckResolve?: () => void;
   onStalemate?: CheckAction;
-  onBoardChange?: (pieces: Piece[]) => void;
+  onBoardChange?: (pieces: ReadonlyPiece[]) => void;
 };
 
 export class Board {
@@ -29,7 +30,7 @@ export class Board {
     this.onStalemate = options?.onStalemate;
     this.onBoardChange = options?.onBoardChange;
 
-    this.onBoardChange?.(this._pieces);
+    this.onBoardChange?.(this.getPieces());
   }
 
   get check() {
@@ -42,30 +43,24 @@ export class Board {
     return this._stalemate;
   }
   get pieces() {
-    return this._pieces;
+    return this._pieces.map((piece) => new ReadonlyPiece(piece));
   }
   get currentMove() {
     return this._currentMove;
   }
-  get lastMovedPiece() {
-    return this._lastMovedPiece;
-  }
 
   getPieceAt(positionInput: PositionInput) {
-    const position = new Position(positionInput);
-    if (!position) return undefined;
+    const piece = this._getPieceAt(positionInput);
+    return piece && new ReadonlyPiece(piece);
+  }
 
-    return this._pieces.find((piece) => piece.isAt(position));
+  getPieces() {
+    return this._pieces.map((piece) => new ReadonlyPiece(piece));
   }
 
   getPiecesByColor(color: Color) {
-    return this._pieces.filter((piece) => piece.color === color);
-  }
-
-  getKing(color: Color) {
-    return this._pieces.find(
-      (piece) => piece.type === Type.King && piece.color === color,
-    ) as King | undefined;
+    const pieces = this._getPiecesByColor(color);
+    return pieces.map((piece) => new ReadonlyPiece(piece));
   }
 
   move(startPositionInput: PositionInput, endPositionInput: PositionInput) {
@@ -76,8 +71,19 @@ export class Board {
     return this.movePiece(startPosition, endPosition);
   }
 
+  private _getPieceAt(positionInput: PositionInput) {
+    const position = new Position(positionInput);
+    if (!position) return undefined;
+
+    return this._pieces.find((piece) => piece.isAt(position));
+  }
+
+  private _getPiecesByColor(color: Color) {
+    return this._pieces.filter((piece) => piece.color === color);
+  }
+
   private movePiece(startPosition: Position, endPosition: Position) {
-    const piece = this.getPieceAt(startPosition);
+    const piece = this._getPieceAt(startPosition);
     if (!piece) return false;
 
     const { rock: castlingRock, newPosition: newRockPosition } =
@@ -140,17 +146,23 @@ export class Board {
     return false;
   }
 
+  private getKing(color: Color) {
+    return this._pieces.find(
+      (piece) => piece.type === Type.King && piece.color === color,
+    ) as King | undefined;
+  }
+
   private getCastlingRock(piece: Piece, position: Position) {
     if (piece instanceof King) {
-      if (!piece.isMoved()) {
+      if (!piece.moved) {
         const { xDiff, yDiff } = getDiff(piece.position, position);
         if (Math.abs(xDiff) === 2 && !yDiff) {
           const { x, y } = position;
           const rockPosX = x < 4 ? 0 : 7;
           const newRockPosX = x < 4 ? 3 : 5;
-          const rock = this.getPieceAt({ x: rockPosX, y });
+          const rock = this._getPieceAt({ x: rockPosX, y });
           if (rock instanceof Rock) {
-            const rockIsMoved = rock?.isMoved();
+            const rockIsMoved = rock?.moved;
             return {
               rock: rockIsMoved ? null : rock,
               newPosition: new Position({ x: newRockPosX, y }),
@@ -167,7 +179,7 @@ export class Board {
     this._currentMove = piece.oppositeColor;
     this._lastMovedPiece = piece;
 
-    this.onBoardChange?.(this._pieces);
+    this.onBoardChange?.(this.getPieces());
 
     const king = this.getKing(this._currentMove);
     if (!king) return;
@@ -180,7 +192,7 @@ export class Board {
       if (isInCheck) {
         this._check = king.color;
 
-        this.onCheck?.(king);
+        this.onCheck?.(new ReadonlyPiece(king));
       } else {
         this._check = undefined;
 
@@ -195,7 +207,7 @@ export class Board {
         this._check = king.color;
         this._checkmate = king.color;
 
-        this.onCheckMate?.(king);
+        this.onCheckMate?.(new ReadonlyPiece(king));
       } else {
         this._checkmate = undefined;
       }
@@ -207,7 +219,7 @@ export class Board {
       if (isInStalemate) {
         this._stalemate = king.color;
 
-        this.onStalemate?.(king);
+        this.onStalemate?.(new ReadonlyPiece(king));
       } else {
         this._stalemate = undefined;
       }
@@ -248,11 +260,11 @@ export class Board {
     );
 
     for (const pos of way) {
-      const pieceOnWay = this.getPieceAt(pos);
+      const pieceOnWay = this._getPieceAt(pos);
       if (pieceOnWay) return false;
     }
 
-    const target = this.getPieceAt(position);
+    const target = this._getPieceAt(position);
     const targetIsEnemy = target?.color === piece.oppositeColor;
     if (targetIsEnemy || !target) {
       const canMove = piece.isMoveValid(
@@ -281,7 +293,7 @@ export class Board {
   private getCheckStatus(king: King) {
     const isInCheck = this.isKingInCheck(king, undefined);
     if (isInCheck) {
-      const team = this.getPiecesByColor(king.color);
+      const team = this._getPiecesByColor(king.color);
       for (const teammate of team) {
         if (teammate === king) continue;
 
@@ -302,7 +314,7 @@ export class Board {
       return CheckStatus.Checkmate;
     }
 
-    const teamPieces = this.getPiecesByColor(king.color);
+    const teamPieces = this._getPiecesByColor(king.color);
     if (teamPieces.length > 0) {
       for (const piece of teamPieces) {
         const possibleMoves = this.getPossibleMoves(piece);
@@ -322,7 +334,7 @@ export class Board {
   }
 
   private piecesCheckingKing(king: King, ignorePiece: Piece | undefined) {
-    const enemies = this.getPiecesByColor(king.oppositeColor);
+    const enemies = this._getPiecesByColor(king.oppositeColor);
     return enemies.filter(
       (enemy) =>
         this.canPieceMove(enemy, king.position) && enemy !== ignorePiece,
@@ -360,7 +372,7 @@ export class Board {
   }
 
   private willBeCheck(piece: Piece, position: Position): boolean {
-    const target = this.getPieceAt(position);
+    const target = this._getPieceAt(position);
     const previousPosition = new Position(piece.position);
 
     piece.position.set(position);
@@ -392,5 +404,5 @@ export class Board {
   private onCheckMate: CheckAction | undefined;
   private onCheckResolve: (() => void) | undefined;
   private onStalemate: CheckAction | undefined;
-  private onBoardChange: ((pieces: Array<Piece>) => void) | undefined;
+  private onBoardChange: ((pieces: Array<ReadonlyPiece>) => void) | undefined;
 }

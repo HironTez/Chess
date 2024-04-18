@@ -42,7 +42,7 @@ const main = async () => {
       continue;
     }
 
-    const x = board.getPieceAt("a1");
+    const x = board._getPieceAt("a1");
     if (x) x.position.set("a5");
   }
 };

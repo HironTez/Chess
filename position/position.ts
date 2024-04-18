@@ -20,7 +20,7 @@ export type PositionString = `${
 
 export type PositionInput = Position | PointT | PositionString;
 
-export class Position {
+export class ReadonlyPosition {
   static isPosition(position: unknown): position is Position {
     return position instanceof Position;
   }
@@ -81,6 +81,35 @@ export class Position {
     return Number.isInteger(this._x) && Number.isInteger(this._y);
   }
 
-  private _x = NaN;
-  private _y = NaN;
+  protected _x = NaN;
+  protected _y = NaN;
+}
+
+export class Position extends ReadonlyPosition {
+  constructor(position: PositionInput | string) {
+    super(position);
+  }
+
+  set(position: PositionInput | string) {
+    if (Position.isPosition(position)) {
+      this._x = position.x;
+      this._y = position.y;
+    } else if (typeof position === "string") {
+      const xChar = position.charCodeAt(0);
+      const yChar = position.charCodeAt(1);
+      const x = xChar >= 97 ? xChar - 97 : xChar - 65;
+      const y = yChar - 49;
+
+      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
+        this._x = x;
+        this._y = y;
+      } else {
+        this._x = NaN;
+        this._y = NaN;
+      }
+    } else {
+      this._x = position.x;
+      this._y = position.y;
+    }
+  }
 }

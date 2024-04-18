@@ -48,7 +48,7 @@ export class Pawn extends Piece {
     return this.justDoubleMoved;
   }
 
-  protected canMove(position: Position) {
+  canMove(position: Position) {
     const distance = this.position.chebyshevDistanceTo(position);
     const movingVertically = areAlignedHorizontally(this.position, position);
     const directionIsRight = this.directionIsRight(position);
@@ -57,7 +57,7 @@ export class Pawn extends Piece {
     return movingVertically && directionIsRight && distanceIsRight;
   }
 
-  protected canCapture(
+  canCapture(
     position: Position,
     lastMoved: Piece | null,
     target: Piece | null,

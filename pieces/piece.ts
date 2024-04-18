@@ -1,4 +1,9 @@
-import { PointT, Position, PositionInput } from "../position/position";
+import {
+  PointT,
+  Position,
+  PositionInput,
+  ReadonlyPosition,
+} from "../position/position";
 
 export enum Color {
   White = "white",
@@ -14,14 +19,20 @@ export enum Type {
   King = "king",
 }
 
-export abstract class Piece {
+export abstract class ReadonlyPieceAbstract {
   constructor(positionInput: PositionInput, color: Color) {
-    const position =
-      new Position(positionInput) ?? new Position({ x: 0, y: 0 });
+    const position = new Position(positionInput);
 
     this._position = position;
     this.color = color;
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
+  }
+
+  get moved() {
+    return this._moved;
+  }
+  get position() {
+    return new ReadonlyPosition(this._position);
   }
 
   move(position: Position) {
@@ -52,19 +63,15 @@ export abstract class Piece {
     return false;
   }
 
-  isMoved() {
-    return this.moved;
-  }
-
   abstract getPossibleMoves(): Position[];
 
-  protected abstract canMove(
+  abstract canMove(
     position: Position,
     lastMoved: Piece | null,
     isCastlingPossible: boolean,
   ): boolean;
 
-  protected canCapture(
+  canCapture(
     position: Position,
     lastMoved: Piece | null,
     target: Piece,
@@ -80,12 +87,41 @@ export abstract class Piece {
   protected _position: Position;
   readonly color: Color;
   readonly oppositeColor: Color;
+}
 
-  get moved() {
-    return this._moved;
+export abstract class Piece extends ReadonlyPieceAbstract {
+  constructor(positionInput: PositionInput, color: Color) {
+    super(positionInput, color);
+  }
+
+  move(position: Position) {
+    this.onMove(position);
+
+    this._position.set(position);
+    this._moved = true;
   }
 
   get position() {
     return this._position;
   }
+}
+
+export class ReadonlyPiece extends ReadonlyPieceAbstract {
+  constructor(piece: Piece) {
+    super(piece.position, piece.color);
+
+    this.canMove = piece.canMove;
+    this.canCapture = piece.canCapture;
+    this.getPossibleMoves = piece.getPossibleMoves;
+    this.type = piece.type;
+  }
+
+  canMove: (
+    position: Position,
+    lastMoved: Piece | null,
+    isCastlingPossible: boolean,
+  ) => boolean;
+
+  getPossibleMoves: () => Position[];
+  type: Type;
 }
