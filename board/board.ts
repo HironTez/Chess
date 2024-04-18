@@ -1,11 +1,32 @@
 import { Color, King, Pawn, Piece, Queen, Rock, Type } from "../pieces";
 import { ReadonlyPiece } from "../pieces/piece";
-import { Position, PositionInput } from "../position/position";
+import {
+  Position,
+  PositionInput,
+  ReadonlyPosition,
+} from "../position/position";
 
 import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
 import { isInLimit } from "../tools";
 
-type CheckAction = (king: ReadonlyPiece) => void;
+type TeamEventHandler = (color: Color, kingPosition: ReadonlyPosition) => void;
+type BoardChangeEventHandler = (pieces: ReadonlyPiece[]) => void;
+type PieceMoveEventHandler = (
+  startPosition: ReadonlyPosition,
+  endPosition: ReadonlyPosition,
+) => void;
+type PieceCaptureEventHandler = (
+  startPosition: ReadonlyPosition,
+  endPosition: ReadonlyPosition,
+  capturedPosition: ReadonlyPosition,
+) => void;
+type CastlingEventHandler = (
+  kingStartPosition: ReadonlyPosition,
+  kingEndPosition: ReadonlyPosition,
+  rockStartPosition: ReadonlyPosition,
+  rockEndPosition: ReadonlyPosition,
+) => void;
+type PiecePromotionEventHandler = (piecePosition: ReadonlyPosition) => void;
 
 enum CheckStatus {
   Check = "check",
@@ -14,11 +35,15 @@ enum CheckStatus {
 }
 
 export type BoardOptionsT = {
-  onCheck?: CheckAction;
-  onCheckMate?: CheckAction;
+  onCheck?: TeamEventHandler;
+  onCheckMate?: TeamEventHandler;
   onCheckResolve?: () => void;
-  onStalemate?: CheckAction;
-  onBoardChange?: (pieces: ReadonlyPiece[]) => void;
+  onStalemate?: TeamEventHandler;
+  onBoardChange?: BoardChangeEventHandler;
+  onMove?: PieceMoveEventHandler;
+  onCapture?: PieceCaptureEventHandler;
+  onCastling?: CastlingEventHandler;
+  onPromotion?: PiecePromotionEventHandler;
 };
 
 export class Board {
@@ -29,6 +54,10 @@ export class Board {
     this.onCheckResolve = options?.onCheckResolve;
     this.onStalemate = options?.onStalemate;
     this.onBoardChange = options?.onBoardChange;
+    this.onMove = options?.onMove;
+    this.onCapture = options?.onCapture;
+    this.onCastling = options?.onCastling;
+    this.onPromotion = options?.onPromotion;
 
     this.onBoardChange?.(this.getPieces());
   }
@@ -88,11 +117,12 @@ export class Board {
 
     const { rock: castlingRock, newPosition: newRockPosition } =
       this.getCastlingRock(piece, endPosition);
+    const castlingRockStartPosition = castlingRock?.position;
 
     const isMoveValid = this.isMoveValid(
       piece,
       endPosition,
-      castlingRock?.position,
+      castlingRockStartPosition,
     );
     if (isMoveValid) {
       const enemyPosition =
@@ -102,19 +132,38 @@ export class Board {
             : endPosition
           : endPosition;
 
+      const isCapturing = !!this.getPieceAt(endPosition);
+
       this.removePieceAt(enemyPosition);
       piece.move(endPosition);
 
       if (this.isPromotionPossible(piece)) {
         this.removePieceAt(piece.position);
         this._pieces.push(new Queen(piece.position, piece.color));
+
+        this.onPromotion?.(piece.position);
       }
 
-      if (castlingRock) {
+      if (castlingRock && castlingRockStartPosition) {
         castlingRock.move(newRockPosition);
+
+        this.onCastling?.(
+          startPosition,
+          endPosition,
+          castlingRockStartPosition,
+          newRockPosition,
+        );
+      } else {
+        this.onMove?.(startPosition, endPosition);
       }
 
-      this.moveEventHandler(piece);
+      if (isCapturing) {
+        this.onCapture?.(startPosition, endPosition, enemyPosition);
+      } else {
+        this.onMove?.(startPosition, endPosition);
+      }
+
+      this.handleBoardChange(piece);
 
       return true;
     }
@@ -154,7 +203,7 @@ export class Board {
 
   private getCastlingRock(piece: Piece, position: Position) {
     if (piece instanceof King) {
-      if (!piece.moved) {
+      if (!piece.isMoved) {
         const { xDiff, yDiff } = getDiff(piece.position, position);
         if (Math.abs(xDiff) === 2 && !yDiff) {
           const { x, y } = position;
@@ -162,7 +211,7 @@ export class Board {
           const newRockPosX = x < 4 ? 3 : 5;
           const rock = this._getPieceAt({ x: rockPosX, y });
           if (rock instanceof Rock) {
-            const rockIsMoved = rock?.moved;
+            const rockIsMoved = rock?.isMoved;
             return {
               rock: rockIsMoved ? null : rock,
               newPosition: new Position({ x: newRockPosX, y }),
@@ -175,7 +224,7 @@ export class Board {
     return {};
   }
 
-  private moveEventHandler(piece: Piece) {
+  private handleBoardChange(piece: Piece) {
     this._currentMove = piece.oppositeColor;
     this._lastMovedPiece = piece;
 
@@ -192,7 +241,7 @@ export class Board {
       if (isInCheck) {
         this._check = king.color;
 
-        this.onCheck?.(new ReadonlyPiece(king));
+        this.onCheck?.(king.color, new ReadonlyPosition(king.position));
       } else {
         this._check = undefined;
 
@@ -207,7 +256,7 @@ export class Board {
         this._check = king.color;
         this._checkmate = king.color;
 
-        this.onCheckMate?.(new ReadonlyPiece(king));
+        this.onCheckMate?.(king.color, new ReadonlyPosition(king.position));
       } else {
         this._checkmate = undefined;
       }
@@ -219,7 +268,7 @@ export class Board {
       if (isInStalemate) {
         this._stalemate = king.color;
 
-        this.onStalemate?.(new ReadonlyPiece(king));
+        this.onStalemate?.(king.color, new ReadonlyPosition(king.position));
       } else {
         this._stalemate = undefined;
       }
@@ -400,9 +449,13 @@ export class Board {
   private _currentMove: Color = Color.White;
   private _lastMovedPiece: Piece | null = null;
 
-  private onCheck: CheckAction | undefined;
-  private onCheckMate: CheckAction | undefined;
+  private onCheck: TeamEventHandler | undefined;
+  private onCheckMate: TeamEventHandler | undefined;
   private onCheckResolve: (() => void) | undefined;
-  private onStalemate: CheckAction | undefined;
-  private onBoardChange: ((pieces: Array<ReadonlyPiece>) => void) | undefined;
+  private onStalemate: TeamEventHandler | undefined;
+  private onBoardChange: BoardChangeEventHandler | undefined;
+  private onMove: PieceMoveEventHandler | undefined;
+  private onCapture: PieceCaptureEventHandler | undefined;
+  private onCastling: CastlingEventHandler | undefined;
+  private onPromotion: PiecePromotionEventHandler | undefined;
 }

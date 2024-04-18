@@ -18,7 +18,7 @@ export class King extends Piece {
   }
 
   canMove(position: Position, _: unknown, isCastlingPossible: boolean) {
-    const distance = this.position.chebyshevDistanceTo(position);
+    const distance = this.position.distanceTo(position);
 
     return distance === (isCastlingPossible ? 2 : 1);
   }

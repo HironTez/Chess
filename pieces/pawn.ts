@@ -32,7 +32,7 @@ export class Pawn extends Piece {
       );
     }
 
-    if (!this.moved) {
+    if (!this.isMoved) {
       possibleMoves.push(
         new Position({
           x,
@@ -49,10 +49,10 @@ export class Pawn extends Piece {
   }
 
   canMove(position: Position) {
-    const distance = this.position.chebyshevDistanceTo(position);
+    const distance = this.position.distanceTo(position);
     const movingVertically = areAlignedHorizontally(this.position, position);
     const directionIsRight = this.directionIsRight(position);
-    const distanceIsRight = distance === 1 || (distance === 2 && !this.moved);
+    const distanceIsRight = distance === 1 || (distance === 2 && !this.isMoved);
 
     return movingVertically && directionIsRight && distanceIsRight;
   }
@@ -62,7 +62,7 @@ export class Pawn extends Piece {
     lastMoved: Piece | null,
     target: Piece | null,
   ) {
-    const distance = this.position.chebyshevDistanceTo(position);
+    const distance = this.position.distanceTo(position);
     const distanceIsRight = distance === 1;
     const movingDiagonally = areAlignedDiagonally(this.position, position);
     const directionIsRight = this.directionIsRight(position);
@@ -82,7 +82,7 @@ export class Pawn extends Piece {
   }
 
   protected onMove(position: Position) {
-    if (!this.moved) {
+    if (!this.isMoved) {
       const distance = this.position.distanceTo(position);
       if (distance === 2) {
         this.justDoubleMoved = true;

@@ -22,7 +22,7 @@ export type PositionInput = Position | PointT | PositionString;
 
 export class ReadonlyPosition {
   static isPosition(position: unknown): position is Position {
-    return position instanceof Position;
+    return position instanceof ReadonlyPosition;
   }
 
   constructor(position: PositionInput | string) {
@@ -35,6 +35,9 @@ export class ReadonlyPosition {
   get y() {
     return this._y;
   }
+  get isValid() {
+    return this._isValid;
+  }
 
   set(position: PositionInput | string) {
     if (Position.isPosition(position)) {
@@ -46,7 +49,7 @@ export class ReadonlyPosition {
       const x = xChar >= 97 ? xChar - 97 : xChar - 65;
       const y = yChar - 49;
 
-      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
+      if (isInLimit(0, x, 7) && isInLimit(0, y, 7)) {
         this._x = x;
         this._y = y;
       } else {
@@ -57,6 +60,12 @@ export class ReadonlyPosition {
       this._x = position.x;
       this._y = position.y;
     }
+
+    this._isValid =
+      Number.isInteger(this._x) &&
+      Number.isInteger(this._y) &&
+      isInLimit(0, this._x, 7) &&
+      isInLimit(0, this._y, 7);
   }
 
   distanceTo(positionInput: PointT | Position) {
@@ -65,24 +74,12 @@ export class ReadonlyPosition {
       : new Position(positionInput);
 
     const { xDiff, yDiff } = getDiff(this, position);
-    return Math.sqrt(xDiff ** 2 + yDiff ** 2);
-  }
-
-  chebyshevDistanceTo(positionInput: PointT | Position) {
-    const position = Position.isPosition(positionInput)
-      ? positionInput
-      : new Position(positionInput);
-
-    const { xDiff, yDiff } = getDiff(this, position);
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
-  }
-
-  isValid() {
-    return Number.isInteger(this._x) && Number.isInteger(this._y);
   }
 
   protected _x = NaN;
   protected _y = NaN;
+  protected _isValid = false;
 }
 
 export class Position extends ReadonlyPosition {

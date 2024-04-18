@@ -28,8 +28,8 @@ export abstract class ReadonlyPieceAbstract {
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
   }
 
-  get moved() {
-    return this._moved;
+  get isMoved() {
+    return this._isMoved;
   }
   get position() {
     return new ReadonlyPosition(this._position);
@@ -39,7 +39,7 @@ export abstract class ReadonlyPieceAbstract {
     this.onMove(position);
 
     this._position.set(position);
-    this._moved = true;
+    this._isMoved = true;
   }
 
   isAt(position: Position | PointT) {
@@ -83,7 +83,7 @@ export abstract class ReadonlyPieceAbstract {
 
   abstract readonly type: Type;
 
-  protected _moved: boolean = false;
+  protected _isMoved: boolean = false;
   protected _position: Position;
   readonly color: Color;
   readonly oppositeColor: Color;
@@ -98,7 +98,7 @@ export abstract class Piece extends ReadonlyPieceAbstract {
     this.onMove(position);
 
     this._position.set(position);
-    this._moved = true;
+    this._isMoved = true;
   }
 
   get position() {
