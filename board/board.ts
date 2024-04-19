@@ -3,18 +3,14 @@ import {
   King,
   Pawn,
   Piece,
+  ReadonlyPiece,
   Rock,
   Type,
   getPieceClassByTypename,
 } from "../pieces";
-import { ReadonlyPiece } from "../pieces/piece";
-import {
-  Position,
-  PositionInput,
-  ReadonlyPosition,
-} from "../position/position";
+import { Position, PositionInput, ReadonlyPosition } from "../position";
 
-import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
+import { getDiff, getSurroundingPositions, getWay } from "../position";
 import { isInLimit } from "../tools";
 
 type PureOrPromise<T> = T | Promise<T>;

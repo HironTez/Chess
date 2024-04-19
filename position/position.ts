@@ -18,7 +18,7 @@ export type PositionString = `${
   | "7"
   | "8"}`;
 
-export type PositionInput = Position | PointT | PositionString;
+export type PositionInput = ReadonlyPosition | PointT | PositionString;
 
 export class ReadonlyPosition {
   static isPosition(position: unknown): position is Position {

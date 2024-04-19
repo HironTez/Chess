@@ -1,8 +1,6 @@
 import { input, printBoard } from "./tools";
 
-import { PreparedBoard } from "./board/preparedBoard";
-import { Type } from "./pieces";
-import { Position } from "./position/position";
+import { Position, PreparedBoard, Type } from "./";
 
 const board = new PreparedBoard({
   getPromotionVariant: () => Type.Queen,

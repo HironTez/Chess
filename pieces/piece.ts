@@ -1,9 +1,4 @@
-import {
-  PointT,
-  Position,
-  PositionInput,
-  ReadonlyPosition,
-} from "../position/position";
+import { PointT, Position, PositionInput, ReadonlyPosition } from "../position";
 
 export enum Color {
   White = "white",

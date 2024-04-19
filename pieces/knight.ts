@@ -1,10 +1,10 @@
 import { Piece, Type } from "./piece";
 
-import { Position } from "../position/position";
 import {
+  Position,
   areAlignedHorizontally,
   areAlignedVertically,
-} from "../position/tools";
+} from "../position";
 
 export class Knight extends Piece {
   getPossibleMoves() {

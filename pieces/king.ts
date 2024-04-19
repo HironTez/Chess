@@ -1,6 +1,6 @@
 import { Piece, Type } from "./piece";
 
-import { Position } from "../position/position";
+import { Position } from "../position";
 
 export class King extends Piece {
   getPossibleMoves() {

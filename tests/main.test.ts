@@ -1,16 +1,7 @@
 import { expect, test } from "bun:test";
 import { Board } from "../board";
 import { PreparedBoard } from "../board/preparedBoard";
-import {
-  Bishop,
-  Color,
-  King,
-  Knight,
-  Pawn,
-  Queen,
-  Rock,
-  Type,
-} from "../pieces";
+import { Color, King, Pawn, Queen, Rock, Type } from "../pieces";
 
 test("Should expect a turn from a different color after move", () => {
   const board = new Board([

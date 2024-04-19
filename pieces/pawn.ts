@@ -2,10 +2,10 @@ import {
   areAlignedDiagonally,
   areAlignedHorizontally,
   isMovingUp,
-} from "../position/tools";
+} from "../position";
 import { Color, Piece, Type } from "./piece";
 
-import { Position } from "../position/position";
+import { Position } from "../position";
 
 export class Pawn extends Piece {
   isMoveValid(

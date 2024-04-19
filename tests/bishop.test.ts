@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Board } from "../board";
 import { Bishop, Color, King, Pawn } from "../pieces";
-import { Position } from "../position/position";
+import { Position } from "../position";
 import { isInLimit } from "../tools";
 
 test("bishop possible positions", () => {

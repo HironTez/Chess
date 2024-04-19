@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Board } from "../board";
 import { Color, King, Pawn, Rock } from "../pieces";
-import { Position } from "../position/position";
+import { Position } from "../position";
 
 test("rock possible positions", () => {
   const board = new Board([

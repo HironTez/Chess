@@ -1,8 +1,7 @@
-import { areAlignedVertically } from "./../position/tools";
+import { areAlignedVertically } from "./../position";
 import { Piece, Type } from "./piece";
 
-import { Position } from "../position/position";
-import { areAlignedHorizontally } from "../position/tools";
+import { Position, areAlignedHorizontally } from "../position";
 
 export class Rock extends Piece {
   getPossibleMoves() {

@@ -1,6 +1,6 @@
 import readline from "node:readline";
 import { Color, Piece, Type } from "./pieces";
-import { Position } from "./position/position";
+import { Position } from "./position";
 
 const rl = readline.createInterface({
   input: process.stdin,

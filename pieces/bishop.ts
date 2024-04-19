@@ -1,7 +1,6 @@
 import { Piece, Type } from "./piece";
 
-import { Position } from "../position/position";
-import { areAlignedDiagonally } from "../position/tools";
+import { Position, areAlignedDiagonally } from "../position";
 import { isInLimit } from "../tools";
 
 export class Bishop extends Piece {

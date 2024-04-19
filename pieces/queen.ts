@@ -1,11 +1,11 @@
 import { Piece, Type } from "./piece";
 
-import { Position } from "../position/position";
 import {
+  Position,
   areAlignedDiagonally,
   areAlignedHorizontally,
   areAlignedVertically,
-} from "../position/tools";
+} from "../position";
 import { isInLimit } from "../tools";
 
 export class Queen extends Piece {
