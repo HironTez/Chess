@@ -1,5 +1,5 @@
 import readline from "node:readline";
-import { Color, Piece, Position, Type } from "./";
+import { Color, MutablePosition, Piece, Type } from "./";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -54,7 +54,7 @@ export const printBoard = (pieces: Piece[]) => {
 
     for (let j = 0; j <= 7; j++) {
       const piece = pieces.find((piece) => {
-        return piece.isAt(new Position({ x: j, y: i }));
+        return piece.isAt(new MutablePosition({ x: j, y: i }));
       });
 
       const symbol = piece && pieceSymbol(piece);
@@ -73,10 +73,10 @@ export const parseMoveInput = (moveInput: string) => {
   const startPositionString = positions?.at(1);
   const endPositionString = positions?.at(2);
   const startPosition = startPositionString
-    ? new Position(startPositionString)
+    ? new MutablePosition(startPositionString)
     : undefined;
   const endPosition = endPositionString
-    ? new Position(endPositionString)
+    ? new MutablePosition(endPositionString)
     : undefined;
 
   return { startPosition, endPosition };

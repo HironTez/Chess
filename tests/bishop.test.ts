@@ -1,11 +1,10 @@
 import { expect, test } from "bun:test";
-import { Board } from "../board";
+import { CustomBoard, Position } from "../";
 import { Bishop, Color, King, Pawn } from "../pieces";
-import { Position } from "../position";
 import { isInLimit } from "../tools";
 
 test("bishop possible positions", () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Bishop("D4", Color.White),

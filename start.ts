@@ -1,9 +1,8 @@
 import { input, parseMoveInput, printBoard } from "./tools";
 
-import { PreparedBoard, Type } from "./";
+import { Board } from "./";
 
-const board = new PreparedBoard({
-  getPromotionVariant: () => Type.Queen,
+const board = new Board({
   onCheck: (color) => {
     console.log(`${color} king is in check!`.toLocaleUpperCase());
   },
@@ -18,29 +17,6 @@ const board = new PreparedBoard({
   },
   onBoardChange: (pieces) => {
     printBoard(pieces);
-  },
-  onMove: (startPosition, endPosition) => {
-    console.log(
-      `${startPosition.x},${startPosition.y} -> ${endPosition.x},${endPosition.y}`,
-    );
-  },
-  onCapture: (startPosition, endPosition, capturedPosition) => {
-    console.log(
-      `${startPosition.x},${startPosition.y} -> ${endPosition.x},${endPosition.y} captured ${capturedPosition.x},${capturedPosition.y}`,
-    );
-  },
-  onCastling: (
-    kingStartPosition,
-    kingEndPosition,
-    rockStartPosition,
-    rockEndPosition,
-  ) => {
-    console.log(
-      `${kingStartPosition.x},${kingStartPosition.y} -> ${kingEndPosition.x},${kingEndPosition.y} castling ${rockStartPosition.x},${rockStartPosition.y} -> ${rockEndPosition.x},${rockEndPosition.y}`,
-    );
-  },
-  onPromotion: (position) => {
-    console.log(`${position.x},${position.y} promoted to Queen`);
   },
 });
 

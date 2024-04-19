@@ -1,14 +1,14 @@
 import {
   Color,
   King,
+  MutablePiece,
   Pawn,
   Piece,
-  ReadonlyPiece,
   Rock,
   Type,
   getPieceClassByTypename,
 } from "../pieces";
-import { Position, PositionInput, ReadonlyPosition } from "../position";
+import { MutablePosition, Position, PositionInput } from "../position";
 
 import { getDiff, getSurroundingPositions, getWay } from "../position";
 import { isInLimit } from "../tools";
@@ -16,26 +16,26 @@ import { isInLimit } from "../tools";
 type PureOrPromise<T> = T | Promise<T>;
 
 type GetPromotionVariant = (
-  pawnPosition: ReadonlyPosition,
+  pawnPosition: Position,
 ) => PureOrPromise<Type.Queen | Type.Rock | Type.Bishop | Type.Knight>;
-type TeamEventHandler = (color: Color, kingPosition: ReadonlyPosition) => void;
-type BoardChangeEventHandler = (pieces: ReadonlyPiece[]) => void;
+type TeamEventHandler = (color: Color, kingPosition: Position) => void;
+type BoardChangeEventHandler = (pieces: Piece[]) => void;
 type PieceMoveEventHandler = (
-  startPosition: ReadonlyPosition,
-  endPosition: ReadonlyPosition,
+  startPosition: Position,
+  endPosition: Position,
 ) => void;
 type PieceCaptureEventHandler = (
-  startPosition: ReadonlyPosition,
-  endPosition: ReadonlyPosition,
-  capturedPosition: ReadonlyPosition,
+  startPosition: Position,
+  endPosition: Position,
+  capturedPosition: Position,
 ) => void;
 type CastlingEventHandler = (
-  kingStartPosition: ReadonlyPosition,
-  kingEndPosition: ReadonlyPosition,
-  rockStartPosition: ReadonlyPosition,
-  rockEndPosition: ReadonlyPosition,
+  kingStartPosition: Position,
+  kingEndPosition: Position,
+  rockStartPosition: Position,
+  rockEndPosition: Position,
 ) => void;
-type PiecePromotionEventHandler = (piecePosition: ReadonlyPosition) => void;
+type PiecePromotionEventHandler = (piecePosition: Position) => void;
 
 enum CheckStatus {
   Check = "check",
@@ -56,8 +56,8 @@ export type BoardOptionsT = {
   onPromotion?: PiecePromotionEventHandler;
 };
 
-export class Board {
-  constructor(pieces: Piece[], options?: BoardOptionsT) {
+export class CustomBoard {
+  constructor(pieces: MutablePiece[], options?: BoardOptionsT) {
     this._pieces = pieces;
 
     this.getPromotionVariant = options?.getPromotionVariant;
@@ -84,7 +84,7 @@ export class Board {
     return this._stalemate;
   }
   get pieces() {
-    return this._pieces.map((piece) => new ReadonlyPiece(piece));
+    return this._pieces.map((piece) => new Piece(piece));
   }
   get currentMove() {
     return this._currentMove;
@@ -92,31 +92,31 @@ export class Board {
 
   getPieceAt(positionInput: PositionInput) {
     const piece = this._getPieceAt(positionInput);
-    return piece && new ReadonlyPiece(piece);
+    return piece && new Piece(piece);
   }
 
   getPieces() {
-    return this._pieces.map((piece) => new ReadonlyPiece(piece));
+    return this._pieces.map((piece) => new Piece(piece));
   }
 
   getPiecesByColor(color: Color) {
     const pieces = this._getPiecesByColor(color);
-    return pieces.map((piece) => new ReadonlyPiece(piece));
+    return pieces.map((piece) => new Piece(piece));
   }
 
   async move(
     startPositionInput: PositionInput,
     endPositionInput: PositionInput,
   ) {
-    const startPosition = new Position(startPositionInput);
-    const endPosition = new Position(endPositionInput);
+    const startPosition = new MutablePosition(startPositionInput);
+    const endPosition = new MutablePosition(endPositionInput);
     if (!startPosition || !endPosition) return false;
 
     return await this.movePiece(startPosition, endPosition);
   }
 
   private _getPieceAt(positionInput: PositionInput) {
-    const position = new Position(positionInput);
+    const position = new MutablePosition(positionInput);
     if (!position) return undefined;
 
     return this._pieces.find((piece) => piece.isAt(position));
@@ -126,7 +126,10 @@ export class Board {
     return this._pieces.filter((piece) => piece.color === color);
   }
 
-  private async movePiece(startPosition: Position, endPosition: Position) {
+  private async movePiece(
+    startPosition: MutablePosition,
+    endPosition: MutablePosition,
+  ) {
     const piece = this._getPieceAt(startPosition);
     if (!piece) return false;
 
@@ -154,9 +157,8 @@ export class Board {
 
       if (this.isPromotionPossible(piece)) {
         const pieceType =
-          (await this.getPromotionVariant?.(
-            new ReadonlyPosition(piece.position),
-          )) ?? Type.Queen;
+          (await this.getPromotionVariant?.(new Position(piece.position))) ??
+          Type.Queen;
         const pieceClass = getPieceClassByTypename(pieceType);
 
         this.removePieceAt(piece.position);
@@ -188,7 +190,7 @@ export class Board {
     return false;
   }
 
-  private isEnPassantPossible(position: Position) {
+  private isEnPassantPossible(position: MutablePosition) {
     const target = this._lastMovedPiece;
     if (!(target instanceof Pawn)) return false;
 
@@ -199,7 +201,7 @@ export class Board {
     return isTargetJustMoved && isTargetOneSquareAway && targetOnSide;
   }
 
-  private isPromotionPossible(piece: Piece) {
+  private isPromotionPossible(piece: MutablePiece) {
     if (piece instanceof Pawn) {
       if (
         (piece.color === Color.White && piece.position.y === 7) ||
@@ -218,7 +220,7 @@ export class Board {
     ) as King | undefined;
   }
 
-  private getCastlingRock(piece: Piece, position: Position) {
+  private getCastlingRock(piece: MutablePiece, position: MutablePosition) {
     if (piece instanceof King) {
       if (!piece.isMoved) {
         const { xDiff, yDiff } = getDiff(piece.position, position);
@@ -231,7 +233,7 @@ export class Board {
             const rockIsMoved = rock?.isMoved;
             return {
               rock: rockIsMoved ? null : rock,
-              newPosition: new Position({ x: newRockPosX, y }),
+              newPosition: new MutablePosition({ x: newRockPosX, y }),
             };
           }
         }
@@ -241,7 +243,7 @@ export class Board {
     return {};
   }
 
-  private handleBoardChange(piece: Piece) {
+  private handleBoardChange(piece: MutablePiece) {
     this._currentMove = piece.oppositeColor;
     this._lastMovedPiece = piece;
 
@@ -258,7 +260,7 @@ export class Board {
       if (isInCheck) {
         this._check = king.color;
 
-        this.onCheck?.(king.color, new ReadonlyPosition(king.position));
+        this.onCheck?.(king.color, new Position(king.position));
       } else {
         this._check = undefined;
 
@@ -273,7 +275,7 @@ export class Board {
         this._check = king.color;
         this._checkmate = king.color;
 
-        this.onCheckMate?.(king.color, new ReadonlyPosition(king.position));
+        this.onCheckMate?.(king.color, new Position(king.position));
       } else {
         this._checkmate = undefined;
       }
@@ -285,7 +287,7 @@ export class Board {
       if (isInStalemate) {
         this._stalemate = king.color;
 
-        this.onStalemate?.(king.color, new ReadonlyPosition(king.position));
+        this.onStalemate?.(king.color, new Position(king.position));
       } else {
         this._stalemate = undefined;
       }
@@ -293,9 +295,9 @@ export class Board {
   }
 
   private isMoveValid(
-    piece: Piece,
-    position: Position,
-    castlingRockPosition?: Position,
+    piece: MutablePiece,
+    position: MutablePosition,
+    castlingRockPosition?: MutablePosition,
   ) {
     if (this._checkmate || this._check) return false;
 
@@ -313,9 +315,9 @@ export class Board {
   }
 
   private canPieceMove(
-    piece: Piece,
-    position: Position,
-    castlingRockPosition?: Position,
+    piece: MutablePiece,
+    position: MutablePosition,
+    castlingRockPosition?: MutablePosition,
   ) {
     const { xDiff } = getDiff(piece.position, position);
     const way = getWay(
@@ -395,11 +397,14 @@ export class Board {
     return undefined;
   }
 
-  private isKingInCheck(king: King, ignorePiece: Piece | undefined) {
+  private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {
     return this.piecesCheckingKing(king, ignorePiece).length > 0;
   }
 
-  private piecesCheckingKing(king: King, ignorePiece: Piece | undefined) {
+  private piecesCheckingKing(
+    king: King,
+    ignorePiece: MutablePiece | undefined,
+  ) {
     const enemies = this._getPiecesByColor(king.oppositeColor);
     return enemies.filter(
       (enemy) =>
@@ -407,7 +412,7 @@ export class Board {
     );
   }
 
-  private canPieceDefendKing(piece: Piece) {
+  private canPieceDefendKing(piece: MutablePiece) {
     const king = this.getKing(piece.color);
     if (!king) return false;
 
@@ -437,9 +442,9 @@ export class Board {
     return true;
   }
 
-  private willBeCheck(piece: Piece, position: Position): boolean {
+  private willBeCheck(piece: MutablePiece, position: MutablePosition): boolean {
     const target = this._getPieceAt(position);
-    const previousPosition = new Position(piece.position);
+    const previousPosition = new MutablePosition(piece.position);
 
     piece.position.set(position);
     const king = this.getKing(piece.color);
@@ -450,11 +455,11 @@ export class Board {
     return isInCheck;
   }
 
-  private removePieceAt(position: Position) {
+  private removePieceAt(position: MutablePosition) {
     this._pieces = this._pieces.filter((piece) => !piece.isAt(position));
   }
 
-  private getPossibleMoves(piece: Piece) {
+  private getPossibleMoves(piece: MutablePiece) {
     const positions = piece.getPossibleMoves();
     return positions.filter((position) => this.isMoveValid(piece, position));
   }
@@ -462,9 +467,9 @@ export class Board {
   private _check: Color | undefined = undefined;
   private _checkmate: Color | undefined = undefined;
   private _stalemate: Color | undefined = undefined;
-  private _pieces: Array<Piece>;
+  private _pieces: Array<MutablePiece>;
   private _currentMove: Color = Color.White;
-  private _lastMovedPiece: Piece | null = null;
+  private _lastMovedPiece: MutablePiece | null = null;
 
   private getPromotionVariant: GetPromotionVariant | undefined;
   private onCheck: TeamEventHandler | undefined;

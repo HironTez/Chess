@@ -1,4 +1,4 @@
-import { Board } from "./board";
-import { PreparedBoard } from "./preparedBoard";
+import { CustomBoard } from "./board";
+import { Board } from "./preparedBoard";
 
-export { Board, PreparedBoard };
+export { Board, CustomBoard };

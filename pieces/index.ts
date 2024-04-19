@@ -1,4 +1,4 @@
-import { Color, Piece, ReadonlyPiece, Type } from "./piece";
+import { Color, MutablePiece, Piece, Type } from "./piece";
 
 import { Bishop } from "./bishop";
 import { King } from "./king";
@@ -13,10 +13,10 @@ export {
   Color,
   King,
   Knight,
+  MutablePiece,
   Pawn,
   Piece,
   Queen,
-  ReadonlyPiece,
   Rock,
   Type,
   getPieceClassByTypename,

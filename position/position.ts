@@ -18,11 +18,11 @@ export type PositionString = `${
   | "7"
   | "8"}`;
 
-export type PositionInput = ReadonlyPosition | PointT | PositionString;
+export type PositionInput = Position | PointT | PositionString;
 
-export class ReadonlyPosition {
-  static isPosition(position: unknown): position is Position {
-    return position instanceof ReadonlyPosition;
+export class Position {
+  static isPosition(position: unknown): position is MutablePosition {
+    return position instanceof Position;
   }
 
   constructor(position: PositionInput | string) {
@@ -39,17 +39,17 @@ export class ReadonlyPosition {
     return this._isValid;
   }
 
-  distanceTo(positionInput: PointT | Position) {
-    const position = Position.isPosition(positionInput)
+  distanceTo(positionInput: PointT | MutablePosition) {
+    const position = MutablePosition.isPosition(positionInput)
       ? positionInput
-      : new Position(positionInput);
+      : new MutablePosition(positionInput);
 
     const { xDiff, yDiff } = getDiff(this, position);
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
   protected _set(position: PositionInput | string) {
-    if (Position.isPosition(position)) {
+    if (MutablePosition.isPosition(position)) {
       this._x = position.x;
       this._y = position.y;
     } else if (typeof position === "string") {
@@ -82,7 +82,7 @@ export class ReadonlyPosition {
   protected _isValid = false;
 }
 
-export class Position extends ReadonlyPosition {
+export class MutablePosition extends Position {
   constructor(position: PositionInput | string) {
     super(position);
   }

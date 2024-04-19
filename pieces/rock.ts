@@ -1,9 +1,9 @@
 import { areAlignedVertically } from "./../position";
-import { Piece, Type } from "./piece";
+import { MutablePiece, Type } from "./piece";
 
-import { Position, areAlignedHorizontally } from "../position";
+import { MutablePosition, areAlignedHorizontally } from "../position";
 
-export class Rock extends Piece {
+export class Rock extends MutablePiece {
   getPossibleMoves() {
     const possibleMoves = [];
 
@@ -11,8 +11,8 @@ export class Rock extends Piece {
     for (let i = 0; i <= 7; i++) {
       if (i !== x) {
         possibleMoves.push(
-          new Position({ x: i, y }),
-          new Position({ x, y: i }),
+          new MutablePosition({ x: i, y }),
+          new MutablePosition({ x, y: i }),
         );
       }
     }
@@ -20,7 +20,7 @@ export class Rock extends Piece {
     return possibleMoves;
   }
 
-  canMove(position: Position) {
+  canMove(position: MutablePosition) {
     const movingVertically = areAlignedHorizontally(this.position, position);
     const movingHorizontally = areAlignedVertically(this.position, position);
     return movingVertically || movingHorizontally;

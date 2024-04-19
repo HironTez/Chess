@@ -1,27 +1,27 @@
-import { Piece, Type } from "./piece";
+import { MutablePiece, Type } from "./piece";
 
 import {
-  Position,
+  MutablePosition,
   areAlignedHorizontally,
   areAlignedVertically,
 } from "../position";
 
-export class Knight extends Piece {
+export class Knight extends MutablePiece {
   getPossibleMoves() {
     const { x, y } = this.position;
     return [
-      new Position({ x: x + 2, y: y + 1 }),
-      new Position({ x: x + 1, y: y + 2 }),
-      new Position({ x: x + 2, y: y - 1 }),
-      new Position({ x: x + 1, y: y - 2 }),
-      new Position({ x: x - 2, y: y - 1 }),
-      new Position({ x: x - 1, y: y - 2 }),
-      new Position({ x: x - 2, y: y + 1 }),
-      new Position({ x: x - 1, y: y + 2 }),
+      new MutablePosition({ x: x + 2, y: y + 1 }),
+      new MutablePosition({ x: x + 1, y: y + 2 }),
+      new MutablePosition({ x: x + 2, y: y - 1 }),
+      new MutablePosition({ x: x + 1, y: y - 2 }),
+      new MutablePosition({ x: x - 2, y: y - 1 }),
+      new MutablePosition({ x: x - 1, y: y - 2 }),
+      new MutablePosition({ x: x - 2, y: y + 1 }),
+      new MutablePosition({ x: x - 1, y: y + 2 }),
     ];
   }
 
-  canMove(position: Position) {
+  canMove(position: MutablePosition) {
     const distance = this.position.distanceTo(position);
     const movingVertically = areAlignedHorizontally(this.position, position);
     const movingHorizontally = areAlignedVertically(this.position, position);

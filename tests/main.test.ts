@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import { Board } from "../board";
-import { PreparedBoard } from "../board/preparedBoard";
+import { CustomBoard } from "../board";
+import { Board } from "../board/preparedBoard";
 import { Color, King, Pawn, Queen, Rock, Type } from "../pieces";
 
 test("Should expect a turn from a different color after move", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("A8", Color.Black),
     new King("A1", Color.White),
   ]);
@@ -21,7 +21,7 @@ test("Should expect a turn from a different color after move", async () => {
 });
 
 test("En passant", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
 
@@ -37,7 +37,7 @@ test("En passant", async () => {
   expect(enPassantSuccess).toBeTrue();
   expect(capturedPiece).toBeUndefined();
 
-  const board2 = new Board([
+  const board2 = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
 
@@ -51,7 +51,7 @@ test("En passant", async () => {
 });
 
 test("Should not move over other pieces", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
 
@@ -65,7 +65,7 @@ test("Should not move over other pieces", async () => {
 });
 
 test("Should not move outside the board", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("H8", Color.Black),
     new King("A1", Color.White),
   ]);
@@ -77,7 +77,7 @@ test("Should not move outside the board", async () => {
 });
 
 test("Should not move to square occupied by same color", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
 
@@ -91,7 +91,7 @@ test("Should not move to square occupied by same color", async () => {
 });
 
 test("King cannot be in check after move", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
 
@@ -104,7 +104,7 @@ test("King cannot be in check after move", async () => {
 });
 
 test("King can only move one square", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
   ]);
@@ -117,7 +117,7 @@ test("King can only move one square", async () => {
 });
 
 test("Castling kingside", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Rock("H1", Color.White),
@@ -133,7 +133,7 @@ test("Castling kingside", async () => {
 });
 
 test("Castling queenside", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Rock("A1", Color.White),
@@ -149,7 +149,7 @@ test("Castling queenside", async () => {
 });
 
 test("Castling through check", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Rock("A1", Color.White),
@@ -166,7 +166,7 @@ test("Castling through check", async () => {
 });
 
 test("Castling to checked square", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Rock("A1", Color.White),
@@ -183,7 +183,7 @@ test("Castling to checked square", async () => {
 });
 
 test("Castling when check", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.Black),
     new King("F8", Color.White),
     new Rock("A1", Color.Black),
@@ -203,7 +203,7 @@ test("Castling when check", async () => {
 });
 
 test("Pawn promotion on reaching last rank", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
 
@@ -217,8 +217,8 @@ test("Pawn promotion on reaching last rank", async () => {
   expect(promotedPiece).toHaveProperty("type", Type.Queen);
 });
 
-test("Board should start with correct piece placement", () => {
-  const board = new PreparedBoard();
+test("CustomBoard should start with correct piece placement", () => {
+  const board = new Board();
 
   [
     { y: 0, color: Color.White },
@@ -265,7 +265,7 @@ test("Board should start with correct piece placement", () => {
 });
 
 test("Should detect check", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Rock("A1", Color.White),
@@ -279,7 +279,7 @@ test("Should detect check", async () => {
 });
 
 test("Should detect checkmate", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
     new Rock("A1", Color.White),
@@ -294,7 +294,7 @@ test("Should detect checkmate", async () => {
 });
 
 test("Should detect stalemate", async () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E1", Color.White),
     new King("A8", Color.Black),
     new Queen("B1", Color.White),

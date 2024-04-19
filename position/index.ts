@@ -1,9 +1,9 @@
 import {
+  MutablePosition,
   PointT,
   Position,
   PositionInput,
   PositionString,
-  ReadonlyPosition,
 } from "./position";
 import {
   areAlignedDiagonally,
@@ -16,8 +16,8 @@ import {
 } from "./tools";
 
 export {
+  MutablePosition,
   Position,
-  ReadonlyPosition,
   areAlignedDiagonally,
   areAlignedHorizontally,
   areAlignedVertically,

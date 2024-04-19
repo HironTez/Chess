@@ -1,6 +1,6 @@
 import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "../pieces";
 import { arrayConstructor } from "../tools";
-import { Board, BoardOptionsT } from "./board";
+import { BoardOptionsT, CustomBoard } from "./board";
 
 const pieceSet = [
   { y: 0, color: Color.White },
@@ -26,7 +26,7 @@ const pieceSet = [
   new King({ x: 4, y }, color),
 ]);
 
-export class PreparedBoard extends Board {
+export class Board extends CustomBoard {
   constructor(options?: BoardOptionsT) {
     super(pieceSet, options);
   }

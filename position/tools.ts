@@ -1,10 +1,7 @@
 import { arrayConstructor, isInLimit } from "../tools";
-import { ReadonlyPosition } from "./position";
+import { MutablePosition, Position } from "./position";
 
-export const getDiff = (
-  position1: ReadonlyPosition,
-  position2: ReadonlyPosition,
-) => {
+export const getDiff = (position1: Position, position2: Position) => {
   const xDiff = position2.x - position1.x;
   const yDiff = position2.y - position1.y;
   return {
@@ -14,41 +11,35 @@ export const getDiff = (
 };
 
 export const areAlignedDiagonally = (
-  position1: ReadonlyPosition,
-  position2: ReadonlyPosition,
+  position1: Position,
+  position2: Position,
 ) => {
   const { xDiff, yDiff } = getDiff(position1, position2);
   return Math.abs(xDiff) === Math.abs(yDiff);
 };
 
 export const areAlignedVertically = (
-  position1: ReadonlyPosition,
-  position2: ReadonlyPosition,
+  position1: Position,
+  position2: Position,
 ) => {
   const { yDiff } = getDiff(position1, position2);
   return yDiff === 0;
 };
 
 export const areAlignedHorizontally = (
-  position1: ReadonlyPosition,
-  position2: ReadonlyPosition,
+  position1: Position,
+  position2: Position,
 ) => {
   const { xDiff } = getDiff(position1, position2);
   return xDiff === 0;
 };
 
-export const isMovingUp = (
-  position1: ReadonlyPosition,
-  position2: ReadonlyPosition,
-) => {
+export const isMovingUp = (position1: Position, position2: Position) => {
   const { yDiff } = getDiff(position1, position2);
   return yDiff > 0;
 };
 
-export const getWay = (
-  position1: ReadonlyPosition,
-  position2: ReadonlyPosition,
-) => {
+export const getWay = (position1: Position, position2: Position) => {
   if (
     areAlignedDiagonally(position1, position2) ||
     areAlignedVertically(position1, position2) ||
@@ -58,7 +49,7 @@ export const getWay = (
     return arrayConstructor(
       Math.abs(xDiff || yDiff) - 1,
       (i) =>
-        new ReadonlyPosition({
+        new MutablePosition({
           x: xDiff ? position1.x + (xDiff > 0 ? i + 1 : -i - 1) : position1.x,
           y: yDiff ? position1.y + (yDiff > 0 ? i + 1 : -i - 1) : position1.y,
         }),
@@ -67,8 +58,8 @@ export const getWay = (
   return [];
 };
 
-export const getSurroundingPositions = (position: ReadonlyPosition) => {
-  const surroundingPositions: ReadonlyPosition[] = [];
+export const getSurroundingPositions = (position: Position) => {
+  const surroundingPositions: MutablePosition[] = [];
 
   for (let i = -1; i <= 1; i++) {
     for (let j = -1; j <= 1; j++) {
@@ -78,7 +69,7 @@ export const getSurroundingPositions = (position: ReadonlyPosition) => {
       const y = position.y + j;
       if (!isInLimit(0, x, 7) || !isInLimit(0, y, 7)) continue;
 
-      surroundingPositions.push(new ReadonlyPosition({ x: x, y: y }));
+      surroundingPositions.push(new MutablePosition({ x: x, y: y }));
     }
   }
 

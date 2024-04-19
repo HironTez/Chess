@@ -1,4 +1,4 @@
-import { PointT, Position, PositionInput, ReadonlyPosition } from "../position";
+import { MutablePosition, PointT, Position, PositionInput } from "../position";
 
 export enum Color {
   White = "white",
@@ -16,7 +16,7 @@ export enum Type {
 
 export abstract class ReadonlyPieceAbstract {
   constructor(positionInput: PositionInput, color: Color) {
-    const position = new Position(positionInput);
+    const position = new MutablePosition(positionInput);
 
     this._position = position;
     this.color = color;
@@ -27,24 +27,24 @@ export abstract class ReadonlyPieceAbstract {
     return this._isMoved;
   }
   get position() {
-    return new ReadonlyPosition(this._position);
+    return new Position(this._position);
   }
 
-  move(position: Position) {
+  move(position: MutablePosition) {
     this.onMove(position);
 
     this._position.set(position);
     this._isMoved = true;
   }
 
-  isAt(position: Position | PointT) {
+  isAt(position: MutablePosition | PointT) {
     return this._position.x === position.x && this._position.y === position.y;
   }
 
   isMoveValid(
-    position: Position,
-    target: Piece | null,
-    lastMoved: Piece | null,
+    position: MutablePosition,
+    target: MutablePiece | null,
+    lastMoved: MutablePiece | null,
     isCastlingPossible: boolean,
   ) {
     const targetIsEnemy = target?.color === this.oppositeColor;
@@ -58,38 +58,38 @@ export abstract class ReadonlyPieceAbstract {
     return false;
   }
 
-  abstract getPossibleMoves(): Position[];
+  abstract getPossibleMoves(): MutablePosition[];
 
   abstract canMove(
-    position: Position,
-    lastMoved: Piece | null,
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
     isCastlingPossible: boolean,
   ): boolean;
 
   canCapture(
-    position: Position,
-    lastMoved: Piece | null,
-    target: Piece,
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
+    target: MutablePiece,
   ): boolean {
     return this.canMove(position, lastMoved, false);
   }
 
-  protected onMove(position: Position) {}
+  protected onMove(position: MutablePosition) {}
 
   abstract readonly type: Type;
 
   protected _isMoved: boolean = false;
-  protected _position: Position;
+  protected _position: MutablePosition;
   readonly color: Color;
   readonly oppositeColor: Color;
 }
 
-export abstract class Piece extends ReadonlyPieceAbstract {
+export abstract class MutablePiece extends ReadonlyPieceAbstract {
   constructor(positionInput: PositionInput, color: Color) {
     super(positionInput, color);
   }
 
-  move(position: Position) {
+  move(position: MutablePosition) {
     this.onMove(position);
 
     this._position.set(position);
@@ -101,8 +101,8 @@ export abstract class Piece extends ReadonlyPieceAbstract {
   }
 }
 
-export class ReadonlyPiece extends ReadonlyPieceAbstract {
-  constructor(piece: Piece) {
+export class Piece extends ReadonlyPieceAbstract {
+  constructor(piece: MutablePiece) {
     super(piece.position, piece.color);
 
     this.canMove = piece.canMove;
@@ -112,11 +112,11 @@ export class ReadonlyPiece extends ReadonlyPieceAbstract {
   }
 
   canMove: (
-    position: Position,
-    lastMoved: Piece | null,
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
     isCastlingPossible: boolean,
   ) => boolean;
 
-  getPossibleMoves: () => Position[];
+  getPossibleMoves: () => MutablePosition[];
   type: Type;
 }

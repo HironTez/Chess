@@ -1,9 +1,9 @@
-import { Piece, Type } from "./piece";
+import { MutablePiece, Type } from "./piece";
 
-import { Position, areAlignedDiagonally } from "../position";
+import { MutablePosition, areAlignedDiagonally } from "../position";
 import { isInLimit } from "../tools";
 
-export class Bishop extends Piece {
+export class Bishop extends MutablePiece {
   getPossibleMoves() {
     const possibleMoves = [];
 
@@ -19,7 +19,7 @@ export class Bishop extends Piece {
 
         for (const point of points) {
           if (isInLimit(0, point.x, 7) && isInLimit(0, point.y, 7)) {
-            possibleMoves.push(new Position(point));
+            possibleMoves.push(new MutablePosition(point));
           }
         }
       }
@@ -28,7 +28,7 @@ export class Bishop extends Piece {
     return possibleMoves;
   }
 
-  canMove(position: Position) {
+  canMove(position: MutablePosition) {
     const movingDiagonally = areAlignedDiagonally(this.position, position);
     return movingDiagonally;
   }

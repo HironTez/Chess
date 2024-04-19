@@ -1,14 +1,14 @@
-import { Piece, Type } from "./piece";
+import { MutablePiece, Type } from "./piece";
 
 import {
-  Position,
+  MutablePosition,
   areAlignedDiagonally,
   areAlignedHorizontally,
   areAlignedVertically,
 } from "../position";
 import { isInLimit } from "../tools";
 
-export class Queen extends Piece {
+export class Queen extends MutablePiece {
   getPossibleMoves() {
     const possibleMoves = [];
 
@@ -24,13 +24,13 @@ export class Queen extends Piece {
 
         for (const point of diagonalPoints) {
           if (isInLimit(0, point.x, 7) && isInLimit(0, point.y, 7)) {
-            possibleMoves.push(new Position(point));
+            possibleMoves.push(new MutablePosition(point));
           }
         }
 
         possibleMoves.push(
-          new Position({ x: i, y }),
-          new Position({ x, y: i }),
+          new MutablePosition({ x: i, y }),
+          new MutablePosition({ x, y: i }),
         );
       }
     }
@@ -38,7 +38,7 @@ export class Queen extends Piece {
     return possibleMoves;
   }
 
-  canMove(position: Position) {
+  canMove(position: MutablePosition) {
     const movingVertically = areAlignedHorizontally(this.position, position);
     const movingHorizontally = areAlignedVertically(this.position, position);
     const movingDiagonally = areAlignedDiagonally(this.position, position);

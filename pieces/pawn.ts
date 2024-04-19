@@ -3,15 +3,15 @@ import {
   areAlignedHorizontally,
   isMovingUp,
 } from "../position";
-import { Color, Piece, Type } from "./piece";
+import { Color, MutablePiece, Type } from "./piece";
 
-import { Position } from "../position";
+import { MutablePosition } from "../position";
 
-export class Pawn extends Piece {
+export class Pawn extends MutablePiece {
   isMoveValid(
-    position: Position,
-    target: Piece | null,
-    lastMoved: Piece | null,
+    position: MutablePosition,
+    target: MutablePiece | null,
+    lastMoved: MutablePiece | null,
   ) {
     const canMove = this.canMove(position);
     const canCapture = this.canCapture(position, lastMoved, target);
@@ -25,7 +25,7 @@ export class Pawn extends Piece {
 
     for (let newX = x - 1; newX <= x + 1; newX++) {
       possibleMoves.push(
-        new Position({
+        new MutablePosition({
           x: newX,
           y: y + (this.color === Color.White ? 1 : -1),
         }),
@@ -34,7 +34,7 @@ export class Pawn extends Piece {
 
     if (!this.isMoved) {
       possibleMoves.push(
-        new Position({
+        new MutablePosition({
           x,
           y: y + (this.color === Color.White ? 2 : -2),
         }),
@@ -48,7 +48,7 @@ export class Pawn extends Piece {
     return this.justDoubleMoved;
   }
 
-  canMove(position: Position) {
+  canMove(position: MutablePosition) {
     const distance = this.position.distanceTo(position);
     const movingVertically = areAlignedHorizontally(this.position, position);
     const directionIsRight = this.directionIsRight(position);
@@ -58,9 +58,9 @@ export class Pawn extends Piece {
   }
 
   canCapture(
-    position: Position,
-    lastMoved: Piece | null,
-    target: Piece | null,
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
+    target: MutablePiece | null,
   ) {
     const distance = this.position.distanceTo(position);
     const distanceIsRight = distance === 1;
@@ -81,7 +81,7 @@ export class Pawn extends Piece {
     );
   }
 
-  protected onMove(position: Position) {
+  protected onMove(position: MutablePosition) {
     if (!this.isMoved) {
       const distance = this.position.distanceTo(position);
       if (distance === 2) {
@@ -93,7 +93,7 @@ export class Pawn extends Piece {
     this.justDoubleMoved = false;
   }
 
-  private directionIsRight(position: Position) {
+  private directionIsRight(position: MutablePosition) {
     const movingUp = isMovingUp(this.position, position);
     return this.color === Color.White ? movingUp : !movingUp;
   }

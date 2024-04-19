@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import { Board } from "../board";
+import { CustomBoard } from "../board";
 import { Color, King, Pawn } from "../pieces";
 import { Position } from "../position";
 
 test("king possible positions", () => {
-  const board = new Board([
+  const board = new CustomBoard([
     new King("E4", Color.White),
     new King("E8", Color.Black),
     new Pawn("E3", Color.Black),
