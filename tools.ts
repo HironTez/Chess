@@ -70,13 +70,13 @@ export const printBoard = (pieces: Piece[]) => {
 
 export const parseMoveInput = (moveInput: string) => {
   const positions = moveInput.match(/^([a-hA-H][1-8]).*([a-hA-H][1-8])$/);
-  const startPositionString = positions?.at(1);
-  const endPositionString = positions?.at(2);
-  const startPosition = startPositionString
-    ? new MutablePosition(startPositionString)
+  const startPositionNotation = positions?.at(1);
+  const endPositionNotation = positions?.at(2);
+  const startPosition = startPositionNotation
+    ? new MutablePosition(startPositionNotation)
     : undefined;
-  const endPosition = endPositionString
-    ? new MutablePosition(endPositionString)
+  const endPosition = endPositionNotation
+    ? new MutablePosition(endPositionNotation)
     : undefined;
 
   return { startPosition, endPosition };

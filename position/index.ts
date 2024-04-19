@@ -3,7 +3,7 @@ import {
   PointT,
   Position,
   PositionInput,
-  PositionString,
+  PositionNotation,
 } from "./position";
 import {
   areAlignedDiagonally,
@@ -27,4 +27,4 @@ export {
   isMovingUp,
 };
 
-export type { PointT, PositionInput, PositionString };
+export type { PointT, PositionInput, PositionNotation };

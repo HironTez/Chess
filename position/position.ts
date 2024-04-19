@@ -1,12 +1,16 @@
 import { isInLimit } from "../tools";
-import { getDiff } from "./tools";
+import {
+  decodePositionNotation,
+  encodePositionNotation,
+  getDiff,
+} from "./tools";
 
 export type PointT = {
   x: number;
   y: number;
 };
 
-export type PositionString = `${
+export type PositionNotation = `${
   | ("a" | "b" | "c" | "d" | "e" | "f" | "g" | "h")
   | ("A" | "B" | "C" | "D" | "E" | "F" | "G" | "H")}${
   | "1"
@@ -18,7 +22,7 @@ export type PositionString = `${
   | "7"
   | "8"}`;
 
-export type PositionInput = Position | PointT | PositionString;
+export type PositionInput = Position | PointT | PositionNotation;
 
 export class Position {
   static isPosition(position: unknown): position is MutablePosition {
@@ -34,6 +38,9 @@ export class Position {
   }
   get y() {
     return this._y;
+  }
+  get notation() {
+    return this._notation;
   }
   get isValid() {
     return this._isValid;
@@ -53,10 +60,7 @@ export class Position {
       this._x = position.x;
       this._y = position.y;
     } else if (typeof position === "string") {
-      const xChar = position.charCodeAt(0);
-      const yChar = position.charCodeAt(1);
-      const x = xChar >= 97 ? xChar - 97 : xChar - 65;
-      const y = yChar - 49;
+      const { x, y } = decodePositionNotation(position);
 
       if (isInLimit(0, x, 7) && isInLimit(0, y, 7)) {
         this._x = x;
@@ -71,14 +75,19 @@ export class Position {
     }
 
     this._isValid =
-      Number.isInteger(this._x) &&
-      Number.isInteger(this._y) &&
+      typeof this._x === "number" &&
+      typeof this._y === "number" &&
       isInLimit(0, this._x, 7) &&
       isInLimit(0, this._y, 7);
+
+    this._notation = this._isValid
+      ? encodePositionNotation(this._x, this._y)
+      : undefined;
   }
 
   protected _x = NaN;
   protected _y = NaN;
+  protected _notation: string | undefined = undefined;
   protected _isValid = false;
 }
 

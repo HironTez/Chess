@@ -75,3 +75,18 @@ export const getSurroundingPositions = (position: Position) => {
 
   return surroundingPositions;
 };
+
+export const decodePositionNotation = (positionNotation: string) => {
+  const xChar = positionNotation.charCodeAt(0);
+  const yString = positionNotation.at(1);
+  const x = xChar >= 97 ? xChar - 97 : xChar - 65;
+  const y = Number(yString);
+
+  return { x, y };
+};
+
+export const encodePositionNotation = (x: number, y: number) => {
+  const xChar = x + 65;
+  const xString = String.fromCharCode(xChar);
+  return `${xString}${y.toString()}`;
+};

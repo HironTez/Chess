@@ -15,7 +15,7 @@ import {
   PointT,
   Position,
   PositionInput,
-  PositionString,
+  PositionNotation,
 } from "./position";
 
 export {
@@ -33,7 +33,7 @@ export {
   Rock,
   Type,
 };
-export type { PointT, PositionInput, PositionString };
+export type { PointT, PositionInput, PositionNotation };
 
 // TODO: history of moves
 // TODO: undone
