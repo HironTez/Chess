@@ -1,6 +1,5 @@
 import readline from "node:readline";
-import { Color, Piece, Type } from "./pieces";
-import { Position } from "./position";
+import { Color, Piece, Position, Type } from "./";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -67,4 +66,18 @@ export const printBoard = (pieces: Piece[]) => {
   }
 
   console.log("   A B C D E F G H");
+};
+
+export const parseMoveInput = (moveInput: string) => {
+  const positions = moveInput.match(/^([a-hA-H][1-8]).*([a-hA-H][1-8])$/);
+  const startPositionString = positions?.at(1);
+  const endPositionString = positions?.at(2);
+  const startPosition = startPositionString
+    ? new Position(startPositionString)
+    : undefined;
+  const endPosition = endPositionString
+    ? new Position(endPositionString)
+    : undefined;
+
+  return { startPosition, endPosition };
 };

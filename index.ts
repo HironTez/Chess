@@ -9,3 +9,7 @@ import {
 
 export { Board, Color, Piece, Position, PreparedBoard, Type };
 export type { PointT, PositionInput, PositionString };
+
+// TODO: history of moves
+// TODO: undone
+// TODO: notations

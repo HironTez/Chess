@@ -26,7 +26,7 @@ export class ReadonlyPosition {
   }
 
   constructor(position: PositionInput | string) {
-    this.set(position);
+    this._set(position);
   }
 
   get x() {
@@ -39,7 +39,16 @@ export class ReadonlyPosition {
     return this._isValid;
   }
 
-  set(position: PositionInput | string) {
+  distanceTo(positionInput: PointT | Position) {
+    const position = Position.isPosition(positionInput)
+      ? positionInput
+      : new Position(positionInput);
+
+    const { xDiff, yDiff } = getDiff(this, position);
+    return Math.max(Math.abs(xDiff), Math.abs(yDiff));
+  }
+
+  protected _set(position: PositionInput | string) {
     if (Position.isPosition(position)) {
       this._x = position.x;
       this._y = position.y;
@@ -68,15 +77,6 @@ export class ReadonlyPosition {
       isInLimit(0, this._y, 7);
   }
 
-  distanceTo(positionInput: PointT | Position) {
-    const position = Position.isPosition(positionInput)
-      ? positionInput
-      : new Position(positionInput);
-
-    const { xDiff, yDiff } = getDiff(this, position);
-    return Math.max(Math.abs(xDiff), Math.abs(yDiff));
-  }
-
   protected _x = NaN;
   protected _y = NaN;
   protected _isValid = false;
@@ -88,25 +88,6 @@ export class Position extends ReadonlyPosition {
   }
 
   set(position: PositionInput | string) {
-    if (Position.isPosition(position)) {
-      this._x = position.x;
-      this._y = position.y;
-    } else if (typeof position === "string") {
-      const xChar = position.charCodeAt(0);
-      const yChar = position.charCodeAt(1);
-      const x = xChar >= 97 ? xChar - 97 : xChar - 65;
-      const y = yChar - 49;
-
-      if (isInLimit(0, x, 8) && isInLimit(0, y, 8)) {
-        this._x = x;
-        this._y = y;
-      } else {
-        this._x = NaN;
-        this._y = NaN;
-      }
-    } else {
-      this._x = position.x;
-      this._y = position.y;
-    }
+    this._set(position);
   }
 }

@@ -1,6 +1,6 @@
-import { input, printBoard } from "./tools";
+import { input, parseMoveInput, printBoard } from "./tools";
 
-import { Position, PreparedBoard, Type } from "./";
+import { PreparedBoard, Type } from "./";
 
 const board = new PreparedBoard({
   getPromotionVariant: () => Type.Queen,
@@ -47,15 +47,7 @@ const board = new PreparedBoard({
 const main = async () => {
   while (true) {
     const moveInput = await input("Enter your move (example: a2 - a4): ");
-    const positions = moveInput.match(/([a-hA-H][1-8]).*([a-hA-H][1-8])/);
-    const startPositionParsed = positions?.at(1);
-    const endPositionParsed = positions?.at(2);
-    const startPosition = startPositionParsed
-      ? new Position(startPositionParsed)
-      : undefined;
-    const endPosition = endPositionParsed
-      ? new Position(endPositionParsed)
-      : undefined;
+    const { startPosition, endPosition } = parseMoveInput(moveInput);
 
     if (!startPosition?.isValid || !endPosition?.isValid) {
       console.error("Invalid input! Try again.");
@@ -67,9 +59,6 @@ const main = async () => {
       console.error("Invalid move! Try again.");
       continue;
     }
-
-    const x = board.getPieceAt("a1");
-    if (x) x.position.set("a5");
   }
 };
 
