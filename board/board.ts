@@ -1,4 +1,12 @@
-import { Color, King, Pawn, Piece, Queen, Rock, Type } from "../pieces";
+import {
+  Color,
+  King,
+  Pawn,
+  Piece,
+  Rock,
+  Type,
+  getPieceClassByTypename,
+} from "../pieces";
 import { ReadonlyPiece } from "../pieces/piece";
 import {
   Position,
@@ -9,6 +17,11 @@ import {
 import { getDiff, getSurroundingPositions, getWay } from "../position/tools";
 import { isInLimit } from "../tools";
 
+type PureOrPromise<T> = T | Promise<T>;
+
+type GetPromotionVariant = (
+  pawnPosition: ReadonlyPosition,
+) => PureOrPromise<Type.Queen | Type.Rock | Type.Bishop | Type.Knight>;
 type TeamEventHandler = (color: Color, kingPosition: ReadonlyPosition) => void;
 type BoardChangeEventHandler = (pieces: ReadonlyPiece[]) => void;
 type PieceMoveEventHandler = (
@@ -35,6 +48,7 @@ enum CheckStatus {
 }
 
 export type BoardOptionsT = {
+  getPromotionVariant?: GetPromotionVariant;
   onCheck?: TeamEventHandler;
   onCheckMate?: TeamEventHandler;
   onCheckResolve?: () => void;
@@ -49,6 +63,8 @@ export type BoardOptionsT = {
 export class Board {
   constructor(pieces: Piece[], options?: BoardOptionsT) {
     this._pieces = pieces;
+
+    this.getPromotionVariant = options?.getPromotionVariant;
     this.onCheck = options?.onCheck;
     this.onCheckMate = options?.onCheckMate;
     this.onCheckResolve = options?.onCheckResolve;
@@ -92,12 +108,15 @@ export class Board {
     return pieces.map((piece) => new ReadonlyPiece(piece));
   }
 
-  move(startPositionInput: PositionInput, endPositionInput: PositionInput) {
+  async move(
+    startPositionInput: PositionInput,
+    endPositionInput: PositionInput,
+  ) {
     const startPosition = new Position(startPositionInput);
     const endPosition = new Position(endPositionInput);
     if (!startPosition || !endPosition) return false;
 
-    return this.movePiece(startPosition, endPosition);
+    return await this.movePiece(startPosition, endPosition);
   }
 
   private _getPieceAt(positionInput: PositionInput) {
@@ -111,7 +130,7 @@ export class Board {
     return this._pieces.filter((piece) => piece.color === color);
   }
 
-  private movePiece(startPosition: Position, endPosition: Position) {
+  private async movePiece(startPosition: Position, endPosition: Position) {
     const piece = this._getPieceAt(startPosition);
     if (!piece) return false;
 
@@ -138,8 +157,14 @@ export class Board {
       piece.move(endPosition);
 
       if (this.isPromotionPossible(piece)) {
+        const pieceType =
+          (await this.getPromotionVariant?.(
+            new ReadonlyPosition(piece.position),
+          )) ?? Type.Queen;
+        const pieceClass = getPieceClassByTypename(pieceType);
+
         this.removePieceAt(piece.position);
-        this._pieces.push(new Queen(piece.position, piece.color));
+        this._pieces.push(new pieceClass(piece.position, piece.color));
 
         this.onPromotion?.(piece.position);
       }
@@ -153,11 +178,7 @@ export class Board {
           castlingRockStartPosition,
           newRockPosition,
         );
-      } else {
-        this.onMove?.(startPosition, endPosition);
-      }
-
-      if (isCapturing) {
+      } else if (isCapturing) {
         this.onCapture?.(startPosition, endPosition, enemyPosition);
       } else {
         this.onMove?.(startPosition, endPosition);
@@ -449,6 +470,7 @@ export class Board {
   private _currentMove: Color = Color.White;
   private _lastMovedPiece: Piece | null = null;
 
+  private getPromotionVariant: GetPromotionVariant | undefined;
   private onCheck: TeamEventHandler | undefined;
   private onCheckMate: TeamEventHandler | undefined;
   private onCheckResolve: (() => void) | undefined;

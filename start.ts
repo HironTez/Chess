@@ -1,9 +1,11 @@
 import { input, printBoard } from "./tools";
 
 import { PreparedBoard } from "./board/preparedBoard";
+import { Type } from "./pieces";
 import { Position } from "./position/position";
 
 const board = new PreparedBoard({
+  getPromotionVariant: () => Type.Queen,
   onCheck: (color) => {
     console.log(`${color} king is in check!`.toLocaleUpperCase());
   },
@@ -18,6 +20,29 @@ const board = new PreparedBoard({
   },
   onBoardChange: (pieces) => {
     printBoard(pieces);
+  },
+  onMove: (startPosition, endPosition) => {
+    console.log(
+      `${startPosition.x},${startPosition.y} -> ${endPosition.x},${endPosition.y}`,
+    );
+  },
+  onCapture: (startPosition, endPosition, capturedPosition) => {
+    console.log(
+      `${startPosition.x},${startPosition.y} -> ${endPosition.x},${endPosition.y} captured ${capturedPosition.x},${capturedPosition.y}`,
+    );
+  },
+  onCastling: (
+    kingStartPosition,
+    kingEndPosition,
+    rockStartPosition,
+    rockEndPosition,
+  ) => {
+    console.log(
+      `${kingStartPosition.x},${kingStartPosition.y} -> ${kingEndPosition.x},${kingEndPosition.y} castling ${rockStartPosition.x},${rockStartPosition.y} -> ${rockEndPosition.x},${rockEndPosition.y}`,
+    );
+  },
+  onPromotion: (position) => {
+    console.log(`${position.x},${position.y} promoted to Queen`);
   },
 });
 
@@ -39,7 +64,7 @@ const main = async () => {
       continue;
     }
 
-    const moved = board.move(startPosition, endPosition);
+    const moved = await board.move(startPosition, endPosition);
     if (!moved) {
       console.error("Invalid move! Try again.");
       continue;
@@ -51,5 +76,3 @@ const main = async () => {
 };
 
 main();
-
-// TODO: pawn promotion variants

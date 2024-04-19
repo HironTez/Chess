@@ -6,5 +6,17 @@ import { Knight } from "./knight";
 import { Pawn } from "./pawn";
 import { Queen } from "./queen";
 import { Rock } from "./rock";
+import { getPieceClassByTypename } from "./tools";
 
-export { Bishop, Color, King, Knight, Pawn, Piece, Queen, Rock, Type };
+export {
+  Bishop,
+  Color,
+  King,
+  Knight,
+  Pawn,
+  Piece,
+  Queen,
+  Rock,
+  Type,
+  getPieceClassByTypename,
+};
