@@ -147,7 +147,7 @@ export class Board {
             : endPosition
           : endPosition;
 
-      const isCapturing = !!this.getPieceAt(endPosition);
+      const isCapturing = !!this.getPieceAt(enemyPosition);
 
       this.removePieceAt(enemyPosition);
       piece.move(endPosition);
