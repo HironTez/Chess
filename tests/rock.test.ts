@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { CustomBoard } from "../board";
-import { Color, King, Pawn, Rock } from "../pieces";
-import { Position } from "../position";
+import { CustomBoard } from "../src/board";
+import { Color, King, Pawn, Rock } from "../src/pieces";
+import { Position } from "../src/position";
 
 test("rock possible positions", () => {
   const board = new CustomBoard([

@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["chebyshev", "outdir", "queenside"]
+  "cSpell.words": [
+    "chebyshev",
+    "hiron",
+    "outdir",
+    "outfile",
+    "postbuild",
+    "queenside",
+    "tsbuildinfo"
+  ]
 }

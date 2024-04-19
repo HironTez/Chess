@@ -1,4 +1,4 @@
-import { MutablePosition, PointT, Position, PositionInput } from "../position";
+import { MutablePosition, PointT, Position, PositionInputT } from "../position";
 
 export enum Color {
   White = "white",
@@ -15,7 +15,7 @@ export enum Type {
 }
 
 export abstract class ReadonlyPieceAbstract {
-  constructor(positionInput: PositionInput, color: Color) {
+  constructor(positionInput: PositionInputT, color: Color) {
     const position = new MutablePosition(positionInput);
 
     this._position = position;
@@ -85,7 +85,7 @@ export abstract class ReadonlyPieceAbstract {
 }
 
 export abstract class MutablePiece extends ReadonlyPieceAbstract {
-  constructor(positionInput: PositionInput, color: Color) {
+  constructor(positionInput: PositionInputT, color: Color) {
     super(positionInput, color);
   }
 

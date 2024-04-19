@@ -1,4 +1,4 @@
-import { arrayConstructor, isInLimit } from "../tools";
+import { arrayConstructor, isInLimit } from "../helpers";
 import { MutablePosition, Position } from "./position";
 
 export const getDiff = (position1: Position, position2: Position) => {
@@ -78,9 +78,9 @@ export const getSurroundingPositions = (position: Position) => {
 
 export const decodePositionNotation = (positionNotation: string) => {
   const xChar = positionNotation.charCodeAt(0);
-  const yString = positionNotation.at(1);
+  const yChar = positionNotation.charCodeAt(1);
   const x = xChar >= 97 ? xChar - 97 : xChar - 65;
-  const y = Number(yString);
+  const y = yChar - 49;
 
   return { x, y };
 };
@@ -88,5 +88,5 @@ export const decodePositionNotation = (positionNotation: string) => {
 export const encodePositionNotation = (x: number, y: number) => {
   const xChar = x + 65;
   const xString = String.fromCharCode(xChar);
-  return `${xString}${y.toString()}`;
+  return `${xString}${y + 1}`;
 };

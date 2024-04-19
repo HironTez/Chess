@@ -1,5 +1,5 @@
+import { arrayConstructor } from "../helpers";
 import { Bishop, Color, King, Knight, Pawn, Queen, Rock } from "../pieces";
-import { arrayConstructor } from "../tools";
 import { BoardOptionsT, CustomBoard } from "./board";
 
 const pieceSet = [

@@ -1,4 +1,4 @@
-import { areAlignedVertically } from "./../position";
+import { areAlignedVertically } from "../position";
 import { MutablePiece, Type } from "./piece";
 
 import { MutablePosition, areAlignedHorizontally } from "../position";

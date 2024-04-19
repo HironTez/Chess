@@ -1,5 +1,5 @@
 import readline from "node:readline";
-import { Color, MutablePosition, Piece, Type } from "./";
+import { Color, Piece, Position, Type } from "../src";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -13,24 +13,6 @@ export const input = (text: any) => {
     });
   });
 };
-
-export const cloneDeep = <T extends object>(obj: T) =>
-  JSON.parse(JSON.stringify(obj)) as T;
-
-const isFunction = <F extends Function>(value: unknown | F): value is F =>
-  typeof value === "function";
-
-export const arrayConstructor = <T>(
-  length: number,
-  constructor: ((index: number) => T) | T,
-): T[] =>
-  Array.from({ length }, (_v, k) =>
-    isFunction(constructor) ? constructor(k) : constructor,
-  );
-
-export const isInLimit = (min: number, value: number, max: number) =>
-  min <= value && value <= max;
-
 const pieceSymbol = (piece: Piece) => {
   switch (piece.type) {
     case Type.King:
@@ -54,7 +36,7 @@ export const printBoard = (pieces: Piece[]) => {
 
     for (let j = 0; j <= 7; j++) {
       const piece = pieces.find((piece) => {
-        return piece.isAt(new MutablePosition({ x: j, y: i }));
+        return piece.isAt(new Position({ x: j, y: i }));
       });
 
       const symbol = piece && pieceSymbol(piece);
@@ -73,10 +55,10 @@ export const parseMoveInput = (moveInput: string) => {
   const startPositionNotation = positions?.at(1);
   const endPositionNotation = positions?.at(2);
   const startPosition = startPositionNotation
-    ? new MutablePosition(startPositionNotation)
+    ? new Position(startPositionNotation)
     : undefined;
   const endPosition = endPositionNotation
-    ? new MutablePosition(endPositionNotation)
+    ? new Position(endPositionNotation)
     : undefined;
 
   return { startPosition, endPosition };

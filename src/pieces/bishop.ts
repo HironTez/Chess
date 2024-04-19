@@ -1,7 +1,7 @@
 import { MutablePiece, Type } from "./piece";
 
+import { isInLimit } from "../helpers";
 import { MutablePosition, areAlignedDiagonally } from "../position";
-import { isInLimit } from "../tools";
 
 export class Bishop extends MutablePiece {
   getPossibleMoves() {

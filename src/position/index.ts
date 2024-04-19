@@ -1,11 +1,4 @@
 import {
-  MutablePosition,
-  PointT,
-  Position,
-  PositionInput,
-  PositionNotation,
-} from "./position";
-import {
   areAlignedDiagonally,
   areAlignedHorizontally,
   areAlignedVertically,
@@ -13,7 +6,9 @@ import {
   getSurroundingPositions,
   getWay,
   isMovingUp,
-} from "./tools";
+} from "./helpers";
+import type { PointT, PositionInputT, PositionNotationT } from "./position";
+import { MutablePosition, Position } from "./position";
 
 export {
   MutablePosition,
@@ -27,4 +22,4 @@ export {
   isMovingUp,
 };
 
-export type { PointT, PositionInput, PositionNotation };
+export type { PointT, PositionInputT, PositionNotationT };

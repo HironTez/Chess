@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { CustomBoard, Position } from "../";
-import { Bishop, Color, King, Pawn } from "../pieces";
+import { Bishop, Color, King, Pawn } from "../src/pieces";
 import { isInLimit } from "../tools";
 
 test("bishop possible positions", () => {

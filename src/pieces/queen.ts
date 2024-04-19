@@ -1,12 +1,12 @@
 import { MutablePiece, Type } from "./piece";
 
+import { isInLimit } from "../helpers";
 import {
   MutablePosition,
   areAlignedDiagonally,
   areAlignedHorizontally,
   areAlignedVertically,
 } from "../position";
-import { isInLimit } from "../tools";
 
 export class Queen extends MutablePiece {
   getPossibleMoves() {

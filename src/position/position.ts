@@ -1,16 +1,16 @@
-import { isInLimit } from "../tools";
+import { isInLimit } from "../helpers";
 import {
   decodePositionNotation,
   encodePositionNotation,
   getDiff,
-} from "./tools";
+} from "./helpers";
 
 export type PointT = {
   x: number;
   y: number;
 };
 
-export type PositionNotation = `${
+export type PositionNotationT = `${
   | ("a" | "b" | "c" | "d" | "e" | "f" | "g" | "h")
   | ("A" | "B" | "C" | "D" | "E" | "F" | "G" | "H")}${
   | "1"
@@ -22,14 +22,14 @@ export type PositionNotation = `${
   | "7"
   | "8"}`;
 
-export type PositionInput = Position | PointT | PositionNotation;
+export type PositionInputT = Position | PointT | PositionNotationT;
 
 export class Position {
   static isPosition(position: unknown): position is MutablePosition {
     return position instanceof Position;
   }
 
-  constructor(position: PositionInput | string) {
+  constructor(position: PositionInputT | string) {
     this._set(position);
   }
 
@@ -47,7 +47,7 @@ export class Position {
   }
 
   distanceTo(positionInput: PointT | MutablePosition) {
-    const position = MutablePosition.isPosition(positionInput)
+    const position = Position.isPosition(positionInput)
       ? positionInput
       : new MutablePosition(positionInput);
 
@@ -55,8 +55,8 @@ export class Position {
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
-  protected _set(position: PositionInput | string) {
-    if (MutablePosition.isPosition(position)) {
+  protected _set(position: PositionInputT | string) {
+    if (Position.isPosition(position)) {
       this._x = position.x;
       this._y = position.y;
     } else if (typeof position === "string") {
@@ -92,11 +92,11 @@ export class Position {
 }
 
 export class MutablePosition extends Position {
-  constructor(position: PositionInput | string) {
+  constructor(position: PositionInputT | string) {
     super(position);
   }
 
-  set(position: PositionInput | string) {
+  set(position: PositionInputT | string) {
     this._set(position);
   }
 }

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { CustomBoard } from "../board";
-import { Board } from "../board/preparedBoard";
-import { Color, King, Pawn, Queen, Rock, Type } from "../pieces";
+import { CustomBoard } from "../src/board";
+import { Board } from "../src/board/preparedBoard";
+import { Color, King, Pawn, Queen, Rock, Type } from "../src/pieces";
 
 test("Should expect a turn from a different color after move", async () => {
   const board = new CustomBoard([

@@ -1,6 +1,6 @@
-import { input, parseMoveInput, printBoard } from "./tools";
+import { input, parseMoveInput, printBoard } from "./helpers";
 
-import { Board } from "./";
+import { Board } from "../src";
 
 const board = new Board({
   onCheck: (color) => {

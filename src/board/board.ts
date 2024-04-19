@@ -8,10 +8,10 @@ import {
   Type,
   getPieceClassByTypename,
 } from "../pieces";
-import { MutablePosition, Position, PositionInput } from "../position";
+import { MutablePosition, Position, PositionInputT } from "../position";
 
+import { isInLimit } from "../helpers";
 import { getDiff, getSurroundingPositions, getWay } from "../position";
-import { isInLimit } from "../tools";
 
 type PureOrPromise<T> = T | Promise<T>;
 
@@ -90,7 +90,7 @@ export class CustomBoard {
     return this._currentMove;
   }
 
-  getPieceAt(positionInput: PositionInput) {
+  getPieceAt(positionInput: PositionInputT) {
     const piece = this._getPieceAt(positionInput);
     return piece && new Piece(piece);
   }
@@ -105,8 +105,8 @@ export class CustomBoard {
   }
 
   async move(
-    startPositionInput: PositionInput,
-    endPositionInput: PositionInput,
+    startPositionInput: PositionInputT,
+    endPositionInput: PositionInputT,
   ) {
     const startPosition = new MutablePosition(startPositionInput);
     const endPosition = new MutablePosition(endPositionInput);
@@ -115,7 +115,7 @@ export class CustomBoard {
     return await this.movePiece(startPosition, endPosition);
   }
 
-  private _getPieceAt(positionInput: PositionInput) {
+  private _getPieceAt(positionInput: PositionInputT) {
     const position = new MutablePosition(positionInput);
     if (!position) return undefined;
 

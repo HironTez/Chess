@@ -1,15 +1,30 @@
 {
+  "name": "ht-chess",
+  "version": "1.0.0",
+  "description": "A chess engine.",
+  "main": "./dist/index.js",
+  "module": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "bun build ./index.ts --outdir ./dist",
-    "start": "bun ./start.ts",
-    "format": "prettier --write \"**/*.ts\""
+    "start": "bun run ./example/index.ts",
+    "dev": "bun --watch run ./example/index.ts",
+    "build": "bun build --target=node ./src/index.ts --outfile=dist/index.js && bun run build:declaration",
+    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "bun-types": "^1.1.4",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
     "typescript": "^5.4.5"
   },
-  "devDependencies": {
-    "bun-types": "^1.1.4"
-  }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HironTez/Chess.git"
+  },
+  "author": "_hiron_tez_",
+  "license": "Apache-2.0",
+  "files": [
+    "dist/index.js"
+  ]
 }

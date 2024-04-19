@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { CustomBoard } from "../board";
-import { Color, King, Pawn, Queen } from "../pieces";
-import { Position } from "../position";
+import { CustomBoard } from "../src/board";
+import { Color, King, Pawn, Queen } from "../src/pieces";
+import { Position } from "../src/position";
 import { isInLimit } from "../tools";
 
 test("queen possible positions", () => {
