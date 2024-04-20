@@ -4,7 +4,7 @@
   "description": "A chess engine. This is a fully functional game core that implements all the functionality and logic and provides an easy way to interact with the pieces.",
   "main": "./dist/index.js",
   "module": "./src/index.ts",
-  "types": "./index.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "start": "bun run ./example/index.ts",
     "dev": "bun --watch run ./example/index.ts",
