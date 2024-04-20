@@ -25,10 +25,6 @@ export type PositionNotationT = `${
 export type PositionInputT = Position | PointT | PositionNotationT;
 
 export class Position {
-  static isPosition(position: unknown): position is MutablePosition {
-    return position instanceof Position;
-  }
-
   constructor(position: PositionInputT | string) {
     this._set(position);
   }
@@ -46,17 +42,18 @@ export class Position {
     return this._isValid;
   }
 
-  distanceTo(positionInput: PointT | MutablePosition) {
-    const position = Position.isPosition(positionInput)
-      ? positionInput
-      : new MutablePosition(positionInput);
+  distanceTo(positionInput: PositionInputT) {
+    const position =
+      typeof positionInput === "string"
+        ? new Position(positionInput)
+        : positionInput;
 
     const { xDiff, yDiff } = getDiff(this, position);
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
   protected _set(position: PositionInputT | string) {
-    if (Position.isPosition(position)) {
+    if (position instanceof Position) {
       this._x = position.x;
       this._y = position.y;
     } else if (typeof position === "string") {

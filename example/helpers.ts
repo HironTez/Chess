@@ -19,7 +19,7 @@ const pieceSymbol = (piece: Piece) => {
       return piece.color === Color.White ? "\u2654" : "\u265A";
     case Type.Queen:
       return piece.color === Color.White ? "\u2655" : "\u265B";
-    case Type.Rock:
+    case Type.Rook:
       return piece.color === Color.White ? "\u2656" : "\u265C";
     case Type.Bishop:
       return piece.color === Color.White ? "\u2657" : "\u265D";

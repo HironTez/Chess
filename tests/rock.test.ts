@@ -1,19 +1,19 @@
 import { expect, test } from "bun:test";
-import { Color, CustomBoard, King, Pawn, Position, Rock } from "../src";
+import { Color, CustomBoard, King, Pawn, Position, Rook } from "../src";
 
-test("rock possible positions", () => {
+test("rook possible positions", () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-    new Rock("D4", Color.White),
+    new Rook("D4", Color.White),
     new Pawn("E4", Color.Black),
   ]);
 
-  const rock = board.getPieceAt("D4")!;
-  expect(rock).toBeDefined();
-  const possibleMoves = rock.getPossibleMoves();
+  const rook = board.getPieceAt("D4")!;
+  expect(rook).toBeDefined();
+  const possibleMoves = rook.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
-  const { x, y } = rock.position;
+  const { x, y } = rook.position;
 
   const expectedPositions: Position[] = [];
   for (let i = 0; i <= 7; i++) {

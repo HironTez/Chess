@@ -3,7 +3,7 @@ import { MutablePiece, Type } from "./piece";
 
 import { MutablePosition, areAlignedHorizontally } from "../position";
 
-export class Rock extends MutablePiece {
+export class Rook extends MutablePiece {
   getPossibleMoves() {
     const possibleMoves = [];
 
@@ -26,5 +26,5 @@ export class Rock extends MutablePiece {
     return movingVertically || movingHorizontally;
   }
 
-  readonly type = Type.Rock;
+  readonly type = Type.Rook;
 }

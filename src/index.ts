@@ -7,7 +7,7 @@ import {
   Pawn,
   Piece,
   Queen,
-  Rock,
+  Rook,
   Type,
 } from "./pieces";
 import type { PointT, PositionInputT, PositionNotationT } from "./position";
@@ -25,7 +25,7 @@ export {
   Piece,
   Position,
   Queen,
-  Rock,
+  Rook,
   Type,
 };
 export type { PointT, PositionInputT, PositionNotationT };

@@ -4,14 +4,14 @@ import { Knight } from "./knight";
 import { Pawn } from "./pawn";
 import { Type } from "./piece";
 import { Queen } from "./queen";
-import { Rock } from "./rock";
+import { Rook } from "./rook";
 
 export const getPieceClassByTypename = (type: Type) => {
   switch (type) {
     case Type.Pawn:
       return Pawn;
-    case Type.Rock:
-      return Rock;
+    case Type.Rook:
+      return Rook;
     case Type.Knight:
       return Knight;
     case Type.Bishop:

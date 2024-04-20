@@ -1,7 +1,10 @@
 import { arrayConstructor, isInLimit } from "../helpers";
-import { MutablePosition, Position } from "./position";
+import { MutablePosition, PointT, Position } from "./position";
 
-export const getDiff = (position1: Position, position2: Position) => {
+export const getDiff = (
+  position1: Position | PointT,
+  position2: Position | PointT,
+) => {
   const xDiff = position2.x - position1.x;
   const yDiff = position2.y - position1.y;
   return {

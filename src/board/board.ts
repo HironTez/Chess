@@ -4,7 +4,7 @@ import {
   MutablePiece,
   Pawn,
   Piece,
-  Rock,
+  Rook,
   Type,
   getPieceClassByTypename,
 } from "../pieces";
@@ -17,8 +17,8 @@ type PureOrPromise<T> = T | Promise<T>;
 
 type GetPromotionVariant = (
   pawnPosition: Position,
-) => PureOrPromise<Type.Queen | Type.Rock | Type.Bishop | Type.Knight>;
-type TeamEventHandler = (color: Color, kingPosition: Position) => void;
+) => PureOrPromise<Type.Queen | Type.Rook | Type.Bishop | Type.Knight>;
+type TeamEventHandler = (color: Color) => void;
 type BoardChangeEventHandler = (pieces: Piece[]) => void;
 type PieceMoveEventHandler = (
   startPosition: Position,
@@ -92,8 +92,8 @@ export class CustomBoard {
   get pieces() {
     return this._pieces.map((piece) => new Piece(piece));
   }
-  get currentMove() {
-    return this._currentMove;
+  get currentTurn() {
+    return this._currentTurn;
   }
 
   getPieceAt(positionInput: PositionInputT) {
@@ -111,7 +111,10 @@ export class CustomBoard {
     if (!piece) return [];
 
     const positions = this._getPossibleMoves(piece);
-    return positions.filter((position) => this.isMoveValid(piece, position));
+    const validMoves = positions.filter((position) =>
+      this.isMoveValid(piece, position),
+    );
+    return validMoves.map((position) => new Position(position));
   }
 
   async move(
@@ -148,7 +151,7 @@ export class CustomBoard {
     const piece = this._getPieceAt(startPosition);
     if (!piece) return false;
 
-    const { rock: castlingRock, newPosition: newRockPosition } =
+    const { rook: castlingRock, newPosition: newRockPosition } =
       this.getCastlingRock(piece, endPosition);
     const castlingRockStartPosition = castlingRock?.position;
 
@@ -243,11 +246,11 @@ export class CustomBoard {
           const { x, y } = position;
           const rockPosX = x < 4 ? 0 : 7;
           const newRockPosX = x < 4 ? 3 : 5;
-          const rock = this._getPieceAt({ x: rockPosX, y });
-          if (rock instanceof Rock) {
-            const rockIsMoved = rock?.isMoved;
+          const rook = this._getPieceAt({ x: rockPosX, y });
+          if (rook instanceof Rook) {
+            const rockIsMoved = rook?.isMoved;
             return {
-              rock: rockIsMoved ? null : rock,
+              rook: rockIsMoved ? null : rook,
               newPosition: new MutablePosition({ x: newRockPosX, y }),
             };
           }
@@ -259,12 +262,12 @@ export class CustomBoard {
   }
 
   private handleBoardChange(lastMovedPiece: MutablePiece | null) {
-    this._currentMove = lastMovedPiece?.oppositeColor ?? this._currentMove;
+    this._currentTurn = lastMovedPiece?.oppositeColor ?? this._currentTurn;
     this._lastMovedPiece = lastMovedPiece;
 
     this.onBoardChange?.(this.pieces);
 
-    const king = this.getKing(this._currentMove);
+    const king = this.getKing(this._currentTurn);
     if (!king) return;
 
     const checkStatus = this.getCheckStatus(king);
@@ -275,7 +278,7 @@ export class CustomBoard {
       if (isInCheck) {
         this._check = king.color;
 
-        this.onCheck?.(king.color, new Position(king.position));
+        this.onCheck?.(king.color);
       } else {
         this._check = undefined;
 
@@ -290,7 +293,7 @@ export class CustomBoard {
         this._check = king.color;
         this._checkmate = king.color;
 
-        this.onCheckMate?.(king.color, new Position(king.position));
+        this.onCheckMate?.(king.color);
       } else {
         this._checkmate = undefined;
       }
@@ -302,7 +305,7 @@ export class CustomBoard {
       if (isInStalemate) {
         this._stalemate = king.color;
 
-        this.onStalemate?.(king.color, new Position(king.position));
+        this.onStalemate?.(king.color);
       } else {
         this._stalemate = undefined;
       }
@@ -316,7 +319,7 @@ export class CustomBoard {
   ) {
     if (this._checkmate || this._check) return false;
 
-    const isTurnRight = piece.color === this._currentMove;
+    const isTurnRight = piece.color === this._currentTurn;
     if (!isTurnRight) return false;
 
     const isMoving = !!piece.position.distanceTo(position);
@@ -478,7 +481,7 @@ export class CustomBoard {
   private _checkmate: Color | undefined = undefined;
   private _stalemate: Color | undefined = undefined;
   private _pieces: Array<MutablePiece>;
-  private _currentMove: Color = Color.White;
+  private _currentTurn: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
 
   private getPromotionVariant: GetPromotionVariant | undefined;

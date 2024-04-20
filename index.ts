@@ -11,7 +11,7 @@ import {
   Piece,
   Position,
   Queen,
-  Rock,
+  Rook,
   Type,
 } from "./src";
 
@@ -27,7 +27,7 @@ export {
   Piece,
   Position,
   Queen,
-  Rock,
+  Rook,
   Type,
 };
 export type { PointT, PositionInputT, PositionNotationT };

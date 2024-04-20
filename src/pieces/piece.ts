@@ -1,4 +1,4 @@
-import { MutablePosition, PointT, Position, PositionInputT } from "../position";
+import { MutablePosition, Position, PositionInputT } from "../position";
 
 export enum Color {
   White = "white",
@@ -7,7 +7,7 @@ export enum Color {
 
 export enum Type {
   Pawn = "pawn",
-  Rock = "rock",
+  Rook = "rook",
   Knight = "knight",
   Bishop = "bishop",
   Queen = "queen",
@@ -30,7 +30,12 @@ export abstract class ReadonlyPieceAbstract {
     return new Position(this._position);
   }
 
-  isAt(position: MutablePosition | PointT) {
+  isAt(positionInput: PositionInputT | string) {
+    const position =
+      typeof positionInput === "string"
+        ? new Position(positionInput)
+        : positionInput;
+
     return this._position.x === position.x && this._position.y === position.y;
   }
 

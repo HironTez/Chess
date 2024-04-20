@@ -6,7 +6,7 @@ import { King } from "./king";
 import { Knight } from "./knight";
 import { Pawn } from "./pawn";
 import { Queen } from "./queen";
-import { Rock } from "./rock";
+import { Rook } from "./rook";
 
 export {
   Bishop,
@@ -17,7 +17,7 @@ export {
   Pawn,
   Piece,
   Queen,
-  Rock,
+  Rook,
   Type,
   getPieceClassByTypename,
 };
