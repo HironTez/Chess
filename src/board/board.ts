@@ -101,10 +101,6 @@ export class CustomBoard {
     return piece && new Piece(piece);
   }
 
-  getPieces() {
-    return this._pieces.map((piece) => new Piece(piece));
-  }
-
   getPiecesByColor(color: Color) {
     const pieces = this._getPiecesByColor(color);
     return pieces.map((piece) => new Piece(piece));
@@ -266,7 +262,7 @@ export class CustomBoard {
     this._currentMove = lastMovedPiece?.oppositeColor ?? this._currentMove;
     this._lastMovedPiece = lastMovedPiece;
 
-    this.onBoardChange?.(this.getPieces());
+    this.onBoardChange?.(this.pieces);
 
     const king = this.getKing(this._currentMove);
     if (!king) return;
