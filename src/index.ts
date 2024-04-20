@@ -11,7 +11,7 @@ import {
   Type,
 } from "./pieces";
 import type { PointT, PositionInputT, PositionNotationT } from "./position";
-import { MutablePosition, Position } from "./position";
+import { Position } from "./position";
 
 export {
   Bishop,
@@ -20,7 +20,6 @@ export {
   CustomBoard,
   King,
   Knight,
-  MutablePosition,
   Pawn,
   Piece,
   Position,
