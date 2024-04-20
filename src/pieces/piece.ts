@@ -30,15 +30,30 @@ export abstract class ReadonlyPieceAbstract {
     return new Position(this._position);
   }
 
+  isAt(position: MutablePosition | PointT) {
+    return this._position.x === position.x && this._position.y === position.y;
+  }
+
+  protected onMove(position: MutablePosition) {}
+
+  abstract readonly type: Type;
+
+  protected _isMoved: boolean = false;
+  protected _position: MutablePosition;
+  readonly color: Color;
+  readonly oppositeColor: Color;
+}
+
+export abstract class PieceAbstract extends ReadonlyPieceAbstract {
+  constructor(positionInput: PositionInputT, color: Color) {
+    super(positionInput, color);
+  }
+
   move(position: MutablePosition) {
     this.onMove(position);
 
     this._position.set(position);
     this._isMoved = true;
-  }
-
-  isAt(position: MutablePosition | PointT) {
-    return this._position.x === position.x && this._position.y === position.y;
   }
 
   isMoveValid(
@@ -73,18 +88,9 @@ export abstract class ReadonlyPieceAbstract {
   ): boolean {
     return this.canMove(position, lastMoved, false);
   }
-
-  protected onMove(position: MutablePosition) {}
-
-  abstract readonly type: Type;
-
-  protected _isMoved: boolean = false;
-  protected _position: MutablePosition;
-  readonly color: Color;
-  readonly oppositeColor: Color;
 }
 
-export abstract class MutablePiece extends ReadonlyPieceAbstract {
+export abstract class MutablePiece extends PieceAbstract {
   constructor(positionInput: PositionInputT, color: Color) {
     super(positionInput, color);
   }
@@ -111,12 +117,18 @@ export class Piece extends ReadonlyPieceAbstract {
     this.type = piece.type;
   }
 
-  canMove: (
+  protected canMove: (
     position: MutablePosition,
     lastMoved: MutablePiece | null,
     isCastlingPossible: boolean,
   ) => boolean;
 
-  getPossibleMoves: () => MutablePosition[];
+  protected canCapture: (
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
+    target: MutablePiece,
+  ) => boolean;
+
+  protected getPossibleMoves: () => MutablePosition[];
   type: Type;
 }
