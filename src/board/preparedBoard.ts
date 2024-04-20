@@ -26,6 +26,11 @@ const pieceSet = [
   new King({ x: 4, y }, color),
 ]);
 
+/**
+ * Chess board with all pieces placed by default
+ * @param options board options
+ */
+
 export class Board extends CustomBoard {
   constructor(options?: BoardOptionsT) {
     super(pieceSet, options);

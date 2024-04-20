@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { CustomBoard, Position } from "../";
+import { CustomBoard, Position } from "../src";
+import { isInLimit } from "../src/helpers";
 import { Bishop, Color, King, Pawn } from "../src/pieces";
-import { isInLimit } from "../tools";
 
 test("bishop possible positions", () => {
   const board = new CustomBoard([
@@ -17,7 +17,7 @@ test("bishop possible positions", () => {
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = bishop.position;
 
-  const expectedPositions = [];
+  const expectedPositions: Position[] = [];
   for (let i = 0; i <= 7; i++) {
     if (i !== x) {
       const points = [

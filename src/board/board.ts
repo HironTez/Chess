@@ -56,6 +56,12 @@ export type BoardOptionsT = {
   onPromotion?: PiecePromotionEventHandler;
 };
 
+/**
+ * Chess board with a custom set of pieces
+ * @param pieces a set of pieces
+ * @param options board options
+ */
+
 export class CustomBoard {
   constructor(pieces: MutablePiece[], options?: BoardOptionsT) {
     this._pieces = pieces;
@@ -71,7 +77,7 @@ export class CustomBoard {
     this.onCastling = options?.onCastling;
     this.onPromotion = options?.onPromotion;
 
-    this.onBoardChange?.(this.getPieces());
+    this.handleBoardChange(null);
   }
 
   get check() {
@@ -104,6 +110,14 @@ export class CustomBoard {
     return pieces.map((piece) => new Piece(piece));
   }
 
+  getPossibleMoves(positionInput: PositionInputT) {
+    const piece = this._getPieceAt(positionInput);
+    if (!piece) return [];
+
+    const positions = this._getPossibleMoves(piece);
+    return positions.filter((position) => this.isMoveValid(piece, position));
+  }
+
   async move(
     startPositionInput: PositionInputT,
     endPositionInput: PositionInputT,
@@ -124,6 +138,11 @@ export class CustomBoard {
 
   private _getPiecesByColor(color: Color) {
     return this._pieces.filter((piece) => piece.color === color);
+  }
+
+  private _getPossibleMoves(piece: MutablePiece) {
+    const positions = piece.getPossibleMoves();
+    return positions.filter((position) => this.isMoveValid(piece, position));
   }
 
   private async movePiece(
@@ -243,9 +262,9 @@ export class CustomBoard {
     return {};
   }
 
-  private handleBoardChange(piece: MutablePiece) {
-    this._currentMove = piece.oppositeColor;
-    this._lastMovedPiece = piece;
+  private handleBoardChange(lastMovedPiece: MutablePiece | null) {
+    this._currentMove = lastMovedPiece?.oppositeColor ?? this._currentMove;
+    this._lastMovedPiece = lastMovedPiece;
 
     this.onBoardChange?.(this.getPieces());
 
@@ -385,7 +404,7 @@ export class CustomBoard {
     const teamPieces = this._getPiecesByColor(king.color);
     if (teamPieces.length > 0) {
       for (const piece of teamPieces) {
-        const possibleMoves = this.getPossibleMoves(piece);
+        const possibleMoves = this._getPossibleMoves(piece);
         if (possibleMoves.length > 0) {
           return undefined;
         }
@@ -457,11 +476,6 @@ export class CustomBoard {
 
   private removePieceAt(position: MutablePosition) {
     this._pieces = this._pieces.filter((piece) => !piece.isAt(position));
-  }
-
-  private getPossibleMoves(piece: MutablePiece) {
-    const positions = piece.getPossibleMoves();
-    return positions.filter((position) => this.isMoveValid(piece, position));
   }
 
   private _check: Color | undefined = undefined;

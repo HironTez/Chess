@@ -1,7 +1,5 @@
 import { expect, test } from "bun:test";
-import { CustomBoard } from "../src/board";
-import { Color, King, Pawn, Rock } from "../src/pieces";
-import { Position } from "../src/position";
+import { Color, CustomBoard, King, Pawn, Position, Rock } from "../src";
 
 test("rock possible positions", () => {
   const board = new CustomBoard([
@@ -17,7 +15,7 @@ test("rock possible positions", () => {
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = rock.position;
 
-  const expectedPositions = [];
+  const expectedPositions: Position[] = [];
   for (let i = 0; i <= 7; i++) {
     if (i !== x) {
       expectedPositions.push(
