@@ -1,18 +1,10 @@
 import { expect, test } from "bun:test";
-import { CustomBoard, Position } from "../src";
+import { Position } from "../src";
 import { isInLimit } from "../src/helpers";
-import { Bishop, Color, King, Pawn } from "../src/pieces";
+import { Bishop, Color } from "../src/pieces";
 
 test("bishop possible positions", () => {
-  const board = new CustomBoard([
-    new King("E1", Color.White),
-    new King("E8", Color.Black),
-    new Bishop("D4", Color.White),
-    new Pawn("E5", Color.Black),
-  ]);
-
-  const bishop = board.getPieceAt("D4")!;
-  expect(bishop).toBeDefined();
+  const bishop = new Bishop("D4", Color.White);
   const possibleMoves = bishop.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = bishop.position;

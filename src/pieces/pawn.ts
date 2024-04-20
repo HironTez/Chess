@@ -21,7 +21,7 @@ export class Pawn extends MutablePiece {
 
   getPossibleMoves() {
     const { x, y } = this.position;
-    const possibleMoves = [];
+    const possibleMoves: MutablePosition[] = [];
 
     for (let newX = x - 1; newX <= x + 1; newX++) {
       possibleMoves.push(

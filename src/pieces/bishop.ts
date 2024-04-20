@@ -5,7 +5,7 @@ import { MutablePosition, areAlignedDiagonally } from "../position";
 
 export class Bishop extends MutablePiece {
   getPossibleMoves() {
-    const possibleMoves = [];
+    const possibleMoves: MutablePosition[] = [];
 
     const { x, y } = this.position;
     for (let i = 0; i <= 7; i++) {

@@ -1,17 +1,9 @@
 import { expect, test } from "bun:test";
-import { Color, CustomBoard, King, Pawn, Position, Queen } from "../src";
+import { Color, Position, Queen } from "../src";
 import { isInLimit } from "../src/helpers";
 
 test("queen possible positions", () => {
-  const board = new CustomBoard([
-    new King("E1", Color.White),
-    new King("E8", Color.Black),
-    new Queen("D4", Color.White),
-    new Pawn("E5", Color.Black),
-  ]);
-
-  const queen = board.getPieceAt("D4")!;
-  expect(queen).toBeDefined();
+  const queen = new Queen("D4", Color.White);
   const possibleMoves = queen.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = queen.position;

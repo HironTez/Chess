@@ -116,24 +116,38 @@ export class Piece extends ReadonlyPieceAbstract {
   constructor(piece: MutablePiece) {
     super(piece.position, piece.color);
 
-    this.canMove = piece.canMove;
-    this.canCapture = piece.canCapture;
-    this.getPossibleMoves = piece.getPossibleMoves;
+    this._canMove = piece.canMove;
+    this._canCapture = piece.canCapture;
     this.type = piece.type;
   }
 
-  protected canMove: (
+  protected canMove(
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
+    isCastlingPossible: boolean,
+  ) {
+    return this._canMove(position, lastMoved, isCastlingPossible);
+  }
+
+  protected canCapture(
+    position: MutablePosition,
+    lastMoved: MutablePiece | null,
+    target: MutablePiece,
+  ) {
+    return this._canCapture(position, lastMoved, target);
+  }
+
+  private _canMove: (
     position: MutablePosition,
     lastMoved: MutablePiece | null,
     isCastlingPossible: boolean,
   ) => boolean;
 
-  protected canCapture: (
+  private _canCapture: (
     position: MutablePosition,
     lastMoved: MutablePiece | null,
     target: MutablePiece,
   ) => boolean;
 
-  protected getPossibleMoves: () => MutablePosition[];
-  type: Type;
+  readonly type: Type;
 }

@@ -1,14 +1,7 @@
 import { expect, test } from "bun:test";
-import { Color, CustomBoard, King, Knight, Pawn, Position } from "../src";
+import { Color, Knight, Position } from "../src";
 
 test("knight possible positions", () => {
-  const board = new CustomBoard([
-    new King("E1", Color.White),
-    new King("E8", Color.Black),
-    new Knight("C4", Color.White),
-    new Pawn("E3", Color.Black),
-  ]);
-
   const expectedPositions = [
     new Position("D6"),
     new Position("E5"),
@@ -20,8 +13,7 @@ test("knight possible positions", () => {
     new Position("B6"),
   ];
 
-  const knight = board.getPieceAt("C4")!;
-  expect(knight).toBeDefined();
+  const knight = new Knight("C4", Color.White);
   const possibleMoves = knight.getPossibleMoves();
   expect(possibleMoves).not.toBeEmpty();
 
