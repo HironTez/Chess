@@ -57,7 +57,7 @@ const checkmateColor = board.checkmate;
 // undefined
 const whiteKingPossibleMoves = board.getPossibleMoves("B2");
 // [array of Position instances]
-const blackPawn?.isAt('A3');
+const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 // true
 ```
 
