@@ -1,6 +1,6 @@
 {
   "name": "chess-ht",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A chess engine. This is a fully functional game core that implements all the functionality and logic and provides an easy way to interact with the pieces.",
   "main": "./dist/index.js",
   "module": "./src/index.ts",
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "bun run ./example/index.ts",
     "dev": "bun --watch run ./example/index.ts",
-    "build": "bun build --target=node ./src/index.ts --outdir=./dist/index.js && bun run build:declaration",
+    "build": "bun build --target=node ./src/index.ts --outfile=./dist/index.js && bun run build:declaration",
     "build:declaration": "tsc --emitDeclarationOnly --project ./tsconfig.types.json"
   },
   "devDependencies": {
@@ -32,7 +32,8 @@
     "chess core",
     "chess engine",
     "chess logic",
-    "chess library"
+    "chess library",
+    "chess game"
   ],
   "bugs": {
     "url": "https://github.com/HironTez/Chess/issues"
