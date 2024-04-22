@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Color, Knight, Position } from "../src";
+import { Color, CustomBoard, King, Knight, Pawn, Position } from "../src";
 
 test("knight possible positions", () => {
   const expectedPositions = [
@@ -24,4 +24,18 @@ test("knight possible positions", () => {
 
     expect(matchedMove).not.toBeUndefined();
   }
+});
+
+test("knight can move over other pieces", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+
+    new Knight("C1", Color.White),
+    new Pawn("B2", Color.Black),
+  ]);
+
+  const movedOverPiece = await board.move("C1", "B3");
+
+  expect(movedOverPiece).toBeTrue();
 });

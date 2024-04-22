@@ -1,6 +1,10 @@
 import { arrayConstructor, isInLimit } from "../helpers";
 import { MutablePosition, PointT, Position } from "./position";
 
+/**
+ * Get difference between two positions. Values can be negative
+ */
+
 export const getDiff = (
   position1: Position | PointT,
   position2: Position | PointT,

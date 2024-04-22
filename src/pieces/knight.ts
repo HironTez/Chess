@@ -1,10 +1,6 @@
 import { MutablePiece, Type } from "./piece";
 
-import {
-  MutablePosition,
-  areAlignedHorizontally,
-  areAlignedVertically,
-} from "../position";
+import { MutablePosition, getDiff } from "../position";
 
 export class Knight extends MutablePiece {
   getPossibleMoves() {
@@ -23,9 +19,13 @@ export class Knight extends MutablePiece {
 
   canMove(position: MutablePosition) {
     const distance = this.position.distanceTo(position);
-    const movingVertically = areAlignedHorizontally(this.position, position);
-    const movingHorizontally = areAlignedVertically(this.position, position);
-    return distance === 3 && movingVertically && movingHorizontally;
+    const { xDiff, yDiff } = getDiff(this.position, position);
+    const xDiffAbs = Math.abs(xDiff);
+    const yDiffAbs = Math.abs(yDiff);
+    return (
+      distance === 2 &&
+      ((xDiffAbs === 1 && yDiffAbs === 2) || (xDiffAbs === 2 && yDiffAbs === 1))
+    );
   }
 
   readonly type = Type.Knight;
