@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "baseUrl": "./",
     "target": "ES2022",
     "module": "NodeNext",
@@ -12,6 +12,5 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "types": ["bun-types"]
-  },
-  "include": ["./src/**/*.ts"]
+  }
 }

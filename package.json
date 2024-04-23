@@ -42,8 +42,5 @@
   "directories": {
     "example": "example",
     "test": "tests"
-  },
-  "dependencies": {
-    "undici-types": "^5.26.5"
   }
 }
