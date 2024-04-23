@@ -6,26 +6,26 @@
 
 #### npm
 
-`npm i chess-ht`
+`npm i @hiron-tez/chess`
 
 #### pnpm
 
-`pnpm add chess-ht`
+`pnpm add @hiron-tez/chess`
 
 #### yarn
 
-`yarn add chess-ht`
+`yarn add @hiron-tez/chess`
 
 #### bun
 
-`bun add chess-ht`
+`bun add @hiron-tez/chess`
 
 ## Usage
 
 ### Basic
 
 ```js
-import { Board } from "chess-ht";
+import { Board } from "@hiron-tez/chess";
 const board = new Board();
 await board.move("a2", "a4");
 ```
@@ -33,7 +33,7 @@ await board.move("a2", "a4");
 ### Advanced
 
 ```js
-import { Board, King, Pawn } from "chess-ht";
+import { Board, King, Pawn } from "@hiron-tez/chess";
 
 const board = new CustomBoard([
   new King("B2", Color.White),
