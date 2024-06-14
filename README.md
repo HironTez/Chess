@@ -33,7 +33,7 @@ await board.move("a2", "a4");
 ### Advanced
 
 ```js
-import { Board, King, Pawn } from "@hiron-tez/chess";
+import { CustomBoard, King, Pawn } from "@hiron-tez/chess";
 
 const board = new CustomBoard([
   new King("B2", Color.White),
