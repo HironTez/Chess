@@ -47,10 +47,10 @@ const pawnDoubleMoved = await board.move("A2", "A4");
 // true
 const enPassantSuccess = await board.move("B4", "A3");
 // true
-const capturedPiece = board.getPieceAt("A4");
-// undefined
 const blackPawn = board.getPieceAt("A3");
 // [instance of Piece]
+const whitePawn = board.getPieceAt("A4");
+// undefined
 const checkColor = board.check;
 // Color.White
 const checkmateColor = board.checkmate;
