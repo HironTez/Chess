@@ -3,8 +3,8 @@ import {
   areAlignedHorizontally,
   areAlignedVertically,
   getDiff,
+  getPath,
   getSurroundingPositions,
-  getWay,
   isMovingUp,
 } from "./helpers";
 import type { PointT, PositionInputT, PositionNotationT } from "./position";
@@ -17,8 +17,8 @@ export {
   areAlignedHorizontally,
   areAlignedVertically,
   getDiff,
+  getPath,
   getSurroundingPositions,
-  getWay,
   isMovingUp,
 };
 

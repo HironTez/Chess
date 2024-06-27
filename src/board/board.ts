@@ -11,13 +11,15 @@ import {
 import { MutablePosition, Position, PositionInputT } from "../position";
 
 import { isInLimit } from "../helpers";
-import { getDiff, getSurroundingPositions, getWay } from "../position";
+import { getDiff, getPath, getSurroundingPositions } from "../position";
+
+type PromotionVariant = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
 
 type PureOrPromise<T> = T | Promise<T>;
 
 type GetPromotionVariant = (
   pawnPosition: Position,
-) => PureOrPromise<Type.Queen | Type.Rook | Type.Bishop | Type.Knight>;
+) => PureOrPromise<PromotionVariant>;
 type TeamEventHandler = (color: Color) => void;
 type BoardChangeEventHandler = (pieces: Piece[]) => void;
 type PieceMoveEventHandler = (
@@ -35,7 +37,10 @@ type CastlingEventHandler = (
   rookStartPosition: Position,
   rookEndPosition: Position,
 ) => void;
-type PiecePromotionEventHandler = (piecePosition: Position) => void;
+type PiecePromotionEventHandler = (
+  piecePosition: Position,
+  newPieceType: PromotionVariant,
+) => void;
 
 enum CheckStatus {
   Check = "check",
@@ -151,61 +156,110 @@ export class CustomBoard {
     const piece = this._getPieceAt(startPosition);
     if (!piece) return false;
 
-    const { rook: castlingRook, newPosition: newRookPosition } =
-      this.getCastlingRook(piece, endPosition);
-    const castlingRookStartPosition = castlingRook?.position;
+    const { castlingRook, castlingRookNewPosition } = this.getCastlingRook(
+      piece,
+      endPosition,
+    );
 
     const isMoveValid = this.isMoveValid(
       piece,
       endPosition,
-      castlingRookStartPosition,
+      castlingRook?.position,
     );
-    if (isMoveValid) {
-      const enemyPosition =
-        piece instanceof Pawn
-          ? this.isEnPassantPossible(startPosition)
-            ? this._lastMovedPiece!.position
-            : endPosition
-          : endPosition;
+    if (!isMoveValid) return false;
 
-      const isCapturing = !!this.getPieceAt(enemyPosition);
+    this.handleMovePiece(piece, endPosition);
 
-      this.removePieceAt(enemyPosition);
-      piece.move(endPosition);
-
-      if (this.isPromotionPossible(piece)) {
-        const pieceType =
-          (await this.getPromotionVariant?.(new Position(piece.position))) ??
-          Type.Queen;
-        const pieceClass = getPieceClassByTypename(pieceType);
-
-        this.removePieceAt(piece.position);
-        this._pieces.push(new pieceClass(piece.position, piece.color));
-
-        this.onPromotion?.(piece.position);
-      }
-
-      if (castlingRook && castlingRookStartPosition) {
-        castlingRook.move(newRookPosition);
-
-        this.onCastling?.(
-          startPosition,
-          endPosition,
-          castlingRookStartPosition,
-          newRookPosition,
-        );
-      } else if (isCapturing) {
-        this.onCapture?.(startPosition, endPosition, enemyPosition);
-      } else {
-        this.onMove?.(startPosition, endPosition);
-      }
-
-      this.handleBoardChange(piece);
-
-      return true;
+    if (this.isPromotionPossible(piece)) {
+      await this.handlePromotePawn(piece);
     }
 
-    return false;
+    if (castlingRook) {
+      this.handleMoveCastlingRook(
+        piece,
+        endPosition,
+        castlingRook,
+        castlingRookNewPosition,
+      );
+    }
+
+    this.handleBoardChange(piece);
+
+    return true;
+  }
+
+  private getCapturePosition(
+    piece: MutablePiece,
+    startPosition: MutablePosition,
+    endPosition: MutablePosition,
+  ) {
+    if (piece instanceof Pawn && this.isEnPassantPossible(startPosition)) {
+      return this._lastMovedPiece!.position;
+    }
+
+    return endPosition;
+  }
+
+  private handleMovePiece(piece: MutablePiece, endPosition: MutablePosition) {
+    const readonlyPieceStartPosition = new Position(piece.position);
+    const readonlyPIeceEndPosition = new Position(endPosition);
+
+    const capturePosition = this.getCapturePosition(
+      piece,
+      piece.position,
+      endPosition,
+    );
+
+    this.removePieceAt(capturePosition);
+    piece.move(endPosition);
+
+    const isCapturing = this.getPieceAt(capturePosition);
+    if (isCapturing) {
+      const readonlyCapturePosition = new Position(capturePosition);
+      this.onCapture?.(
+        readonlyPieceStartPosition,
+        readonlyPIeceEndPosition,
+        readonlyCapturePosition,
+      );
+    } else {
+      this.onMove?.(readonlyPieceStartPosition, readonlyPIeceEndPosition);
+    }
+  }
+
+  private async handlePromotePawn(piece: MutablePiece) {
+    const readonlyPiecePosition = new Position(piece.position);
+
+    const pieceTypeInput = await this.getPromotionVariant?.(
+      readonlyPiecePosition,
+    );
+    const pieceType = pieceTypeInput ?? Type.Queen;
+    const pieceClass = getPieceClassByTypename(pieceType);
+
+    this.removePieceAt(piece.position);
+    this._pieces.push(new pieceClass(piece.position, piece.color));
+
+    this.onPromotion?.(readonlyPiecePosition, pieceType);
+  }
+
+  private handleMoveCastlingRook(
+    king: MutablePiece,
+    kingNewPosition: MutablePosition,
+    rook: MutablePiece,
+    newRookPosition: MutablePosition,
+  ) {
+    const readonlyKingStartPosition = new Position(king.position);
+    const readonlyKingEndPosition = new Position(kingNewPosition);
+    const readonlyRookStartPosition = new Position(rook.position);
+    const readonlyRookEndPosition = new Position(newRookPosition);
+
+    rook.move(newRookPosition);
+
+    this.onCastling?.(
+      readonlyKingStartPosition,
+      readonlyKingEndPosition,
+      readonlyRookStartPosition,
+      readonlyRookEndPosition,
+    );
   }
 
   private isEnPassantPossible(position: MutablePosition) {
@@ -213,10 +267,10 @@ export class CustomBoard {
     if (!(target instanceof Pawn)) return false;
 
     const isTargetJustMoved = target.isJustDoubleMoved();
-    const isTargetOneSquareAway = target.position.distanceTo(position) === 1;
+    const isTargetOneSquareApath = target.position.distanceTo(position) === 1;
     const targetOnSide = target.position.y === position.y;
 
-    return isTargetJustMoved && isTargetOneSquareAway && targetOnSide;
+    return isTargetJustMoved && isTargetOneSquareApath && targetOnSide;
   }
 
   private isPromotionPossible(piece: MutablePiece) {
@@ -234,26 +288,28 @@ export class CustomBoard {
 
   private getKing(color: Color) {
     return this._pieces.find(
-      (piece) => piece.type === Type.King && piece.color === color,
-    ) as King | undefined;
+      (piece): piece is King =>
+        piece.type === Type.King && piece.color === color,
+    );
   }
 
   private getCastlingRook(piece: MutablePiece, position: MutablePosition) {
-    if (piece instanceof King) {
-      if (!piece.isMoved) {
-        const { xDiff, yDiff } = getDiff(piece.position, position);
-        if (Math.abs(xDiff) === 2 && !yDiff) {
-          const { x, y } = position;
-          const rookPosX = x < 4 ? 0 : 7;
-          const newRookPosX = x < 4 ? 3 : 5;
-          const rook = this._getPieceAt({ x: rookPosX, y });
-          if (rook instanceof Rook) {
-            const rookIsMoved = rook?.isMoved;
-            return {
-              rook: rookIsMoved ? null : rook,
-              newPosition: new MutablePosition({ x: newRookPosX, y }),
-            };
-          }
+    if (piece instanceof King && piece.isMoved === false) {
+      const { xDiff, yDiff } = getDiff(piece.position, position);
+      const kingMoves2SquaresHorizontally = Math.abs(xDiff) === 2 && !yDiff;
+      if (kingMoves2SquaresHorizontally) {
+        const { x, y } = position;
+        const rookPosX = x < 4 ? 0 : 7;
+        const newRookPosX = x < 4 ? 3 : 5;
+        const rook = this._getPieceAt({ x: rookPosX, y });
+        if (rook instanceof Rook && rook.isMoved === false) {
+          return {
+            castlingRook: rook,
+            castlingRookNewPosition: new MutablePosition({
+              x: newRookPosX,
+              y,
+            }),
+          };
         }
       }
     }
@@ -337,43 +393,93 @@ export class CustomBoard {
     position: MutablePosition,
     castlingRookPosition?: MutablePosition,
   ) {
-    const { xDiff } = getDiff(piece.position, position);
-    const way = getWay(
-      piece.position,
-      castlingRookPosition && Math.abs(xDiff) === 2
-        ? castlingRookPosition
-        : position,
-    );
+    if (
+      castlingRookPosition &&
+      !this.isCastlingPossible(piece, position, castlingRookPosition)
+    ) {
+      return false;
+    }
 
-    for (const pos of way) {
-      const pieceOnWay = this._getPieceAt(pos);
-      if (pieceOnWay) return false;
+    const endPosition = castlingRookPosition ?? position;
+    const path = getPath(piece.position, endPosition);
+
+    if (!this.isPathClear(path)) {
+      return false;
     }
 
     const target = this._getPieceAt(position);
     const targetIsEnemy = target?.color === piece.oppositeColor;
-    if (targetIsEnemy || !target) {
-      const canMove = piece.isMoveValid(
+
+    if (!targetIsEnemy && target) {
+      return false;
+    }
+
+    if (
+      piece.isMoveValid(
         position,
         target ?? null,
         this._lastMovedPiece,
         !!castlingRookPosition,
+      )
+    ) {
+      return (
+        !this.willBeCheck(piece, position) &&
+        this.isCastlingPathClear(path, piece, castlingRookPosition)
       );
-      if (canMove) {
-        const willBeCheck = this.willBeCheck(piece, position);
-
-        if (castlingRookPosition) {
-          for (const pos of way) {
-            const isPosOnCheck = this.willBeCheck(piece, pos);
-            if (isPosOnCheck) return false;
-          }
-        }
-
-        return !willBeCheck;
-      }
     }
 
     return false;
+  }
+
+  private isPathClear(path: MutablePosition[]) {
+    for (const pos of path) {
+      if (this._getPieceAt(pos)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isCastlingPathClear(
+    path: MutablePosition[],
+    piece: MutablePiece,
+    castlingRookPosition?: MutablePosition,
+  ) {
+    if (!castlingRookPosition) {
+      return true;
+    }
+
+    for (const pos of path) {
+      if (this.willBeCheck(piece, pos)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private isCastlingPossible(
+    piece: MutablePiece,
+    endPosition: MutablePosition,
+    castlingRookPosition: MutablePosition,
+  ) {
+    if (!(piece instanceof King) || piece.isMoved) return false;
+
+    const { yDiff } = getDiff(piece.position, endPosition);
+    const isKingMovingTwoSquaresHorizontally =
+      yDiff === 0 && piece.position.distanceTo(endPosition) === 2;
+
+    const isRookPositionValid =
+      (piece.position.distanceTo(castlingRookPosition) === 3 &&
+        castlingRookPosition.x === 7) ||
+      (piece.position.distanceTo(castlingRookPosition) === 4 &&
+        castlingRookPosition.x === 0);
+
+    if (!isKingMovingTwoSquaresHorizontally || !isRookPositionValid)
+      return false;
+
+    const rook = this._getPieceAt(castlingRookPosition);
+    return rook instanceof Rook && !rook.isMoved && piece.color === rook.color;
   }
 
   private getCheckStatus(king: King) {
@@ -446,8 +552,8 @@ export class CustomBoard {
         return false;
       }
 
-      const enemyWay = getWay(enemy.position, king.position);
-      for (const position of enemyWay) {
+      const enemyPath = getPath(enemy.position, king.position);
+      for (const position of enemyPath) {
         const canCover = this.canPieceMove(piece, position);
         const willCancelCheck = this.willBeCheck(piece, position);
 

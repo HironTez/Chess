@@ -46,7 +46,7 @@ export const isMovingUp = (position1: Position, position2: Position) => {
   return yDiff > 0;
 };
 
-export const getWay = (position1: Position, position2: Position) => {
+export const getPath = (position1: Position, position2: Position) => {
   if (
     areAlignedDiagonally(position1, position2) ||
     areAlignedVertically(position1, position2) ||
