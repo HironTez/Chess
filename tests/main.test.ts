@@ -148,11 +148,11 @@ test("Castling queenside", async () => {
 
   const castled = await board.move("E1", "C1");
   const kingPosition = board.getPieceAt("C1");
-  const rockPosition = board.getPieceAt("D1");
+  const rookPosition = board.getPieceAt("D1");
 
   expect(castled).toBeTrue();
   expect(kingPosition).toHaveProperty("type", Type.King);
-  expect(rockPosition).toHaveProperty("type", Type.Rook);
+  expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
 
 test("Castling through check", async () => {
@@ -165,11 +165,11 @@ test("Castling through check", async () => {
 
   const castled = await board.move("E1", "C1");
   const kingPosition = board.getPieceAt("E1");
-  const rockPosition = board.getPieceAt("A1");
+  const rookPosition = board.getPieceAt("A1");
 
   expect(castled).toBeFalse();
   expect(kingPosition).toHaveProperty("type", Type.King);
-  expect(rockPosition).toHaveProperty("type", Type.Rook);
+  expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
 
 test("Castling to checked square", async () => {
@@ -182,11 +182,11 @@ test("Castling to checked square", async () => {
 
   const castled = await board.move("E1", "C1");
   const kingPosition = board.getPieceAt("E1");
-  const rockPosition = board.getPieceAt("A1");
+  const rookPosition = board.getPieceAt("A1");
 
   expect(castled).toBeFalse();
   expect(kingPosition).toHaveProperty("type", Type.King);
-  expect(rockPosition).toHaveProperty("type", Type.Rook);
+  expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
 
 test("Castling when check", async () => {
@@ -200,13 +200,13 @@ test("Castling when check", async () => {
   const checked = await board.move("D8", "E8");
   const castled = await board.move("E1", "C1");
   const kingPosition = board.getPieceAt("E1");
-  const rockPosition = board.getPieceAt("A1");
+  const rookPosition = board.getPieceAt("A1");
 
   expect(checked).toBeTrue();
   expect(board.check).toBe(Color.Black);
   expect(castled).toBeFalse();
   expect(kingPosition).toHaveProperty("type", Type.King);
-  expect(rockPosition).toHaveProperty("type", Type.Rook);
+  expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
 
 test("Pawn promotion on reaching last rank", async () => {
@@ -242,8 +242,8 @@ test("CustomBoard should start with correct piece placement", () => {
       expect(pawn).toHaveProperty("color", color);
     }
 
-    const rock1 = board.getPieceAt({ x: 0, y });
-    const rock2 = board.getPieceAt({ x: 7, y });
+    const rook1 = board.getPieceAt({ x: 0, y });
+    const rook2 = board.getPieceAt({ x: 7, y });
     const knight1 = board.getPieceAt({ x: 1, y });
     const knight2 = board.getPieceAt({ x: 6, y });
     const bishop1 = board.getPieceAt({ x: 2, y });
@@ -251,8 +251,8 @@ test("CustomBoard should start with correct piece placement", () => {
     const queen = board.getPieceAt({ x: 3, y });
     const king = board.getPieceAt({ x: 4, y });
 
-    expect(rock1).toHaveProperty("type", Type.Rook);
-    expect(rock2).toHaveProperty("type", Type.Rook);
+    expect(rook1).toHaveProperty("type", Type.Rook);
+    expect(rook2).toHaveProperty("type", Type.Rook);
     expect(knight1).toHaveProperty("type", Type.Knight);
     expect(knight2).toHaveProperty("type", Type.Knight);
     expect(bishop1).toHaveProperty("type", Type.Bishop);
@@ -260,8 +260,8 @@ test("CustomBoard should start with correct piece placement", () => {
     expect(queen).toHaveProperty("type", Type.Queen);
     expect(king).toHaveProperty("type", Type.King);
 
-    expect(rock1).toHaveProperty("color", color);
-    expect(rock2).toHaveProperty("color", color);
+    expect(rook1).toHaveProperty("color", color);
+    expect(rook2).toHaveProperty("color", color);
     expect(knight1).toHaveProperty("color", color);
     expect(knight2).toHaveProperty("color", color);
     expect(bishop1).toHaveProperty("color", color);
@@ -278,9 +278,9 @@ test("Should detect check", async () => {
     new Rook("A1", Color.White),
   ]);
 
-  const rockMoved = await board.move("A1", "A8");
+  const rookMoved = await board.move("A1", "A8");
 
-  expect(rockMoved).toBeTrue();
+  expect(rookMoved).toBeTrue();
   expect(board.check).toBe(Color.Black);
   expect(board.checkmate).toBeUndefined();
 });
@@ -293,9 +293,9 @@ test("Should detect checkmate", async () => {
     new Rook("H7", Color.White),
   ]);
 
-  const rockMoved = await board.move("A1", "A8");
+  const rookMoved = await board.move("A1", "A8");
 
-  expect(rockMoved).toBeTrue();
+  expect(rookMoved).toBeTrue();
   expect(board.check).toBe(Color.Black);
   expect(board.checkmate).toBe(Color.Black);
 });

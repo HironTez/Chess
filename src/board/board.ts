@@ -32,8 +32,8 @@ type PieceCaptureEventHandler = (
 type CastlingEventHandler = (
   kingStartPosition: Position,
   kingEndPosition: Position,
-  rockStartPosition: Position,
-  rockEndPosition: Position,
+  rookStartPosition: Position,
+  rookEndPosition: Position,
 ) => void;
 type PiecePromotionEventHandler = (piecePosition: Position) => void;
 
@@ -151,14 +151,14 @@ export class CustomBoard {
     const piece = this._getPieceAt(startPosition);
     if (!piece) return false;
 
-    const { rook: castlingRock, newPosition: newRockPosition } =
-      this.getCastlingRock(piece, endPosition);
-    const castlingRockStartPosition = castlingRock?.position;
+    const { rook: castlingRook, newPosition: newRookPosition } =
+      this.getCastlingRook(piece, endPosition);
+    const castlingRookStartPosition = castlingRook?.position;
 
     const isMoveValid = this.isMoveValid(
       piece,
       endPosition,
-      castlingRockStartPosition,
+      castlingRookStartPosition,
     );
     if (isMoveValid) {
       const enemyPosition =
@@ -185,14 +185,14 @@ export class CustomBoard {
         this.onPromotion?.(piece.position);
       }
 
-      if (castlingRock && castlingRockStartPosition) {
-        castlingRock.move(newRockPosition);
+      if (castlingRook && castlingRookStartPosition) {
+        castlingRook.move(newRookPosition);
 
         this.onCastling?.(
           startPosition,
           endPosition,
-          castlingRockStartPosition,
-          newRockPosition,
+          castlingRookStartPosition,
+          newRookPosition,
         );
       } else if (isCapturing) {
         this.onCapture?.(startPosition, endPosition, enemyPosition);
@@ -238,20 +238,20 @@ export class CustomBoard {
     ) as King | undefined;
   }
 
-  private getCastlingRock(piece: MutablePiece, position: MutablePosition) {
+  private getCastlingRook(piece: MutablePiece, position: MutablePosition) {
     if (piece instanceof King) {
       if (!piece.isMoved) {
         const { xDiff, yDiff } = getDiff(piece.position, position);
         if (Math.abs(xDiff) === 2 && !yDiff) {
           const { x, y } = position;
-          const rockPosX = x < 4 ? 0 : 7;
-          const newRockPosX = x < 4 ? 3 : 5;
-          const rook = this._getPieceAt({ x: rockPosX, y });
+          const rookPosX = x < 4 ? 0 : 7;
+          const newRookPosX = x < 4 ? 3 : 5;
+          const rook = this._getPieceAt({ x: rookPosX, y });
           if (rook instanceof Rook) {
-            const rockIsMoved = rook?.isMoved;
+            const rookIsMoved = rook?.isMoved;
             return {
-              rook: rockIsMoved ? null : rook,
-              newPosition: new MutablePosition({ x: newRockPosX, y }),
+              rook: rookIsMoved ? null : rook,
+              newPosition: new MutablePosition({ x: newRookPosX, y }),
             };
           }
         }
@@ -315,7 +315,7 @@ export class CustomBoard {
   private isMoveValid(
     piece: MutablePiece,
     position: MutablePosition,
-    castlingRockPosition?: MutablePosition,
+    castlingRookPosition?: MutablePosition,
   ) {
     if (this._checkmate || this._check) return false;
 
@@ -328,20 +328,20 @@ export class CustomBoard {
     if (!isInLimit(0, position.x, 7) || !isInLimit(0, position.y, 7))
       return false;
 
-    const canMove = this.canPieceMove(piece, position, castlingRockPosition);
+    const canMove = this.canPieceMove(piece, position, castlingRookPosition);
     return canMove;
   }
 
   private canPieceMove(
     piece: MutablePiece,
     position: MutablePosition,
-    castlingRockPosition?: MutablePosition,
+    castlingRookPosition?: MutablePosition,
   ) {
     const { xDiff } = getDiff(piece.position, position);
     const way = getWay(
       piece.position,
-      castlingRockPosition && Math.abs(xDiff) === 2
-        ? castlingRockPosition
+      castlingRookPosition && Math.abs(xDiff) === 2
+        ? castlingRookPosition
         : position,
     );
 
@@ -357,12 +357,12 @@ export class CustomBoard {
         position,
         target ?? null,
         this._lastMovedPiece,
-        !!castlingRockPosition,
+        !!castlingRookPosition,
       );
       if (canMove) {
         const willBeCheck = this.willBeCheck(piece, position);
 
-        if (castlingRockPosition) {
+        if (castlingRookPosition) {
           for (const pos of way) {
             const isPosOnCheck = this.willBeCheck(piece, pos);
             if (isPosOnCheck) return false;
