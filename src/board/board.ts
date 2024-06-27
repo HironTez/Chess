@@ -63,8 +63,18 @@ export type BoardOptionsT = {
 
 /**
  * Chess board with a custom set of pieces
- * @param pieces a set of pieces
- * @param options board options
+ * @param {MutablePiece[]} pieces - A set of mutable chess pieces to initialize the board.
+ * @param {BoardOptionsT} [options] - Board options to customize behavior.
+ * @param {GetPromotionVariant} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
+ * @param {TeamEventHandler} [options.onCheck] - Callback function triggered when a king is in check.
+ * @param {TeamEventHandler} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
+ * @param {() => void} [options.onCheckResolve] - Callback function triggered when a check is resolved.
+ * @param {TeamEventHandler} [options.onStalemate] - Callback function triggered when the game is in stalemate.
+ * @param {BoardChangeEventHandler} [options.onBoardChange] - Callback function triggered when the board state changes.
+ * @param {PieceMoveEventHandler} [options.onMove] - Callback function triggered when a piece moves.
+ * @param {PieceCaptureEventHandler} [options.onCapture] - Callback function triggered when a piece captures another piece.
+ * @param {CastlingEventHandler} [options.onCastling] - Callback function triggered when castling occurs.
+ * @param {PiecePromotionEventHandler} [options.onPromotion] - Callback function triggered when a pawn is promoted.
  */
 
 export class CustomBoard {
