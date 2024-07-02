@@ -31,9 +31,11 @@ const getPieceCharacter = (piece: Piece) => {
   }
 };
 
-export const printBoard = (pieces: Piece[]) => {
+export const stringifyBoard = (pieces: Piece[]) => {
+  let boardString = "";
+
   for (let i = 7; i >= 0; i--) {
-    let line = `${i + 1} |`;
+    boardString = boardString.concat(`${i + 1} |`);
 
     for (let j = 0; j <= 7; j++) {
       const piece = pieces.find((piece) => {
@@ -42,13 +44,14 @@ export const printBoard = (pieces: Piece[]) => {
 
       const character = piece && getPieceCharacter(piece);
 
-      line = line.concat((piece && character) ?? " ").concat("|");
+      boardString = boardString.concat((piece && character) ?? " ").concat("|");
     }
 
-    console.log(line);
+    boardString = boardString.concat("\n");
   }
 
-  console.log("   A B C D E F G H");
+  boardString = boardString.concat("   A B C D E F G H");
+  return boardString;
 };
 
 export const parseMoveInput = (moveInput: string) => {
