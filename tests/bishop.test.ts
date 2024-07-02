@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { Position } from "../src";
+import { CustomBoard, Position } from "../src";
 import { isInLimit } from "../src/helpers";
-import { Bishop, Color } from "../src/pieces";
+import { Bishop, Color, King, Pawn, Type } from "../src/pieces";
 
 test("bishop possible positions", () => {
   const bishop = new Bishop("D4", Color.White);
@@ -34,4 +34,44 @@ test("bishop possible positions", () => {
 
     expect(matchedMove).not.toBeUndefined();
   }
+});
+
+test("Bishop movement", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Bishop("C1", Color.White),
+  ]);
+
+  const bishopMoved = await board.move("C1", "G5");
+
+  expect(bishopMoved).toBeTrue();
+});
+
+test("Bishop capture", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Bishop("C1", Color.White),
+    new Pawn("E3", Color.Black),
+  ]);
+
+  const bishopMoved = await board.move("C1", "E3");
+  const capturedPiece = board.getPieceAt("E3");
+
+  expect(bishopMoved).toBeTrue();
+  expect(capturedPiece).toHaveProperty("type", Type.Bishop);
+});
+
+test("Bishop illegal move", async () => {
+  const board = new CustomBoard([
+    new Bishop("C1", Color.White),
+    new King("E8", Color.Black),
+  ]);
+
+  const bishopMoved = await board.move("C1", "C4");
+
+  expect(bishopMoved).toBeFalse();
+  expect(board.getPieceAt("C1")).toHaveProperty("type", Type.Bishop);
+  expect(board.getPieceAt("C1")).toHaveProperty("color", Color.White);
 });

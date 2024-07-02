@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Color, Position, Queen } from "../src";
+import { Color, CustomBoard, King, Pawn, Position, Queen, Type } from "../src";
 import { isInLimit } from "../src/helpers";
 
 test("queen possible positions", () => {
@@ -38,4 +38,45 @@ test("queen possible positions", () => {
 
     expect(matchedMove).not.toBeUndefined();
   }
+});
+
+test("Queen basic movement", async () => {
+  const board = new CustomBoard([
+    new Queen("D1", Color.White),
+    new King("E8", Color.Black),
+  ]);
+
+  const queenMoved = await board.move("D1", "H5");
+
+  expect(queenMoved).toBeTrue();
+  expect(board.getPieceAt("H5")).toHaveProperty("type", Type.Queen);
+});
+
+test("Queen capture piece", async () => {
+  const board = new CustomBoard([
+    new Queen("D1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("H5", Color.Black),
+  ]);
+
+  const queenMoved = await board.move("D1", "H5");
+  const capturedPiece = board.getPieceAt("H5");
+
+  expect(queenMoved).toBeTrue();
+  expect(capturedPiece).toHaveProperty("type", Type.Queen);
+  expect(capturedPiece).toHaveProperty("color", Color.White);
+});
+
+test("Queen illegal move", async () => {
+  const board = new CustomBoard([
+    new Queen("D1", Color.White),
+    new King("E1", Color.Black),
+    new King("E8", Color.Black),
+  ]);
+
+  const queenMoved = await board.move("D1", "E3");
+
+  expect(queenMoved).toBeFalse();
+  expect(board.getPieceAt("D1")).toHaveProperty("type", Type.Queen);
+  expect(board.getPieceAt("D1")).toHaveProperty("color", Color.White);
 });

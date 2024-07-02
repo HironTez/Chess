@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Color, King, Position } from "../src";
+import { Color, CustomBoard, King, Pawn, Position, Type } from "../src";
 
 test("king possible positions", () => {
   const expectedPositions = [
@@ -24,4 +24,43 @@ test("king possible positions", () => {
 
     expect(matchedMove).not.toBeUndefined();
   }
+});
+
+test("King basic movement", async () => {
+  const board = new CustomBoard([
+    new King("E4", Color.White),
+    new King("E8", Color.Black),
+  ]);
+
+  const kingMoved = await board.move("E4", "E5");
+
+  expect(kingMoved).toBeTrue();
+  expect(board.getPieceAt("E5")).toHaveProperty("type", Type.King);
+});
+
+test("King can only move one square", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+  ]);
+
+  const movedTwoSquares = await board.move("E1", "D3");
+  const movedOneSquare = await board.move("E1", "F1");
+
+  expect(movedTwoSquares).toBeFalse();
+  expect(movedOneSquare).toBeTrue();
+});
+
+test("King capture piece", async () => {
+  const board = new CustomBoard([
+    new King("E4", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("D5", Color.Black),
+  ]);
+
+  const kingMoved = await board.move("E4", "D5");
+  const king = board.getPieceAt("D5");
+
+  expect(kingMoved).toBeTrue();
+  expect(king).toHaveProperty("type", Type.King);
 });

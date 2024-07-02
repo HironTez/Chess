@@ -13,13 +13,13 @@ import { MutablePosition, Position, PositionInputT } from "../position";
 import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
 
-type PromotionVariant = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
+export type PromotionType = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
 
 type PureOrPromise<T> = T | Promise<T>;
 
 type GetPromotionVariant = (
   pawnPosition: Position,
-) => PureOrPromise<PromotionVariant>;
+) => PureOrPromise<PromotionType>;
 type TeamEventHandler = (color: Color) => void;
 type BoardChangeEventHandler = (pieces: Piece[]) => void;
 type PieceMoveEventHandler = (
@@ -39,7 +39,7 @@ type CastlingEventHandler = (
 ) => void;
 type PiecePromotionEventHandler = (
   piecePosition: Position,
-  newPieceType: PromotionVariant,
+  newPieceType: PromotionType,
 ) => void;
 
 enum CheckStatus {
@@ -277,10 +277,10 @@ export class CustomBoard {
     if (!(target instanceof Pawn)) return false;
 
     const isTargetJustMoved = target.isJustDoubleMoved();
-    const isTargetOneSquareApath = target.position.distanceTo(position) === 1;
+    const isTargetOneSquareAway = target.position.distanceTo(position) === 1;
     const targetOnSide = target.position.y === position.y;
 
-    return isTargetJustMoved && isTargetOneSquareApath && targetOnSide;
+    return isTargetJustMoved && isTargetOneSquareAway && targetOnSide;
   }
 
   private isPromotionPossible(piece: MutablePiece) {
@@ -337,44 +337,34 @@ export class CustomBoard {
     if (!king) return;
 
     const checkStatus = this.getCheckStatus(king);
+    this.updateCheckStatus(king, checkStatus);
+  }
+
+  private updateCheckStatus(king: King, checkStatus: CheckStatus | undefined) {
     const isInCheck = checkStatus === CheckStatus.Check;
     const isInCheckmate = checkStatus === CheckStatus.Checkmate;
     const isInStalemate = checkStatus === CheckStatus.Stalemate;
+
     if (this._check !== king.oppositeColor && !!this._check !== isInCheck) {
-      if (isInCheck) {
-        this._check = king.color;
-
-        this.onCheck?.(king.color);
-      } else {
-        this._check = undefined;
-
-        this.onCheckResolve?.();
-      }
+      this._check = isInCheck ? king.color : undefined;
+      isInCheck ? this.onCheck?.(king.color) : this.onCheckResolve?.();
     }
     if (
       this._checkmate !== king.oppositeColor &&
       !!this._checkmate !== isInCheckmate
     ) {
+      this._checkmate = isInCheckmate ? king.color : undefined;
       if (isInCheckmate) {
         this._check = king.color;
-        this._checkmate = king.color;
-
         this.onCheckMate?.(king.color);
-      } else {
-        this._checkmate = undefined;
       }
     }
     if (
       this._stalemate !== king.oppositeColor &&
       !!this._stalemate !== isInStalemate
     ) {
-      if (isInStalemate) {
-        this._stalemate = king.color;
-
-        this.onStalemate?.(king.color);
-      } else {
-        this._stalemate = undefined;
-      }
+      this._stalemate = isInStalemate ? king.color : undefined;
+      if (isInStalemate) this.onStalemate?.(king.color);
     }
   }
 

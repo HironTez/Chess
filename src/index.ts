@@ -1,3 +1,4 @@
+import type { PromotionType } from "./board";
 import { Board, CustomBoard } from "./board";
 import {
   Bishop,
@@ -27,7 +28,7 @@ export {
   Rook,
   Type,
 };
-export type { PointT, PositionInputT, PositionNotationT };
+export type { PointT, PositionInputT, PositionNotationT, PromotionType };
 
 // TODO: history of moves
 // TODO: undone

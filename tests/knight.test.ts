@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Color, CustomBoard, King, Knight, Pawn, Position } from "../src";
+import { Color, CustomBoard, King, Knight, Pawn, Position, Type } from "../src";
 
 test("knight possible positions", () => {
   const expectedPositions = [
@@ -38,4 +38,32 @@ test("knight can move over other pieces", async () => {
   const movedOverPiece = await board.move("C1", "B3");
 
   expect(movedOverPiece).toBeTrue();
+});
+
+test("Knight capture movement", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Knight("B1", Color.White),
+    new Pawn("C3", Color.Black),
+  ]);
+
+  const knightMoved = await board.move("B1", "C3");
+  const capturedPiece = board.getPieceAt("C3");
+
+  expect(knightMoved).toBeTrue();
+  expect(capturedPiece).toHaveProperty("type", Type.Knight);
+});
+
+test("Knight illegal move", async () => {
+  const board = new CustomBoard([
+    new Knight("B1", Color.White),
+    new King("E8", Color.Black),
+  ]);
+
+  const knightMoved = await board.move("B1", "B4");
+
+  expect(knightMoved).toBeFalse();
+  expect(board.getPieceAt("B1")).toHaveProperty("type", Type.Knight);
+  expect(board.getPieceAt("B1")).toHaveProperty("color", Color.White);
 });
