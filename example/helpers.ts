@@ -13,7 +13,8 @@ export const input = (text: any) => {
     });
   });
 };
-const pieceSymbol = (piece: Piece) => {
+
+const getPieceCharacter = (piece: Piece) => {
   switch (piece.type) {
     case Type.King:
       return piece.color === Color.White ? "\u2654" : "\u265A";
@@ -39,9 +40,9 @@ export const printBoard = (pieces: Piece[]) => {
         return piece.isAt(new Position({ x: j, y: i }));
       });
 
-      const symbol = piece && pieceSymbol(piece);
+      const character = piece && getPieceCharacter(piece);
 
-      line = line.concat((piece && symbol) ?? " ").concat("|");
+      line = line.concat((piece && character) ?? " ").concat("|");
     }
 
     console.log(line);
@@ -62,4 +63,8 @@ export const parseMoveInput = (moveInput: string) => {
     : undefined;
 
   return { startPosition, endPosition };
+};
+
+export const capitalize = (s: string) => {
+  return s[0].toUpperCase() + s.slice(1);
 };

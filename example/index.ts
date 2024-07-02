@@ -1,18 +1,18 @@
 import { Board } from "../src";
-import { input, parseMoveInput, printBoard } from "./helpers";
+import { capitalize, input, parseMoveInput, printBoard } from "./helpers";
 
 const board = new Board({
   onCheck: (color) => {
-    console.log(`${color} king is in check!`.toLocaleUpperCase());
+    console.log(`${capitalize(color)} king is in check!`);
   },
   onCheckMate: (color) => {
-    console.log(`${color} king is in checkmate!`.toLocaleUpperCase());
+    console.log(`${capitalize(color)} king is in checkmate!`);
   },
   onCheckResolve: () => {
     console.log("Check resolved");
   },
   onStalemate: (color) => {
-    console.log(`${color} king is in stalemate!`.toLocaleUpperCase());
+    console.log(`${capitalize(color)} king is in stalemate!`);
   },
   onBoardChange: (pieces) => {
     printBoard(pieces);
