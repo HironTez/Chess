@@ -1,30 +1,23 @@
-import { Color, CustomBoard, King, Pawn } from "src";
+import { Board } from "../src";
 import { input, parseMoveInput, printBoard } from "./helpers";
 
-const board = new CustomBoard(
-  [
-    new King("E4", Color.White),
-    new King("E8", Color.Black),
-    new Pawn("D5", Color.Black),
-  ],
-  {
-    onCheck: (color) => {
-      console.log(`${color} king is in check!`.toLocaleUpperCase());
-    },
-    onCheckMate: (color) => {
-      console.log(`${color} king is in checkmate!`.toLocaleUpperCase());
-    },
-    onCheckResolve: () => {
-      console.log("Check resolved");
-    },
-    onStalemate: (color) => {
-      console.log(`${color} king is in stalemate!`.toLocaleUpperCase());
-    },
-    onBoardChange: (pieces) => {
-      printBoard(pieces);
-    },
+const board = new Board({
+  onCheck: (color) => {
+    console.log(`${color} king is in check!`.toLocaleUpperCase());
   },
-);
+  onCheckMate: (color) => {
+    console.log(`${color} king is in checkmate!`.toLocaleUpperCase());
+  },
+  onCheckResolve: () => {
+    console.log("Check resolved");
+  },
+  onStalemate: (color) => {
+    console.log(`${color} king is in stalemate!`.toLocaleUpperCase());
+  },
+  onBoardChange: (pieces) => {
+    printBoard(pieces);
+  },
+});
 
 const main = async () => {
   while (true) {
