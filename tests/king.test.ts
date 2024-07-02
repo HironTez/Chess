@@ -51,7 +51,7 @@ test("King can only move one square", async () => {
   expect(movedOneSquare).toBeTrue();
 });
 
-test("King capture piece", async () => {
+test("King capture attacking piece", async () => {
   const board = new CustomBoard([
     new King("E4", Color.White),
     new King("E8", Color.Black),

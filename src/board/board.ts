@@ -373,7 +373,7 @@ export class CustomBoard {
     position: MutablePosition,
     castlingRookPosition?: MutablePosition,
   ) {
-    if (this._checkmate || this._check) return false;
+    if (this._checkmate || this._stalemate) return false;
 
     const isTurnRight = piece.color === this._currentTurn;
     if (!isTurnRight) return false;
@@ -414,14 +414,13 @@ export class CustomBoard {
       return false;
     }
 
-    if (
-      piece.isMoveValid(
-        position,
-        target ?? null,
-        this._lastMovedPiece,
-        !!castlingRookPosition,
-      )
-    ) {
+    const isMoveValid = piece.isMoveValid(
+      position,
+      target ?? null,
+      this._lastMovedPiece,
+      !!castlingRookPosition,
+    );
+    if (isMoveValid) {
       return (
         !this.willBeCheck(piece, position) &&
         this.isCastlingPathClear(path, piece, castlingRookPosition)
@@ -463,7 +462,12 @@ export class CustomBoard {
     endPosition: MutablePosition,
     castlingRookPosition: MutablePosition,
   ) {
-    if (!(piece instanceof King) || piece.isMoved) return false;
+    if (
+      !(piece instanceof King) ||
+      piece.isMoved ||
+      this._check === piece.color
+    )
+      return false;
 
     const { yDiff } = getDiff(piece.position, endPosition);
     const isKingMovingTwoSquaresHorizontally =
