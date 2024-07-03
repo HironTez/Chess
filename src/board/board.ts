@@ -331,12 +331,12 @@ export class CustomBoard {
     this._currentTurn = lastMovedPiece?.oppositeColor ?? this._currentTurn;
     this._lastMovedPiece = lastMovedPiece;
 
-    this.onBoardChange?.(this.pieces);
-
     const king = this.getKing(this._currentTurn);
     if (!king) return;
 
     this.updateCheckStatus(king);
+
+    this.onBoardChange?.(this.pieces);
   }
 
   private updateCheckStatus(king: King) {
