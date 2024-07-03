@@ -53,7 +53,7 @@ export type BoardOptionsT = {
   onCheck?: TeamEventHandler;
   onCheckMate?: TeamEventHandler;
   onCheckResolve?: () => void;
-  onStalemate?: TeamEventHandler;
+  onStalemate?: () => void;
   onBoardChange?: BoardChangeEventHandler;
   onMove?: PieceMoveEventHandler;
   onCapture?: PieceCaptureEventHandler;
@@ -69,7 +69,7 @@ export type BoardOptionsT = {
  * @param {TeamEventHandler} [options.onCheck] - Callback function triggered when a king is in check.
  * @param {TeamEventHandler} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
  * @param {() => void} [options.onCheckResolve] - Callback function triggered when a check is resolved.
- * @param {TeamEventHandler} [options.onStalemate] - Callback function triggered when the game is in stalemate.
+ * @param {() => void} [options.onStalemate] - Callback function triggered when the game is in stalemate.
  * @param {BoardChangeEventHandler} [options.onBoardChange] - Callback function triggered when the board state changes.
  * @param {PieceMoveEventHandler} [options.onMove] - Callback function triggered when a piece moves.
  * @param {PieceCaptureEventHandler} [options.onCapture] - Callback function triggered when a piece captures another piece.
@@ -364,7 +364,7 @@ export class CustomBoard {
       !!this._stalemate !== isInStalemate
     ) {
       this._stalemate = isInStalemate ? king.color : undefined;
-      if (isInStalemate) this.onStalemate?.(king.color);
+      if (isInStalemate) this.onStalemate?.();
     }
   }
 
@@ -598,7 +598,7 @@ export class CustomBoard {
   private onCheck: TeamEventHandler | undefined;
   private onCheckMate: TeamEventHandler | undefined;
   private onCheckResolve: (() => void) | undefined;
-  private onStalemate: TeamEventHandler | undefined;
+  private onStalemate: (() => void) | undefined;
   private onBoardChange: BoardChangeEventHandler | undefined;
   private onMove: PieceMoveEventHandler | undefined;
   private onCapture: PieceCaptureEventHandler | undefined;

@@ -169,8 +169,6 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
         - `color` Color - the color of the team that's in checkmate
     - `options.onCheckResolve` (optional) - check resolve event handler
     - `options.onStalemate` (optional) - stalemate event handler
-      - parameters:
-        - `color` Color - the color of the team that's in stalemate
     - `options.onBoardChange` (optional) - board change event handler
       - parameters:
         - `pieces` Array<Piece> - the current piece set
