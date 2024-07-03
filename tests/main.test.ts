@@ -254,7 +254,7 @@ test("Should detect stalemate", async () => {
   expect(queenMoved).toBeTrue();
   expect(board.check).toBeUndefined();
   expect(board.checkmate).toBeUndefined();
-  expect(board.stalemate).toBe(Color.Black);
+  expect(board.stalemate).toBe(true);
 });
 
 test("Castling when Rook has moved", async () => {

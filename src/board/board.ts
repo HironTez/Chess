@@ -336,35 +336,33 @@ export class CustomBoard {
     const king = this.getKing(this._currentTurn);
     if (!king) return;
 
-    const checkStatus = this.getCheckStatus(king);
-    this.updateCheckStatus(king, checkStatus);
+    this.updateCheckStatus(king);
   }
 
-  private updateCheckStatus(king: King, checkStatus: CheckStatus | undefined) {
+  private updateCheckStatus(king: King) {
+    const checkStatus = this.getCheckStatus(king);
     const isInCheck = checkStatus === CheckStatus.Check;
     const isInCheckmate = checkStatus === CheckStatus.Checkmate;
     const isInStalemate = checkStatus === CheckStatus.Stalemate;
 
-    if (this._check !== king.oppositeColor && !!this._check !== isInCheck) {
+    const isOppositeKingInCheck = this._check === king.oppositeColor;
+    const isCheckStatusChanged = !!this._check !== isInCheck;
+    if (!isOppositeKingInCheck && isCheckStatusChanged) {
       this._check = isInCheck ? king.color : undefined;
-      isInCheck ? this.onCheck?.(king.color) : this.onCheckResolve?.();
-    }
-    if (
-      this._checkmate !== king.oppositeColor &&
-      !!this._checkmate !== isInCheckmate
-    ) {
-      this._checkmate = isInCheckmate ? king.color : undefined;
-      if (isInCheckmate) {
-        this._check = king.color;
-        this.onCheckMate?.(king.color);
+      if (isInCheck) {
+        this.onCheck?.(king.color);
+      } else {
+        this.onCheckResolve?.();
       }
     }
-    if (
-      this._stalemate !== king.oppositeColor &&
-      !!this._stalemate !== isInStalemate
-    ) {
-      this._stalemate = isInStalemate ? king.color : undefined;
-      if (isInStalemate) this.onStalemate?.();
+    if (isInCheckmate) {
+      this._checkmate = king.color;
+      this._check = king.color;
+      this.onCheckMate?.(king.color);
+    }
+    if (isInStalemate) {
+      this._stalemate = true;
+      this.onStalemate?.();
     }
   }
 
@@ -589,7 +587,7 @@ export class CustomBoard {
 
   private _check: Color | undefined = undefined;
   private _checkmate: Color | undefined = undefined;
-  private _stalemate: Color | undefined = undefined;
+  private _stalemate: boolean = false;
   private _pieces: Array<MutablePiece>;
   private _currentTurn: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
