@@ -22,10 +22,10 @@ export type PositionNotationT = `${
   | "7"
   | "8"}`;
 
-export type PositionInputT = Position | PointT | PositionNotationT;
+export type PositionInputT = Position | PointT | PositionNotationT | string;
 
 export class Position {
-  constructor(position: PositionInputT | string) {
+  constructor(position: PositionInputT) {
     this._set(position);
   }
 
@@ -52,20 +52,15 @@ export class Position {
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
-  protected _set(position: PositionInputT | string) {
+  protected _set(position: PositionInputT) {
     if (position instanceof Position) {
       this._x = position.x;
       this._y = position.y;
     } else if (typeof position === "string") {
       const { x, y } = decodePositionNotation(position);
 
-      if (isInLimit(0, x, 7) && isInLimit(0, y, 7)) {
-        this._x = x;
-        this._y = y;
-      } else {
-        this._x = NaN;
-        this._y = NaN;
-      }
+      this._x = x ?? NaN;
+      this._y = y ?? NaN;
     } else {
       this._x = position.x;
       this._y = position.y;
@@ -84,16 +79,16 @@ export class Position {
 
   protected _x = NaN;
   protected _y = NaN;
-  protected _notation: string | undefined = undefined;
+  protected _notation: PositionNotationT | undefined = undefined;
   protected _isValid = false;
 }
 
 export class MutablePosition extends Position {
-  constructor(position: PositionInputT | string) {
+  constructor(position: PositionInputT) {
     super(position);
   }
 
-  set(position: PositionInputT | string) {
+  set(position: PositionInputT) {
     this._set(position);
   }
 }

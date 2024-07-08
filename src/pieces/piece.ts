@@ -30,7 +30,7 @@ export abstract class ReadonlyPieceAbstract {
     return new Position(this._position);
   }
 
-  isAt(positionInput: PositionInputT | string) {
+  isAt(positionInput: PositionInputT) {
     const position =
       typeof positionInput === "string"
         ? new Position(positionInput)

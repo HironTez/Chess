@@ -67,12 +67,14 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   > String that represents a position on a chess board. Allowed characters: a-h, A-H, 1-8.
 
+  - type: `string`
   - example: `"A1"`
 
 - PointT
 
   > An object with x and y coordinates. Allowed values: 0-7
 
+  - type: `object`
   - example:
 
     ```js
@@ -85,6 +87,8 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 - PositionInputT
 
   > PositionNotationT, PointT or Position
+
+  - type: `PositionNotationT` | `PointT` | `Position` | `string`
 
 - Type
 
@@ -111,7 +115,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   > A class with coordinates and useful methods and properties to work with positions
 
   - params:
-    - `position` PositionInputT | string
+    - `position` PositionInputT
   - properties:
     - `x` number - coordinate
     - `y` number - coordinate
@@ -140,7 +144,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - methods:
     - `isAt` - check if the piece is at specified position
       - params:
-        - `position` PositionInputT | string
+        - `position` PositionInputT
       - returns boolean
 
 - King, Queen, Rook, Bishop, Knight, Pawn (extend Piece)

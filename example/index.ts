@@ -15,8 +15,8 @@ const main = async () => {
     onCheckResolve: () => {
       console.log("Check resolved");
     },
-    onStalemate: (color) => {
-      console.log(`${capitalize(color)} king is in stalemate!`);
+    onStalemate: () => {
+      console.log(`Stalemate!`);
     },
     onBoardChange: (pieces) => {
       console.log(`\n${stringifyBoard(pieces)}\n`);

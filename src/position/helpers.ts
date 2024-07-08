@@ -1,5 +1,10 @@
 import { arrayConstructor, isInLimit } from "../helpers";
-import { MutablePosition, PointT, Position } from "./position";
+import {
+  MutablePosition,
+  PointT,
+  Position,
+  PositionNotationT,
+} from "./position";
 
 /**
  * Get difference between two positions. Values can be negative
@@ -86,14 +91,26 @@ export const getSurroundingPositions = (position: Position) => {
 export const decodePositionNotation = (positionNotation: string) => {
   const xChar = positionNotation.charCodeAt(0);
   const yChar = positionNotation.charCodeAt(1);
-  const x = xChar >= 97 ? xChar - 97 : xChar - 65;
-  const y = yChar - 49;
+  if (isInLimit(49, yChar, 56)) {
+    const y = yChar - 49;
+    if (isInLimit(65, xChar, 90)) {
+      const x = xChar - 65;
+      return { x, y };
+    }
+    if (isInLimit(97, xChar, 122)) {
+      const x = xChar - 97;
+      return { x, y };
+    }
+  }
 
-  return { x, y };
+  return { x: undefined, y: undefined };
 };
 
 export const encodePositionNotation = (x: number, y: number) => {
-  const xChar = x + 65;
-  const xString = String.fromCharCode(xChar);
-  return `${xString}${y + 1}`;
+  if (isInLimit(0, x, 7) && isInLimit(0, y, 7)) {
+    const xChar = x + 65;
+    const xString = String.fromCharCode(xChar);
+    return `${xString}${y + 1}` as PositionNotationT;
+  }
+  return undefined;
 };
