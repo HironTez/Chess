@@ -12,6 +12,15 @@ export type PointT = {
 
 export type PositionInputT = Position | PointT | string;
 
+export const parsePoint = (positionInput: PositionInputT) => {
+  if (typeof positionInput === "string") {
+    const { x, y } = decodePositionNotation(positionInput);
+    return { x: x ?? NaN, y: y ?? NaN };
+  }
+
+  return { x: positionInput.x, y: positionInput.y };
+};
+
 export class Position {
   constructor(position: PositionInputT) {
     this._set(position);
@@ -31,35 +40,19 @@ export class Position {
   }
 
   distanceTo(positionInput: PositionInputT) {
-    const point =
-      typeof positionInput === "string"
-        ? new Position(positionInput)
-        : positionInput;
-
+    const point = parsePoint(positionInput);
     const { xDiff, yDiff } = getDiff(this, point);
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 
-  protected _set(position: PositionInputT) {
-    if (typeof position === "string") {
-      const { x, y } = decodePositionNotation(position);
+  protected _set(positionInput: PositionInputT) {
+    const { x, y } = parsePoint(positionInput);
+    this._x = x;
+    this._y = y;
 
-      this._x = x ?? NaN;
-      this._y = y ?? NaN;
-    } else {
-      this._x = position.x;
-      this._y = position.y;
-    }
+    this._isValid = isInLimit(0, this._x, 7) && isInLimit(0, this._y, 7);
 
-    this._isValid =
-      typeof this._x === "number" &&
-      typeof this._y === "number" &&
-      isInLimit(0, this._x, 7) &&
-      isInLimit(0, this._y, 7);
-
-    this._notation = this._isValid
-      ? encodePositionNotation(this._x, this._y)
-      : undefined;
+    this._notation = encodePositionNotation(this._x, this._y);
   }
 
   protected _x = NaN;

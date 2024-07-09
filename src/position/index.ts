@@ -8,7 +8,7 @@ import {
   isMovingUp,
 } from "./helpers";
 import type { PointT, PositionInputT } from "./position";
-import { MutablePosition, Position } from "./position";
+import { MutablePosition, Position, parsePoint } from "./position";
 
 export {
   MutablePosition,
@@ -20,6 +20,7 @@ export {
   getPath,
   getSurroundingPositions,
   isMovingUp,
+  parsePoint,
 };
 
 export type { PointT, PositionInputT };

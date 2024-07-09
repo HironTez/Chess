@@ -1,4 +1,9 @@
-import { MutablePosition, Position, PositionInputT } from "../position";
+import {
+  MutablePosition,
+  Position,
+  PositionInputT,
+  parsePoint,
+} from "../position";
 
 export enum Color {
   White = "white",
@@ -31,11 +36,7 @@ export abstract class ReadonlyPieceAbstract {
   }
 
   isAt(positionInput: PositionInputT) {
-    const point =
-      typeof positionInput === "string"
-        ? new Position(positionInput)
-        : positionInput;
-
+    const point = parsePoint(positionInput);
     return this._position.x === point.x && this._position.y === point.y;
   }
 

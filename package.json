@@ -10,7 +10,7 @@
     "dev": "bun --watch run ./example/index.ts",
     "build": "bun build --target=node ./src/index.ts --outfile=./dist/index.js && bun run build:declaration",
     "build:declaration": "tsc --emitDeclarationOnly --project ./tsconfig.types.json",
-    "duplications-report": "bunx jscpd src --format=typescript --mode=strict --reporters=console"
+    "duplications-report": "bunx jscpd src --format=typescript --mode=strict --reporters=console --ignore=index.ts"
   },
   "devDependencies": {
     "bun-types": "^1.1.17",
