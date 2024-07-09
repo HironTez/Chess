@@ -340,20 +340,19 @@ export class CustomBoard {
   }
 
   private updateCheckStatus(king: King) {
+    if (this._check === king.oppositeColor) {
+      this._check = undefined;
+      this.onCheckResolve?.();
+    }
+
     const checkStatus = this.getCheckStatus(king);
     const isInCheck = checkStatus === CheckStatus.Check;
     const isInCheckmate = checkStatus === CheckStatus.Checkmate;
     const isInStalemate = checkStatus === CheckStatus.Stalemate;
 
-    const isOppositeKingInCheck = this._check === king.oppositeColor;
-    const isCheckStatusChanged = !!this._check !== isInCheck;
-    if (!isOppositeKingInCheck && isCheckStatusChanged) {
-      this._check = isInCheck ? king.color : undefined;
-      if (isInCheck) {
-        this.onCheck?.(king.color);
-      } else {
-        this.onCheckResolve?.();
-      }
+    if (isInCheck) {
+      this._check = king.color;
+      this.onCheck?.(king.color);
     }
     if (isInCheckmate) {
       this._checkmate = king.color;
