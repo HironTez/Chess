@@ -1,6 +1,6 @@
 import { MutablePiece, Type } from "./piece";
 
-import { MutablePosition, areAlignedHorizontally } from "../position";
+import { MutablePosition, areAlignedVertically } from "../position";
 
 export class King extends MutablePiece {
   getPossibleMoves() {
@@ -19,7 +19,7 @@ export class King extends MutablePiece {
 
   canMove(position: MutablePosition) {
     const distance = this.position.distanceTo(position);
-    const movingHorizontally = areAlignedHorizontally(this.position, position);
+    const movingHorizontally = areAlignedVertically(this.position, position);
     const canMove = distance === 1;
     const canCastle = !this.isMoved && movingHorizontally && distance === 2;
 

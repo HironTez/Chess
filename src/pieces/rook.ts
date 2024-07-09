@@ -17,8 +17,8 @@ export class Rook extends MutablePiece {
   }
 
   canMove(position: MutablePosition) {
-    const movingVertically = areAlignedVertically(this.position, position);
-    const movingHorizontally = areAlignedHorizontally(this.position, position);
+    const movingVertically = areAlignedHorizontally(this.position, position);
+    const movingHorizontally = areAlignedVertically(this.position, position);
     return movingVertically || movingHorizontally;
   }
 

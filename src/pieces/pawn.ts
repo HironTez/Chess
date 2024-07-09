@@ -1,4 +1,4 @@
-import { areAlignedVertically, isMovingUp } from "../position";
+import { areAlignedHorizontally, isMovingUp } from "../position";
 import { Color, MutablePiece, Type } from "./piece";
 
 import { MutablePosition } from "../position";
@@ -35,7 +35,7 @@ export class Pawn extends MutablePiece {
 
   canMove(position: MutablePosition) {
     const distance = this.position.distanceTo(position);
-    const movingVertically = areAlignedVertically(this.position, position);
+    const movingVertically = areAlignedHorizontally(this.position, position);
     const directionIsRight = this.directionIsRight(position);
     const canMove = distance === 1;
     const canDoubleMove = movingVertically && !this.isMoved && distance === 2;

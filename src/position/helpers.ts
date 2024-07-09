@@ -29,16 +29,16 @@ export const areAlignedVertically = (
   position1: Position,
   position2: Position,
 ) => {
-  const { xDiff } = getDiff(position1, position2);
-  return xDiff === 0;
+  const { yDiff } = getDiff(position1, position2);
+  return yDiff === 0;
 };
 
 export const areAlignedHorizontally = (
   position1: Position,
   position2: Position,
 ) => {
-  const { yDiff } = getDiff(position1, position2);
-  return yDiff === 0;
+  const { xDiff } = getDiff(position1, position2);
+  return xDiff === 0;
 };
 
 export const isMovingUp = (position1: Position, position2: Position) => {
