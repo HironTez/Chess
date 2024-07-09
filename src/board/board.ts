@@ -125,11 +125,8 @@ export class CustomBoard {
     const piece = this._getPieceAt(positionInput);
     if (!piece) return [];
 
-    const positions = this._getPossibleMoves(piece);
-    const validMoves = positions.filter((position) =>
-      this.isMoveValid(piece, position),
-    );
-    return validMoves.map((position) => new Position(position));
+    const positions = this._getLegalMovesOf(piece);
+    return positions.map((position) => new Position(position));
   }
 
   async move(
@@ -154,9 +151,14 @@ export class CustomBoard {
     return this._pieces.filter((piece) => piece.color === color);
   }
 
-  private _getPossibleMoves(piece: MutablePiece) {
+  private _getLegalMovesOf(piece: MutablePiece) {
     const positions = piece.getPossibleMoves();
-    return positions.filter((position) => this.isMoveValid(piece, position));
+    return positions.filter((position) => this.isMoveLegal(piece, position));
+  }
+
+  private hasPieceLegalMoves(piece: MutablePiece) {
+    const positions = piece.getPossibleMoves();
+    return positions.some((position) => this.isMoveLegal(piece, position));
   }
 
   private async movePiece(
@@ -171,7 +173,7 @@ export class CustomBoard {
       endPosition,
     );
 
-    const isMoveValid = this.isMoveValid(
+    const isMoveValid = this.isMoveLegal(
       piece,
       endPosition,
       castlingRook?.position,
@@ -365,7 +367,7 @@ export class CustomBoard {
     }
   }
 
-  private isMoveValid(
+  private isMoveLegal(
     piece: MutablePiece,
     position: MutablePosition,
     castlingRookPosition?: MutablePosition,
@@ -503,18 +505,14 @@ export class CustomBoard {
     }
 
     const teamPieces = this._getPiecesByColor(king.color);
-    if (teamPieces.length > 0) {
-      for (const piece of teamPieces) {
-        const possibleMoves = this._getPossibleMoves(piece);
-        if (possibleMoves.length > 0) {
-          return undefined;
-        }
+    for (const piece of teamPieces) {
+      const hasLegalMoves = this.hasPieceLegalMoves(piece);
+      if (hasLegalMoves) {
+        return undefined;
       }
-
-      return CheckStatus.Stalemate;
     }
 
-    return undefined;
+    return CheckStatus.Stalemate;
   }
 
   private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {
