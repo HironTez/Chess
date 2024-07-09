@@ -63,9 +63,9 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
 ## Documentation
 
-- PositionNotationT
+- Notation string
 
-  > String that represents a position on a chess board. Allowed characters: a-h, A-H, 1-8.
+  > String that represents a position on a chess board. Allowed characters: a-h, A-H, 1-8. Format: "[File][Rank]"
 
   - type: `string`
   - example: `"A1"`
@@ -86,9 +86,9 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
 - PositionInputT
 
-  > PositionNotationT, PointT or Position
+  > PointT, Position or notation string
 
-  - type: `PositionNotationT` | `PointT` | `Position` | `string`
+  - type: `PointT` | `Position` | `string`
 
 - Type
 

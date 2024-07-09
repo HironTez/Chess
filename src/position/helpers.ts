@@ -1,10 +1,5 @@
 import { arrayConstructor, isInLimit } from "../helpers";
-import {
-  MutablePosition,
-  PointT,
-  Position,
-  PositionNotationT,
-} from "./position";
+import { MutablePosition, PointT, Position } from "./position";
 
 /**
  * Get difference between two positions. Values can be negative
@@ -110,7 +105,7 @@ export const encodePositionNotation = (x: number, y: number) => {
   if (isInLimit(0, x, 7) && isInLimit(0, y, 7)) {
     const xChar = x + 65;
     const xString = String.fromCharCode(xChar);
-    return `${xString}${y + 1}` as PositionNotationT;
+    return `${xString}${y + 1}`;
   }
   return undefined;
 };

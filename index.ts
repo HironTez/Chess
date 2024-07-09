@@ -1,9 +1,4 @@
-import type {
-  PointT,
-  PositionInputT,
-  PositionNotationT,
-  PromotionType,
-} from "./src";
+import type { PointT, PositionInputT, PromotionType } from "./src";
 import {
   Bishop,
   Board,
@@ -33,4 +28,4 @@ export {
   Rook,
   Type,
 };
-export type { PointT, PositionInputT, PositionNotationT, PromotionType };
+export type { PointT, PositionInputT, PromotionType };

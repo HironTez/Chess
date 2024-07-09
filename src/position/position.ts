@@ -10,19 +10,7 @@ export type PointT = {
   y: number;
 };
 
-export type PositionNotationT = `${
-  | ("a" | "b" | "c" | "d" | "e" | "f" | "g" | "h")
-  | ("A" | "B" | "C" | "D" | "E" | "F" | "G" | "H")}${
-  | "1"
-  | "2"
-  | "3"
-  | "4"
-  | "5"
-  | "6"
-  | "7"
-  | "8"}`;
-
-export type PositionInputT = Position | PointT | PositionNotationT | string;
+export type PositionInputT = Position | PointT | string;
 
 export class Position {
   constructor(position: PositionInputT) {
@@ -53,10 +41,7 @@ export class Position {
   }
 
   protected _set(position: PositionInputT) {
-    if (position instanceof Position) {
-      this._x = position.x;
-      this._y = position.y;
-    } else if (typeof position === "string") {
+    if (typeof position === "string") {
       const { x, y } = decodePositionNotation(position);
 
       this._x = x ?? NaN;
@@ -79,7 +64,7 @@ export class Position {
 
   protected _x = NaN;
   protected _y = NaN;
-  protected _notation: PositionNotationT | undefined = undefined;
+  protected _notation: string | undefined = undefined;
   protected _isValid = false;
 }
 

@@ -11,7 +11,7 @@ import {
   Rook,
   Type,
 } from "./pieces";
-import type { PointT, PositionInputT, PositionNotationT } from "./position";
+import type { PointT, PositionInputT } from "./position";
 import { Position } from "./position";
 
 export {
@@ -28,7 +28,7 @@ export {
   Rook,
   Type,
 };
-export type { PointT, PositionInputT, PositionNotationT, PromotionType };
+export type { PointT, PositionInputT, PromotionType };
 
 // TODO: history of moves
 // TODO: undone

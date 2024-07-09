@@ -68,8 +68,8 @@ export type BoardOptionsT = {
  * @param {GetPromotionVariant} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
  * @param {TeamEventHandler} [options.onCheck] - Callback function triggered when a king is in check.
  * @param {TeamEventHandler} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
- * @param {() => void} [options.onCheckResolve] - Callback function triggered when a check is resolved.
- * @param {() => void} [options.onStalemate] - Callback function triggered when the game is in stalemate.
+ * @param {Function} [options.onCheckResolve] - Callback function triggered when a check is resolved.
+ * @param {Function} [options.onStalemate] - Callback function triggered when the game is in stalemate.
  * @param {BoardChangeEventHandler} [options.onBoardChange] - Callback function triggered when the board state changes.
  * @param {PieceMoveEventHandler} [options.onMove] - Callback function triggered when a piece moves.
  * @param {PieceCaptureEventHandler} [options.onCapture] - Callback function triggered when a piece captures another piece.

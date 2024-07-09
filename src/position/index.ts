@@ -7,7 +7,7 @@ import {
   getSurroundingPositions,
   isMovingUp,
 } from "./helpers";
-import type { PointT, PositionInputT, PositionNotationT } from "./position";
+import type { PointT, PositionInputT } from "./position";
 import { MutablePosition, Position } from "./position";
 
 export {
@@ -22,4 +22,4 @@ export {
   isMovingUp,
 };
 
-export type { PointT, PositionInputT, PositionNotationT };
+export type { PointT, PositionInputT };
