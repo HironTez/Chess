@@ -225,3 +225,9 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - parameters:
     - `options` - same as in CustomBoard
+
+## Limitations
+
+- No evaluation
+- No automatic moves
+- No stalemate on move repetition
