@@ -1,6 +1,6 @@
 {
   "name": "@hiron-tez/chess",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A chess engine. This is a fully functional game core that implements all the functionality and logic and provides an easy way to interact with the pieces.",
   "main": "./dist/index.js",
   "module": "./src/index.ts",
