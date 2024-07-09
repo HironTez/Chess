@@ -1,24 +1,9 @@
-import {
-  areAlignedDiagonally,
-  areAlignedHorizontally,
-  isMovingUp,
-} from "../position";
+import { areAlignedVertically, isMovingUp } from "../position";
 import { Color, MutablePiece, Type } from "./piece";
 
 import { MutablePosition } from "../position";
 
 export class Pawn extends MutablePiece {
-  isMoveValid(
-    position: MutablePosition,
-    target: MutablePiece | null,
-    lastMoved: MutablePiece | null,
-  ) {
-    const canMove = this.canMove(position);
-    const canCapture = this.canCapture(position, lastMoved, target);
-
-    return canCapture || (!target && canMove);
-  }
-
   getPossibleMoves() {
     const { x, y } = this.position;
     const possibleMoves: MutablePosition[] = [];
@@ -50,35 +35,13 @@ export class Pawn extends MutablePiece {
 
   canMove(position: MutablePosition) {
     const distance = this.position.distanceTo(position);
-    const movingVertically = areAlignedHorizontally(this.position, position);
+    const movingVertically = areAlignedVertically(this.position, position);
     const directionIsRight = this.directionIsRight(position);
-    const distanceIsRight = distance === 1 || (distance === 2 && !this.isMoved);
+    const canMove = distance === 1;
+    const canDoubleMove = movingVertically && !this.isMoved && distance === 2;
+    const distanceIsRight = canMove || canDoubleMove;
 
-    return movingVertically && directionIsRight && distanceIsRight;
-  }
-
-  canCapture(
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    target: MutablePiece | null,
-  ) {
-    const distance = this.position.distanceTo(position);
-    const distanceIsRight = distance === 1;
-    const movingDiagonally = areAlignedDiagonally(this.position, position);
-    const directionIsRight = this.directionIsRight(position);
-    const targetIsEnemy = target?.color === this.oppositeColor;
-
-    const canCaptureEnemy =
-      targetIsEnemy ||
-      (lastMoved instanceof Pawn
-        ? lastMoved.isJustDoubleMoved() &&
-          lastMoved.position.distanceTo(this.position) === 1 &&
-          lastMoved.position.y === this.position.y
-        : false);
-
-    return (
-      movingDiagonally && directionIsRight && distanceIsRight && canCaptureEnemy
-    );
+    return directionIsRight && distanceIsRight;
   }
 
   protected onMove(position: MutablePosition) {

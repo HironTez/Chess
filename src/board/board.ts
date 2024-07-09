@@ -408,17 +408,12 @@ export class CustomBoard {
     const target = this._getPieceAt(position);
     const targetIsEnemy = target?.color === piece.oppositeColor;
 
-    if (!targetIsEnemy && target) {
+    if (target && !targetIsEnemy) {
       return false;
     }
 
-    const isMoveValid = piece.isMoveValid(
-      position,
-      target ?? null,
-      this._lastMovedPiece,
-      !!castlingRookPosition,
-    );
-    if (isMoveValid) {
+    const canPieceMove = piece.canMove(position);
+    if (canPieceMove) {
       return (
         !this.willBeCheck(piece, position) &&
         this.isCastlingPathClear(path, piece, castlingRookPosition)

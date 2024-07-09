@@ -62,38 +62,9 @@ export abstract class PieceAbstract extends ReadonlyPieceAbstract {
     this._isMoved = true;
   }
 
-  isMoveValid(
-    position: MutablePosition,
-    target: MutablePiece | null,
-    lastMoved: MutablePiece | null,
-    isCastlingPossible: boolean,
-  ) {
-    const targetIsEnemy = target?.color === this.oppositeColor;
-
-    if (target && targetIsEnemy) {
-      return this.canCapture(position, lastMoved, target);
-    } else if (!target) {
-      return this.canMove(position, lastMoved, isCastlingPossible);
-    }
-
-    return false;
-  }
-
   abstract getPossibleMoves(): MutablePosition[];
 
-  abstract canMove(
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    isCastlingPossible: boolean,
-  ): boolean;
-
-  canCapture(
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    target: MutablePiece,
-  ): boolean {
-    return this.canMove(position, lastMoved, false);
-  }
+  abstract canMove(position: MutablePosition): boolean;
 }
 
 export abstract class MutablePiece extends PieceAbstract {
@@ -117,38 +88,8 @@ export class Piece extends ReadonlyPieceAbstract {
   constructor(piece: MutablePiece) {
     super(piece.position, piece.color);
 
-    this._canMove = piece.canMove;
-    this._canCapture = piece.canCapture;
     this.type = piece.type;
   }
-
-  protected canMove(
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    isCastlingPossible: boolean,
-  ) {
-    return this._canMove(position, lastMoved, isCastlingPossible);
-  }
-
-  protected canCapture(
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    target: MutablePiece,
-  ) {
-    return this._canCapture(position, lastMoved, target);
-  }
-
-  private _canMove: (
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    isCastlingPossible: boolean,
-  ) => boolean;
-
-  private _canCapture: (
-    position: MutablePosition,
-    lastMoved: MutablePiece | null,
-    target: MutablePiece,
-  ) => boolean;
 
   readonly type: Type;
 }
