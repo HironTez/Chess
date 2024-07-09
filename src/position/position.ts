@@ -31,12 +31,12 @@ export class Position {
   }
 
   distanceTo(positionInput: PositionInputT) {
-    const position =
+    const point =
       typeof positionInput === "string"
         ? new Position(positionInput)
         : positionInput;
 
-    const { xDiff, yDiff } = getDiff(this, position);
+    const { xDiff, yDiff } = getDiff(this, point);
     return Math.max(Math.abs(xDiff), Math.abs(yDiff));
   }
 

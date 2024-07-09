@@ -47,7 +47,8 @@ test("Should not move outside the board", async () => {
     new King("A1", Color.White),
   ]);
 
-  // @ts-expect-error Trying to move outside the board
+  board.getPieceAt("A1")?.position.distanceTo;
+
   const movedOutOfBounds = await board.move("H8", "I9");
 
   expect(movedOutOfBounds).toBeFalse();

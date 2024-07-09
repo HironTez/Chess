@@ -31,12 +31,12 @@ export abstract class ReadonlyPieceAbstract {
   }
 
   isAt(positionInput: PositionInputT) {
-    const position =
+    const point =
       typeof positionInput === "string"
         ? new Position(positionInput)
         : positionInput;
 
-    return this._position.x === position.x && this._position.y === position.y;
+    return this._position.x === point.x && this._position.y === point.y;
   }
 
   protected onMove(position: MutablePosition) {}
