@@ -14,6 +14,7 @@ test("Should expect a turn from a different color after move", async () => {
   const board = new CustomBoard([
     new King("A8", Color.Black),
     new King("A1", Color.White),
+    new Pawn("H1", Color.White),
   ]);
 
   const blackMovedFirst = await board.move("A8", "A7");
@@ -298,4 +299,15 @@ test("King cannot stay in check", async () => {
   expect(kingMoved).toBeFalse();
   expect(board.getPieceAt("E4")).toHaveProperty("type", Type.King);
   expect(board.getPieceAt("E4")).toHaveProperty("color", Color.White);
+});
+
+test("Should detect stalemate with only two kings remaining", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+  ]);
+
+  const stalemate = board.stalemate;
+
+  expect(stalemate).toBeTrue();
 });

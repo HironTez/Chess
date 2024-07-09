@@ -42,7 +42,7 @@ type PiecePromotionEventHandler = (
   newPieceType: PromotionType,
 ) => void;
 
-enum CheckStatus {
+enum Status {
   Check = "check",
   Checkmate = "checkmate",
   Stalemate = "stalemate",
@@ -336,21 +336,21 @@ export class CustomBoard {
     const king = this.getKing(this._currentTurn);
     if (!king) return;
 
-    this.updateCheckStatus(king);
+    this.updateStatus(king);
 
     this.onBoardChange?.(this.pieces);
   }
 
-  private updateCheckStatus(king: King) {
+  private updateStatus(king: King) {
     if (this._check === king.oppositeColor) {
       this._check = undefined;
       this.onCheckResolve?.();
     }
 
-    const checkStatus = this.getCheckStatus(king);
-    const isInCheck = checkStatus === CheckStatus.Check;
-    const isInCheckmate = checkStatus === CheckStatus.Checkmate;
-    const isInStalemate = checkStatus === CheckStatus.Stalemate;
+    const status = this.getStatus(king);
+    const isInCheck = status === Status.Check;
+    const isInCheckmate = status === Status.Checkmate;
+    const isInStalemate = status === Status.Stalemate;
 
     if (isInCheck) {
       this._check = king.color;
@@ -480,7 +480,7 @@ export class CustomBoard {
     return rook instanceof Rook && !rook.isMoved && piece.color === rook.color;
   }
 
-  private getCheckStatus(king: King) {
+  private getStatus(king: King) {
     const isInCheck = this.isKingInCheck(king, undefined);
     if (isInCheck) {
       const team = this._getPiecesByColor(king.color);
@@ -489,7 +489,7 @@ export class CustomBoard {
 
         const canDefendKing = this.canPieceDefendKing(teammate);
         if (canDefendKing) {
-          return CheckStatus.Check;
+          return Status.Check;
         }
       }
 
@@ -497,11 +497,18 @@ export class CustomBoard {
       for (const position of surroundingPositions) {
         const canEscape = this.canPieceMove(king, position);
         if (canEscape) {
-          return CheckStatus.Check;
+          return Status.Check;
         }
       }
 
-      return CheckStatus.Checkmate;
+      return Status.Checkmate;
+    }
+
+    const piecesExceptKings = this._pieces.filter(
+      (piece) => piece.type !== Type.King,
+    );
+    if (piecesExceptKings.length === 0) {
+      return Status.Stalemate;
     }
 
     const teamPieces = this._getPiecesByColor(king.color);
@@ -512,7 +519,7 @@ export class CustomBoard {
       }
     }
 
-    return CheckStatus.Stalemate;
+    return Status.Stalemate;
   }
 
   private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {

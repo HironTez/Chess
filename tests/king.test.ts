@@ -30,6 +30,7 @@ test("King basic movement", async () => {
   const board = new CustomBoard([
     new King("E4", Color.White),
     new King("E8", Color.Black),
+    new Pawn("H8", Color.Black),
   ]);
 
   const kingMoved = await board.move("E4", "E5");
@@ -42,6 +43,7 @@ test("King can only move one square", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
+    new Pawn("H8", Color.Black),
   ]);
 
   const movedTwoSquares = await board.move("E1", "D3");
