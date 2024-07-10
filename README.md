@@ -207,10 +207,26 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - parameters:
     - `options` - same as in CustomBoard
 
-- EventHandler
+- Event
+
+  > Enum that represents the type of an event
+
+  - members:
+    - `BoardChange`
+    - `Check`
+    - `Checkmate`
+    - `CheckResolve`
+    - `Stalemate`
+    - `Move`
+    - `Capture`
+    - `Castling`
+    - `Promotion`
+
+- EventHandlerT
 
   > Event handlers types
 
+  - type: `object`
   - `GetPromotionVariant` - get the promotion variant for a pawn
     - parameters:
       - `position` Position - the position of the pawn

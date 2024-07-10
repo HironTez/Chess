@@ -1,5 +1,5 @@
-import type { PromotionType } from "./board";
-import { Board, CustomBoard } from "./board";
+import type { EventHandlerT, PromotionType } from "./board";
+import { Board, CustomBoard, Event } from "./board";
 import {
   Bishop,
   Color,
@@ -19,6 +19,7 @@ export {
   Board,
   Color,
   CustomBoard,
+  Event,
   King,
   Knight,
   Pawn,
@@ -28,8 +29,4 @@ export {
   Rook,
   Type,
 };
-export type { PointT, PositionInputT, PromotionType };
-
-// TODO: history of moves
-// TODO: undone
-// TODO: notations
+export type { EventHandlerT, PointT, PositionInputT, PromotionType };

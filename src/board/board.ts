@@ -14,19 +14,20 @@ import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
 
 export type PromotionType = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
-enum Event {
+
+export enum Event {
+  BoardChange = "boardChange",
   Check = "check",
   Checkmate = "checkmate",
   CheckResolve = "checkResolve",
   Stalemate = "stalemate",
-  BoardChange = "boardChange",
   Move = "move",
   Capture = "capture",
   Castling = "castling",
   Promotion = "promotion",
 }
 
-type EventHandler = {
+export type EventHandlerT = {
   GetPromotionVariant: (
     piecePosition: Position,
   ) => PromotionType | Promise<PromotionType>;
@@ -57,32 +58,32 @@ enum Status {
 }
 
 export type BoardOptionsT = {
-  getPromotionVariant?: EventHandler["GetPromotionVariant"];
-  onBoardChange?: EventHandler["BoardChange"];
-  onCheck?: EventHandler["Check"];
-  onCheckMate?: EventHandler["Checkmate"];
-  onCheckResolve?: EventHandler["CheckResolve"];
-  onStalemate?: EventHandler["Stalemate"];
-  onMove?: EventHandler["Move"];
-  onCapture?: EventHandler["Capture"];
-  onCastling?: EventHandler["Castling"];
-  onPromotion?: EventHandler["Promotion"];
+  getPromotionVariant?: EventHandlerT["GetPromotionVariant"];
+  onBoardChange?: EventHandlerT["BoardChange"];
+  onCheck?: EventHandlerT["Check"];
+  onCheckMate?: EventHandlerT["Checkmate"];
+  onCheckResolve?: EventHandlerT["CheckResolve"];
+  onStalemate?: EventHandlerT["Stalemate"];
+  onMove?: EventHandlerT["Move"];
+  onCapture?: EventHandlerT["Capture"];
+  onCastling?: EventHandlerT["Castling"];
+  onPromotion?: EventHandlerT["Promotion"];
 };
 
 /**
  * Chess board with a custom set of pieces
  * @param {MutablePiece[]} pieces - A set of mutable chess pieces to initialize the board.
  * @param {BoardOptionsT} [options] - Board options to customize behavior.
- * @param {EventHandler["GetPromotionVariant"]} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
- * @param {EventHandler["BoardChange"]} [options.onBoardChange] - Callback function triggered when the board state changes.
- * @param {EventHandler["Check"]} [options.onCheck] - Callback function triggered when a king is in check.
- * @param {EventHandler["Checkmate"]} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
- * @param {EventHandler["CheckResolve"]} [options.onCheckResolve] - Callback function triggered when a check is resolved.
- * @param {EventHandler["Stalemate"]} [options.onStalemate] - Callback function triggered when the game is in stalemate.
- * @param {EventHandler["Move"]} [options.onMove] - Callback function triggered when a piece moves.
- * @param {EventHandler["Capture"]} [options.onCapture] - Callback function triggered when a piece captures another piece.
- * @param {EventHandler["Castling"]} [options.onCastling] - Callback function triggered when castling occurs.
- * @param {EventHandler["Promotion"]} [options.onPromotion] - Callback function triggered when a pawn is promoted.
+ * @param {EventHandlerT["GetPromotionVariant"]} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
+ * @param {EventHandlerT["BoardChange"]} [options.onBoardChange] - Callback function triggered when the board state changes.
+ * @param {EventHandlerT["Check"]} [options.onCheck] - Callback function triggered when a king is in check.
+ * @param {EventHandlerT["Checkmate"]} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
+ * @param {EventHandlerT["CheckResolve"]} [options.onCheckResolve] - Callback function triggered when a check is resolved.
+ * @param {EventHandlerT["Stalemate"]} [options.onStalemate] - Callback function triggered when the game is in stalemate.
+ * @param {EventHandlerT["Move"]} [options.onMove] - Callback function triggered when a piece moves.
+ * @param {EventHandlerT["Capture"]} [options.onCapture] - Callback function triggered when a piece captures another piece.
+ * @param {EventHandlerT["Castling"]} [options.onCastling] - Callback function triggered when castling occurs.
+ * @param {EventHandlerT["Promotion"]} [options.onPromotion] - Callback function triggered when a pawn is promoted.
  */
 
 export class CustomBoard {
@@ -119,46 +120,49 @@ export class CustomBoard {
     return this._currentTurn;
   }
 
-  on(event: Event.BoardChange, eventHandler: EventHandler["BoardChange"]): void;
-  on(event: Event.Check, eventHandler: EventHandler["Check"]): void;
-  on(event: Event.Checkmate, eventHandler: EventHandler["Checkmate"]): void;
+  on(
+    event: Event.BoardChange,
+    eventHandlerT: EventHandlerT["BoardChange"],
+  ): void;
+  on(event: Event.Check, eventHandlerT: EventHandlerT["Check"]): void;
+  on(event: Event.Checkmate, eventHandlerT: EventHandlerT["Checkmate"]): void;
   on(
     event: Event.CheckResolve,
-    eventHandler: EventHandler["CheckResolve"],
+    eventHandlerT: EventHandlerT["CheckResolve"],
   ): void;
-  on(event: Event.Stalemate, eventHandler: EventHandler["Stalemate"]): void;
-  on(event: Event.Move, eventHandler: EventHandler["Move"]): void;
-  on(event: Event.Capture, eventHandler: EventHandler["Capture"]): void;
-  on(event: Event.Castling, eventHandler: EventHandler["Castling"]): void;
-  on(event: Event.Promotion, eventHandler: EventHandler["Promotion"]): void;
-  on(event: Event, eventHandler: EventHandler[keyof EventHandler]) {
+  on(event: Event.Stalemate, eventHandlerT: EventHandlerT["Stalemate"]): void;
+  on(event: Event.Move, eventHandlerT: EventHandlerT["Move"]): void;
+  on(event: Event.Capture, eventHandlerT: EventHandlerT["Capture"]): void;
+  on(event: Event.Castling, eventHandlerT: EventHandlerT["Castling"]): void;
+  on(event: Event.Promotion, eventHandlerT: EventHandlerT["Promotion"]): void;
+  on(event: Event, eventHandlerT: EventHandlerT[keyof EventHandlerT]) {
     switch (event) {
       case Event.Check:
-        this.onCheck = eventHandler as typeof this.onCheck;
+        this.onCheck = eventHandlerT as typeof this.onCheck;
         break;
       case Event.Checkmate:
-        this.onCheckMate = eventHandler as typeof this.onCheckMate;
+        this.onCheckMate = eventHandlerT as typeof this.onCheckMate;
         break;
       case Event.CheckResolve:
-        this.onCheckResolve = eventHandler as typeof this.onCheckResolve;
+        this.onCheckResolve = eventHandlerT as typeof this.onCheckResolve;
         break;
       case Event.Stalemate:
-        this.onStalemate = eventHandler as typeof this.onStalemate;
+        this.onStalemate = eventHandlerT as typeof this.onStalemate;
         break;
       case Event.BoardChange:
-        this.onBoardChange = eventHandler as typeof this.onBoardChange;
+        this.onBoardChange = eventHandlerT as typeof this.onBoardChange;
         break;
       case Event.Move:
-        this.onMove = eventHandler as typeof this.onMove;
+        this.onMove = eventHandlerT as typeof this.onMove;
         break;
       case Event.Capture:
-        this.onCapture = eventHandler as typeof this.onCapture;
+        this.onCapture = eventHandlerT as typeof this.onCapture;
         break;
       case Event.Castling:
-        this.onCastling = eventHandler as typeof this.onCastling;
+        this.onCastling = eventHandlerT as typeof this.onCastling;
         break;
       case Event.Promotion:
-        this.onPromotion = eventHandler as typeof this.onPromotion;
+        this.onPromotion = eventHandlerT as typeof this.onPromotion;
         break;
     }
   }
@@ -644,14 +648,17 @@ export class CustomBoard {
   private _currentTurn: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
 
-  private getPromotionVariant: EventHandler["GetPromotionVariant"] | undefined;
-  private onBoardChange: EventHandler["BoardChange"] | undefined;
-  private onCheck: EventHandler["Check"] | undefined;
-  private onCheckMate: EventHandler["Checkmate"] | undefined;
-  private onCheckResolve: EventHandler["CheckResolve"] | undefined;
-  private onStalemate: EventHandler["Stalemate"] | undefined;
-  private onMove: EventHandler["Move"] | undefined;
-  private onCapture: EventHandler["Capture"] | undefined;
-  private onCastling: EventHandler["Castling"] | undefined;
-  private onPromotion: EventHandler["Promotion"] | undefined;
+  private getPromotionVariant: EventHandlerT["GetPromotionVariant"] | undefined;
+  private onBoardChange: EventHandlerT["BoardChange"] | undefined;
+  private onCheck: EventHandlerT["Check"] | undefined;
+  private onCheckMate: EventHandlerT["Checkmate"] | undefined;
+  private onCheckResolve: EventHandlerT["CheckResolve"] | undefined;
+  private onStalemate: EventHandlerT["Stalemate"] | undefined;
+  private onMove: EventHandlerT["Move"] | undefined;
+  private onCapture: EventHandlerT["Capture"] | undefined;
+  private onCastling: EventHandlerT["Castling"] | undefined;
+  private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
+
+// TODO: history of moves
+// TODO: undone

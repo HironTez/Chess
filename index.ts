@@ -1,9 +1,15 @@
-import type { PointT, PositionInputT, PromotionType } from "./src";
+import type {
+  EventHandlerT,
+  PointT,
+  PositionInputT,
+  PromotionType,
+} from "./src";
 import {
   Bishop,
   Board,
   Color,
   CustomBoard,
+  Event,
   King,
   Knight,
   Pawn,
@@ -19,6 +25,7 @@ export {
   Board,
   Color,
   CustomBoard,
+  Event,
   King,
   Knight,
   Pawn,
@@ -28,4 +35,4 @@ export {
   Rook,
   Type,
 };
-export type { PointT, PositionInputT, PromotionType };
+export type { EventHandlerT, PointT, PositionInputT, PromotionType };
