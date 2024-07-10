@@ -30,7 +30,6 @@ test("knight can move over other pieces", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Knight("C1", Color.White),
     new Pawn("B2", Color.Black),
   ]);
@@ -57,8 +56,9 @@ test("Knight capture movement", async () => {
 
 test("Knight illegal move", async () => {
   const board = new CustomBoard([
-    new Knight("B1", Color.White),
+    new King("E1", Color.White),
     new King("E8", Color.Black),
+    new Knight("B1", Color.White),
   ]);
 
   const knightMoved = await board.move("B1", "B4");

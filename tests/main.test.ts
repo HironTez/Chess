@@ -12,8 +12,8 @@ import {
 
 test("Should expect a turn from a different color after move", async () => {
   const board = new CustomBoard([
-    new King("A8", Color.Black),
     new King("A1", Color.White),
+    new King("A8", Color.Black),
     new Pawn("H1", Color.White),
   ]);
 
@@ -32,7 +32,6 @@ test("Should not move over other pieces", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Pawn("A2", Color.White),
     new Rook("A1", Color.White),
   ]);
@@ -44,11 +43,12 @@ test("Should not move over other pieces", async () => {
 
 test("Should not move outside the board", async () => {
   const board = new CustomBoard([
-    new King("H8", Color.Black),
     new King("A1", Color.White),
+    new King("A8", Color.Black),
+    new Rook("H1", Color.White),
   ]);
 
-  const movedOutOfBounds = await board.move("H8", "I9");
+  const movedOutOfBounds = await board.move("H1", "I9");
 
   expect(movedOutOfBounds).toBeFalse();
 });
@@ -57,7 +57,6 @@ test("Should not move to square occupied by same color", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Pawn("A2", Color.White),
     new Pawn("B2", Color.White),
   ]);
@@ -71,7 +70,6 @@ test("King cannot be in check after move", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Rook("F8", Color.Black),
   ]);
 
@@ -224,7 +222,7 @@ test("Should detect check", async () => {
 
   expect(rookMoved).toBeTrue();
   expect(board.check).toBe(Color.Black);
-  expect(board.checkmate).toBeUndefined();
+  expect(board.checkmate).toBeNull();
 });
 
 test("Should detect checkmate", async () => {
@@ -252,8 +250,8 @@ test("Should detect stalemate", async () => {
   const queenMoved = await board.move("B1", "B6");
 
   expect(queenMoved).toBeTrue();
-  expect(board.check).toBeUndefined();
-  expect(board.checkmate).toBeUndefined();
+  expect(board.check).toBeNull();
+  expect(board.checkmate).toBeNull();
   expect(board.stalemate).toBe(true);
 });
 

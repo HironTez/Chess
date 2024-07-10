@@ -14,33 +14,41 @@ import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
 
 export type PromotionType = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
+enum Event {
+  Check = "check",
+  Checkmate = "checkmate",
+  CheckResolve = "checkResolve",
+  Stalemate = "stalemate",
+  BoardChange = "boardChange",
+  Move = "move",
+  Capture = "capture",
+  Castling = "castling",
+  Promotion = "promotion",
+}
 
-type PureOrPromise<T> = T | Promise<T>;
-
-type GetPromotionVariant = (
-  pawnPosition: Position,
-) => PureOrPromise<PromotionType>;
-type TeamEventHandler = (color: Color) => void;
-type BoardChangeEventHandler = (pieces: Piece[]) => void;
-type PieceMoveEventHandler = (
-  startPosition: Position,
-  endPosition: Position,
-) => void;
-type PieceCaptureEventHandler = (
-  startPosition: Position,
-  endPosition: Position,
-  capturedPosition: Position,
-) => void;
-type CastlingEventHandler = (
-  kingStartPosition: Position,
-  kingEndPosition: Position,
-  rookStartPosition: Position,
-  rookEndPosition: Position,
-) => void;
-type PiecePromotionEventHandler = (
-  piecePosition: Position,
-  newPieceType: PromotionType,
-) => void;
+type EventHandler = {
+  GetPromotionVariant: (
+    piecePosition: Position,
+  ) => PromotionType | Promise<PromotionType>;
+  BoardChange: (pieces: Piece[]) => void;
+  Check: (color: Color) => void;
+  Checkmate: (color: Color) => void;
+  CheckResolve: () => void;
+  Stalemate: () => void;
+  Move: (startPosition: Position, endPosition: Position) => void;
+  Capture: (
+    startPosition: Position,
+    endPosition: Position,
+    capturedPosition: Position,
+  ) => void;
+  Castling: (
+    kingStartPosition: Position,
+    kingEndPosition: Position,
+    rookStartPosition: Position,
+    rookEndPosition: Position,
+  ) => void;
+  Promotion: (piecePosition: Position, newPieceType: PromotionType) => void;
+};
 
 enum Status {
   Check = "check",
@@ -49,32 +57,32 @@ enum Status {
 }
 
 export type BoardOptionsT = {
-  getPromotionVariant?: GetPromotionVariant;
-  onCheck?: TeamEventHandler;
-  onCheckMate?: TeamEventHandler;
-  onCheckResolve?: () => void;
-  onStalemate?: () => void;
-  onBoardChange?: BoardChangeEventHandler;
-  onMove?: PieceMoveEventHandler;
-  onCapture?: PieceCaptureEventHandler;
-  onCastling?: CastlingEventHandler;
-  onPromotion?: PiecePromotionEventHandler;
+  getPromotionVariant?: EventHandler["GetPromotionVariant"];
+  onBoardChange?: EventHandler["BoardChange"];
+  onCheck?: EventHandler["Check"];
+  onCheckMate?: EventHandler["Checkmate"];
+  onCheckResolve?: EventHandler["CheckResolve"];
+  onStalemate?: EventHandler["Stalemate"];
+  onMove?: EventHandler["Move"];
+  onCapture?: EventHandler["Capture"];
+  onCastling?: EventHandler["Castling"];
+  onPromotion?: EventHandler["Promotion"];
 };
 
 /**
  * Chess board with a custom set of pieces
  * @param {MutablePiece[]} pieces - A set of mutable chess pieces to initialize the board.
  * @param {BoardOptionsT} [options] - Board options to customize behavior.
- * @param {GetPromotionVariant} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
- * @param {TeamEventHandler} [options.onCheck] - Callback function triggered when a king is in check.
- * @param {TeamEventHandler} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
- * @param {Function} [options.onCheckResolve] - Callback function triggered when a check is resolved.
- * @param {Function} [options.onStalemate] - Callback function triggered when the game is in stalemate.
- * @param {BoardChangeEventHandler} [options.onBoardChange] - Callback function triggered when the board state changes.
- * @param {PieceMoveEventHandler} [options.onMove] - Callback function triggered when a piece moves.
- * @param {PieceCaptureEventHandler} [options.onCapture] - Callback function triggered when a piece captures another piece.
- * @param {CastlingEventHandler} [options.onCastling] - Callback function triggered when castling occurs.
- * @param {PiecePromotionEventHandler} [options.onPromotion] - Callback function triggered when a pawn is promoted.
+ * @param {EventHandler["GetPromotionVariant"]} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
+ * @param {EventHandler["BoardChange"]} [options.onBoardChange] - Callback function triggered when the board state changes.
+ * @param {EventHandler["Check"]} [options.onCheck] - Callback function triggered when a king is in check.
+ * @param {EventHandler["Checkmate"]} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
+ * @param {EventHandler["CheckResolve"]} [options.onCheckResolve] - Callback function triggered when a check is resolved.
+ * @param {EventHandler["Stalemate"]} [options.onStalemate] - Callback function triggered when the game is in stalemate.
+ * @param {EventHandler["Move"]} [options.onMove] - Callback function triggered when a piece moves.
+ * @param {EventHandler["Capture"]} [options.onCapture] - Callback function triggered when a piece captures another piece.
+ * @param {EventHandler["Castling"]} [options.onCastling] - Callback function triggered when castling occurs.
+ * @param {EventHandler["Promotion"]} [options.onPromotion] - Callback function triggered when a pawn is promoted.
  */
 
 export class CustomBoard {
@@ -109,6 +117,50 @@ export class CustomBoard {
   }
   get currentTurn() {
     return this._currentTurn;
+  }
+
+  on(event: Event.BoardChange, eventHandler: EventHandler["BoardChange"]): void;
+  on(event: Event.Check, eventHandler: EventHandler["Check"]): void;
+  on(event: Event.Checkmate, eventHandler: EventHandler["Checkmate"]): void;
+  on(
+    event: Event.CheckResolve,
+    eventHandler: EventHandler["CheckResolve"],
+  ): void;
+  on(event: Event.Stalemate, eventHandler: EventHandler["Stalemate"]): void;
+  on(event: Event.Move, eventHandler: EventHandler["Move"]): void;
+  on(event: Event.Capture, eventHandler: EventHandler["Capture"]): void;
+  on(event: Event.Castling, eventHandler: EventHandler["Castling"]): void;
+  on(event: Event.Promotion, eventHandler: EventHandler["Promotion"]): void;
+  on(event: Event, eventHandler: EventHandler[keyof EventHandler]) {
+    switch (event) {
+      case Event.Check:
+        this.onCheck = eventHandler as typeof this.onCheck;
+        break;
+      case Event.Checkmate:
+        this.onCheckMate = eventHandler as typeof this.onCheckMate;
+        break;
+      case Event.CheckResolve:
+        this.onCheckResolve = eventHandler as typeof this.onCheckResolve;
+        break;
+      case Event.Stalemate:
+        this.onStalemate = eventHandler as typeof this.onStalemate;
+        break;
+      case Event.BoardChange:
+        this.onBoardChange = eventHandler as typeof this.onBoardChange;
+        break;
+      case Event.Move:
+        this.onMove = eventHandler as typeof this.onMove;
+        break;
+      case Event.Capture:
+        this.onCapture = eventHandler as typeof this.onCapture;
+        break;
+      case Event.Castling:
+        this.onCastling = eventHandler as typeof this.onCastling;
+        break;
+      case Event.Promotion:
+        this.onPromotion = eventHandler as typeof this.onPromotion;
+        break;
+    }
   }
 
   getPieceAt(positionInput: PositionInputT) {
@@ -180,19 +232,19 @@ export class CustomBoard {
     );
     if (!isMoveValid) return false;
 
-    this.handleMovePiece(piece, endPosition);
-
-    if (this.isPromotionPossible(piece)) {
-      await this.handlePromotePawn(piece);
-    }
-
     if (castlingRook) {
-      this.handleMoveCastlingRook(
+      this.handleCastle(
         piece,
         endPosition,
         castlingRook,
         castlingRookNewPosition,
       );
+    } else {
+      this.handleMovePiece(piece, endPosition);
+
+      if (this.isPromotionPossible(piece)) {
+        await this.handlePromotePawn(piece);
+      }
     }
 
     this.handleBoardChange(piece);
@@ -214,7 +266,7 @@ export class CustomBoard {
 
   private handleMovePiece(piece: MutablePiece, endPosition: MutablePosition) {
     const readonlyPieceStartPosition = new Position(piece.position);
-    const readonlyPIeceEndPosition = new Position(endPosition);
+    const readonlyPieceEndPosition = new Position(endPosition);
 
     const capturePosition = this.getCapturePosition(
       piece,
@@ -222,19 +274,19 @@ export class CustomBoard {
       endPosition,
     );
 
+    const isCapturing = this.getPieceAt(capturePosition);
     this.removePieceAt(capturePosition);
     piece.move(endPosition);
 
-    const isCapturing = this.getPieceAt(capturePosition);
     if (isCapturing) {
       const readonlyCapturePosition = new Position(capturePosition);
       this.onCapture?.(
         readonlyPieceStartPosition,
-        readonlyPIeceEndPosition,
+        readonlyPieceEndPosition,
         readonlyCapturePosition,
       );
     } else {
-      this.onMove?.(readonlyPieceStartPosition, readonlyPIeceEndPosition);
+      this.onMove?.(readonlyPieceStartPosition, readonlyPieceEndPosition);
     }
   }
 
@@ -253,18 +305,19 @@ export class CustomBoard {
     this.onPromotion?.(readonlyPiecePosition, pieceType);
   }
 
-  private handleMoveCastlingRook(
+  private handleCastle(
     king: MutablePiece,
-    kingNewPosition: MutablePosition,
+    kingEndPosition: MutablePosition,
     rook: MutablePiece,
-    newRookPosition: MutablePosition,
+    rookEndPosition: MutablePosition,
   ) {
     const readonlyKingStartPosition = new Position(king.position);
-    const readonlyKingEndPosition = new Position(kingNewPosition);
+    const readonlyKingEndPosition = new Position(kingEndPosition);
     const readonlyRookStartPosition = new Position(rook.position);
-    const readonlyRookEndPosition = new Position(newRookPosition);
+    const readonlyRookEndPosition = new Position(rookEndPosition);
 
-    rook.move(newRookPosition);
+    king.move(kingEndPosition);
+    rook.move(rookEndPosition);
 
     this.onCastling?.(
       readonlyKingStartPosition,
@@ -343,7 +396,7 @@ export class CustomBoard {
 
   private updateStatus(king: King) {
     if (this._check === king.oppositeColor) {
-      this._check = undefined;
+      this._check = null;
       this.onCheckResolve?.();
     }
 
@@ -584,21 +637,21 @@ export class CustomBoard {
     this._pieces = this._pieces.filter((piece) => !piece.isAt(position));
   }
 
-  private _check: Color | undefined = undefined;
-  private _checkmate: Color | undefined = undefined;
+  private _check: Color | null = null;
+  private _checkmate: Color | null = null;
   private _stalemate: boolean = false;
   private _pieces: Array<MutablePiece>;
   private _currentTurn: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
 
-  private getPromotionVariant: GetPromotionVariant | undefined;
-  private onCheck: TeamEventHandler | undefined;
-  private onCheckMate: TeamEventHandler | undefined;
-  private onCheckResolve: (() => void) | undefined;
-  private onStalemate: (() => void) | undefined;
-  private onBoardChange: BoardChangeEventHandler | undefined;
-  private onMove: PieceMoveEventHandler | undefined;
-  private onCapture: PieceCaptureEventHandler | undefined;
-  private onCastling: CastlingEventHandler | undefined;
-  private onPromotion: PiecePromotionEventHandler | undefined;
+  private getPromotionVariant: EventHandler["GetPromotionVariant"] | undefined;
+  private onBoardChange: EventHandler["BoardChange"] | undefined;
+  private onCheck: EventHandler["Check"] | undefined;
+  private onCheckMate: EventHandler["Checkmate"] | undefined;
+  private onCheckResolve: EventHandler["CheckResolve"] | undefined;
+  private onStalemate: EventHandler["Stalemate"] | undefined;
+  private onMove: EventHandler["Move"] | undefined;
+  private onCapture: EventHandler["Capture"] | undefined;
+  private onCastling: EventHandler["Castling"] | undefined;
+  private onPromotion: EventHandler["Promotion"] | undefined;
 }

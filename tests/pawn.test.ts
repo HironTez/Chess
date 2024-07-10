@@ -23,9 +23,9 @@ test("pawn possible positions", () => {
 
 test("Pawn basic move", async () => {
   const board = new CustomBoard([
-    new Pawn("E2", Color.White),
-    new King("E8", Color.Black),
     new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("E2", Color.White),
   ]);
 
   const pawnMoved = await board.move("E2", "E3");
@@ -37,9 +37,9 @@ test("Pawn basic move", async () => {
 
 test("Pawn double move from initial position", async () => {
   const board = new CustomBoard([
-    new Pawn("E2", Color.White),
-    new King("E8", Color.Black),
     new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("E2", Color.White),
   ]);
 
   const pawnMoved = await board.move("E2", "E4");
@@ -51,9 +51,9 @@ test("Pawn double move from initial position", async () => {
 
 test("Pawn capture piece", async () => {
   const board = new CustomBoard([
-    new Pawn("E4", Color.White),
-    new King("E8", Color.Black),
     new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("E4", Color.White),
     new Pawn("D5", Color.Black),
   ]);
 
@@ -69,7 +69,6 @@ test("En passant", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Pawn("A2", Color.White),
     new Pawn("B4", Color.Black),
   ]);
@@ -85,7 +84,6 @@ test("En passant", async () => {
   const board2 = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Pawn("A4", Color.White),
     new Pawn("B4", Color.Black),
   ]);
@@ -99,7 +97,6 @@ test("Pawn promotion on reaching last rank", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
-
     new Pawn("A7", Color.White),
   ]);
 
@@ -167,9 +164,9 @@ test("Pawn promotion to Bishop on reaching last rank", async () => {
 
 test("Pawn illegal move backward", async () => {
   const board = new CustomBoard([
-    new Pawn("E3", Color.White),
-    new King("E8", Color.Black),
     new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("E3", Color.White),
   ]);
 
   const pawnMoved = await board.move("E3", "E2");
@@ -181,9 +178,9 @@ test("Pawn illegal move backward", async () => {
 
 test("Pawn illegal double move not from initial position", async () => {
   const board = new CustomBoard([
-    new Pawn("E2", Color.White),
-    new King("E8", Color.Black),
     new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("E2", Color.White),
   ]);
 
   const pawnMoved = await board.move("E2", "E3");

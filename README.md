@@ -161,43 +161,20 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - parameters:
     - `pieces` Array<King | Queen | Rook | Bishop | Knight | Pawn> - the set of pieces
-    - `options.getPromotionVariant` (optional) - get the promotion variant for a pawn
-      - parameters:
-        - `position` Position - the position of the pawn
-      - returns Type | Promise<Type>
-    - `options.onCheck` (optional) - check event handler
-      - parameters:
-        - `color` Color - the color of the team that's in check
-    - `options.onCheckmate` (optional) - checkmate event handler
-      - parameters:
-        - `color` Color - the color of the team that's in checkmate
-    - `options.onCheckResolve` (optional) - check resolve event handler
-    - `options.onStalemate` (optional) - stalemate event handler
-    - `options.onBoardChange` (optional) - board change event handler
-      - parameters:
-        - `pieces` Array<Piece> - the current piece set
-    - `options.onMove` (optional) - piece movement event handler
-      - parameters:
-        - `startPosition` Position - piece start position
-        - `endPosition` Position - piece end position
-    - `options.onCapture` (optional) - piece capture event handler
-      - parameters:
-        - `startPosition` Position - piece start position
-        - `endPosition` Position - piece end position
-        - `capturedPosition` Position - captured target position. It's different from `endPosition` only on en passant because the piece doesn't move to the target's position
-    - `options.onCastling` (optional) - castling event handler
-      - parameters:
-        - `kingStartPosition` Position - king start position
-        - `kingEndPosition` Position - king end position
-        - `rookStartPosition` Position - rook start position
-        - `rookEndPosition` Position - rook end position
-    - `options.onPromotion` (optional) - pawn promotion event handler
-      - parameters:
-        - `position` Position - position of the pawn
+    - `options.getPromotionVariant` EventHandler["GetPromotionVariant"] (optional)
+    - `options.onBoardChange` EventHandler["BoardChange"] (optional)
+    - `options.onCheck` EventHandler["Check"] (optional)
+    - `options.onCheckmate` EventHandler["Checkmate"] (optional)
+    - `options.onCheckResolve` EventHandler["CheckResolve"] (optional)
+    - `options.onStalemate` EventHandler["Stalemate"] (optional)
+    - `options.onMove` EventHandler["Move"] (optional)
+    - `options.onCapture` EventHandler["Capture"] (optional)
+    - `options.onCastling` EventHandler["Castling"] (optional)
+    - `options.onPromotion` EventHandler["Promotion"] (optional)
   - properties:
-    - `check` Color | undefined - color team in check
-    - `checkmate` Color | undefined - color team in checkmate
-    - `stalemate` Color | undefined - color team in stalemate
+    - `check` Color | null - color team in check
+    - `checkmate` Color | null - color team in checkmate
+    - `stalemate` boolean - color team in stalemate
     - `pieces` Array<Piece> - the current set of pieces
     - `currentTurn` Color - color of the team to make next move
   - methods:
@@ -218,6 +195,10 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
         - `startPosition` PositionInput
         - `endPosition` PositionInput
       - returns Promise<boolean> - move success status
+    - `on` - set event handler. Overrides previous handler for the same event
+      - params:
+        - `event` Event
+        - `eventHandler` EventHandler
 
 - Board (extends CustomBoard)
 
@@ -225,6 +206,42 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - parameters:
     - `options` - same as in CustomBoard
+
+- EventHandler
+
+  > Event handlers types
+
+  - `GetPromotionVariant` - get the promotion variant for a pawn
+    - parameters:
+      - `position` Position - the position of the pawn
+    - returns Type | Promise<Type>
+  - `BoardChange` - board change event handler
+    - parameters:
+      - `pieces` Array<Piece> - the current piece set
+  - `Check` - check event handler
+    - parameters:
+      - `color` Color - the color of the team that's in check
+  - `Checkmate` - checkmate event handler
+    - parameters:
+      - `color` Color - the color of the team that's in checkmate
+  - `CheckResolve` - check resolve event handler
+  - `Stalemate` - stalemate event handler
+  - `Move` - piece movement event handler
+    - parameters:
+      - `startPosition` Position - piece start position
+      - `endPosition` Position - piece end position
+  - `Capture` - piece capture event handler
+    - parameters:
+      - `capturedPosition` Position - captured piece position
+  - `Castling` - castling event handler
+    - parameters:
+      - `kingStartPosition` Position - king start position
+      - `kingEndPosition` Position - king end position
+      - `rookStartPosition` Position - rook start position
+      - `rookEndPosition` Position - rook end position
+  - `Promotion` - pawn promotion event handler
+    - parameters:
+      - `position` Position - position of the pawn
 
 ## Limitations
 
