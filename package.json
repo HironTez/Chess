@@ -11,7 +11,7 @@
     "build": "bun build --target=node ./src/index.ts --outfile=./dist/index.js && bun run build:declaration",
     "build:declaration": "tsc --emitDeclarationOnly --project ./tsconfig.types.json",
     "duplications-report": "bunx jscpd src --format=typescript --mode=strict --reporters=html --ignore=index.ts",
-    "release": "bun run build ; npm version patch && npm publish"
+    "release": "bun run build && npm version patch && npm publish"
   },
   "devDependencies": {
     "bun-types": "^1.1.18",
