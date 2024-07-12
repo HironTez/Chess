@@ -295,4 +295,3 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
 - No evaluation
 - No automatic moves
-- No stalemate on move repetition

@@ -89,6 +89,12 @@ export type EventHandlerT = {
   Promotion: (piecePosition: Position, newPieceType: PromotionTypeT) => void;
 };
 
+enum KingStatus {
+  Normal = "normal",
+  Check = "check",
+  Checkmate = "checkmate",
+}
+
 enum Status {
   Check = "check",
   Checkmate = "checkmate",
@@ -659,6 +665,22 @@ export class CustomBoard {
       return Status.Stalemate;
     }
 
+    const lastMovedPiece = this._lastMovedPiece;
+    if (lastMovedPiece) {
+      const lastMovedPiecePosition = lastMovedPiece.position;
+      const lastMovedPieceId = lastMovedPiece.id;
+
+      const repeatedMoves = this._history.filter(
+        (move) =>
+          move.pieceId === lastMovedPieceId &&
+          move.endPosition.distanceTo(lastMovedPiecePosition) === 0,
+      );
+
+      if (repeatedMoves.length >= 3) {
+        return Status.Stalemate;
+      }
+    }
+
     const teamPieces = this._getPiecesByColor(king.color);
     for (const piece of teamPieces) {
       const hasLegalMoves = this.hasPieceLegalMoves(piece);
@@ -756,6 +778,5 @@ export class CustomBoard {
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
 
-// TODO: stalemate on move repetition
 // TODO: undone
 // TODO: list of captured pieces

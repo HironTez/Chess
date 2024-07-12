@@ -4,6 +4,7 @@ import {
   Color,
   CustomBoard,
   King,
+  Knight,
   MoveType,
   Pawn,
   Position,
@@ -437,4 +438,25 @@ test("Id of a piece should stay the same", async () => {
   if (move.success) {
     expect(move.pieceId).toBe(pawn.id);
   }
+});
+
+test("Should be stalemate when a move repeats 3 times", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("A8", Color.Black),
+    new Knight("H1", Color.White),
+    new Knight("H8", Color.Black),
+  ]);
+
+  await board.move("H1", "G3");
+  await board.move("H8", "G6");
+  await board.move("G3", "H1");
+  await board.move("G6", "H8");
+  await board.move("H1", "G3");
+  await board.move("H8", "G6");
+  await board.move("G3", "H1");
+  await board.move("G6", "H8");
+  await board.move("H1", "G3");
+
+  expect(board.stalemate).toBeTrue();
 });
