@@ -421,3 +421,20 @@ test("Should save moves to history", async () => {
     );
   }
 });
+
+test("Id of a piece should stay the same", async () => {
+  const pawn = new Pawn("A7", Color.White);
+
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    pawn,
+  ]);
+
+  const move = await board.move("A7", "A8");
+
+  expect(move).toHaveProperty("success", true);
+  if (move.success) {
+    expect(move.pieceId).toBe(pawn.id);
+  }
+});

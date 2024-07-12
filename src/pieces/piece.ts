@@ -19,13 +19,18 @@ export enum Type {
   King = "king",
 }
 
-export abstract class ReadonlyPieceAbstract {
-  constructor(positionInput: PositionInputT, color: Color) {
+export abstract class PieceAbstract {
+  constructor(
+    positionInput: PositionInputT,
+    color: Color,
+    id: string | undefined,
+  ) {
     const position = new MutablePosition(positionInput);
 
     this._position = position;
     this.color = color;
     this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
+    this.id = id ?? Math.random().toString(16).slice(2);
   }
 
   get isMoved() {
@@ -48,11 +53,12 @@ export abstract class ReadonlyPieceAbstract {
   protected _position: MutablePosition;
   readonly color: Color;
   readonly oppositeColor: Color;
+  readonly id: string;
 }
 
-export abstract class PieceAbstract extends ReadonlyPieceAbstract {
+export abstract class MutablePieceAbstract extends PieceAbstract {
   constructor(positionInput: PositionInputT, color: Color) {
-    super(positionInput, color);
+    super(positionInput, color, undefined);
   }
 
   move(position: MutablePosition) {
@@ -71,7 +77,7 @@ export abstract class PieceAbstract extends ReadonlyPieceAbstract {
   ): boolean;
 }
 
-export abstract class MutablePiece extends PieceAbstract {
+export abstract class MutablePiece extends MutablePieceAbstract {
   constructor(positionInput: PositionInputT, color: Color) {
     super(positionInput, color);
   }
@@ -88,9 +94,9 @@ export abstract class MutablePiece extends PieceAbstract {
   }
 }
 
-export class Piece extends ReadonlyPieceAbstract {
+export class Piece extends PieceAbstract {
   constructor(piece: MutablePiece) {
-    super(piece.position, piece.color);
+    super(new Position(piece.position), piece.color, piece.id);
 
     this.type = piece.type;
   }

@@ -29,6 +29,7 @@ export enum MoveType {
 type DynamicMoveT<T extends Position> = {
   startPosition: T;
   endPosition: T;
+  pieceId: string;
 } & (
   | {
       type: MoveType.Move;
@@ -550,6 +551,7 @@ export class CustomBoard {
       type: MoveType.Move,
       startPosition: new MutablePosition(piece.position),
       endPosition: new MutablePosition(endPosition),
+      pieceId: piece.id,
     };
 
     const { castlingRook, castlingRookNewPosition } = this.getCastlingRook(

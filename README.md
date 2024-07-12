@@ -141,6 +141,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `oppositeColor` Color (readonly) - the color of the opposite team
     - `position` Position - the position of the piece
     - `isMoved` boolean - whether the piece was already moved or not yet
+    - `id` string - a unique identifier
   - methods:
     - `isAt` - check if the piece is at specified position
       - params:
@@ -288,6 +289,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - `castlingRookStartPosition` Position | undefined (exists if `type` is `Castling`) - initial position of the castling rook
   - `castlingRookEndPosition` Position | undefined (exists if `type` is `Castling`) - final position of the castling rook
   - `newPieceType` Type | undefined (exists if `type` is `Promotion`) - the new piece type of the promoted pawn
+  - `pieceId` string - id of the moved piece
 
 ## Limitations
 
