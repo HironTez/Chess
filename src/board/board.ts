@@ -26,39 +26,29 @@ export enum MoveType {
   Promotion = "promotion",
 }
 
-type MutableMoveT = {
-  startPosition: MutablePosition;
-  endPosition: MutablePosition;
+type DynamicMoveT<T extends Position> = {
+  startPosition: T;
+  endPosition: T;
 } & (
   | {
       type: MoveType.Move;
     }
-  | { type: MoveType.Capture; capturedPosition: MutablePosition }
+  | {
+      type: MoveType.Capture;
+      capturedPosition: T;
+    }
   | {
       type: MoveType.Castling;
-      castlingRookStartPosition: MutablePosition;
-      castlingRookEndPosition: MutablePosition;
+      castlingRookStartPosition: T;
+      castlingRookEndPosition: T;
     }
+  | { type: MoveType.Promotion; newPieceType: PromotionTypeT }
 );
 
-export type MoveT =
-  | { success: false }
-  | ({
-      success: true;
-      startPosition: Position;
-      endPosition: Position;
-    } & (
-      | {
-          type: MoveType.Move;
-        }
-      | { type: MoveType.Capture; capturedPosition: Position }
-      | {
-          type: MoveType.Castling;
-          castlingRookStartPosition: Position;
-          castlingRookEndPosition: Position;
-        }
-      | { type: MoveType.Promotion; newPieceType: PromotionTypeT }
-    ));
+export type MoveT = DynamicMoveT<Position>;
+type MutableMoveT = DynamicMoveT<MutablePosition>;
+
+export type MoveReturnT = { success: false } | ({ success: true } & MoveT);
 
 export type PromotionTypeT = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
 
@@ -166,6 +156,9 @@ export class CustomBoard {
   get currentTurn() {
     return this._currentTurn;
   }
+  get history() {
+    return this._history.map(this.makeMoveReadonly);
+  }
 
   on(
     event: Event.BoardChange,
@@ -235,10 +228,10 @@ export class CustomBoard {
   async move(
     startPositionInput: PositionInputT,
     endPositionInput: PositionInputT,
-  ) {
+  ): Promise<MoveReturnT> {
     const startPosition = new MutablePosition(startPositionInput);
     const endPosition = new MutablePosition(endPositionInput);
-    if (!startPosition || !endPosition) return false;
+    if (!startPosition || !endPosition) return { success: false };
 
     return await this.movePiece(startPosition, endPosition);
   }
@@ -264,24 +257,30 @@ export class CustomBoard {
     return positions.some((position) => this.isMoveValid(piece, position));
   }
 
+  private makeMoveReadonly(mutableMove: MutableMoveT) {
+    const move: MoveT = { ...mutableMove };
+    for (const keyName in move) {
+      const key = keyName as keyof typeof move;
+      const value = move[key];
+      if (value instanceof MutablePosition) {
+        (move as any)[key] = new Position(value);
+      }
+    }
+
+    return move;
+  }
+
   private async movePiece(
     startPosition: MutablePosition,
     endPosition: MutablePosition,
-  ): Promise<MoveT> {
-    const unsuccessfulMove: MoveT = { success: false };
+  ): Promise<MoveReturnT> {
+    const unsuccessfulMove: MoveReturnT = { success: false };
 
     const piece = this._getPieceAt(startPosition);
     if (!piece) return unsuccessfulMove;
 
-    const mutableMove = this.checkMove(piece, endPosition);
+    let mutableMove = this.checkMove(piece, endPosition);
     if (!mutableMove) return unsuccessfulMove;
-
-    let move: MoveT = {
-      success: true,
-      type: MoveType.Move,
-      startPosition: new Position(mutableMove.startPosition),
-      endPosition: new Position(mutableMove.endPosition),
-    };
 
     if (mutableMove.type === MoveType.Castling) {
       this.handleCastle(
@@ -291,48 +290,45 @@ export class CustomBoard {
         mutableMove.castlingRookEndPosition,
       );
 
-      move = {
-        ...move,
+      mutableMove = {
+        ...mutableMove,
         type: MoveType.Castling,
-        castlingRookStartPosition: new Position(
-          mutableMove.castlingRookStartPosition,
-        ),
-        castlingRookEndPosition: new Position(
-          mutableMove.castlingRookEndPosition,
-        ),
+        castlingRookStartPosition: mutableMove.castlingRookStartPosition,
+        castlingRookEndPosition: mutableMove.castlingRookEndPosition,
       };
     } else {
-      const pieceToCapture = this.getPieceToCapture(
-        piece,
-        mutableMove.endPosition,
-      );
+      const pieceToCapture =
+        mutableMove.type === MoveType.Capture
+          ? this._getPieceAt(mutableMove.capturedPosition) ?? null
+          : null;
+
       this.handleMovePiece(piece, mutableMove.endPosition, pieceToCapture);
 
       if (this.isPromotionPossible(piece)) {
         const pieceType = await this.handlePromotePawn(piece);
 
-        move = {
-          ...move,
+        mutableMove = {
+          ...mutableMove,
           type: MoveType.Promotion,
           newPieceType: pieceType,
         };
       } else if (pieceToCapture) {
-        move = {
-          ...move,
+        mutableMove = {
+          ...mutableMove,
           type: MoveType.Capture,
-          capturedPosition: new Position(pieceToCapture.position),
+          capturedPosition: pieceToCapture.position,
         };
       }
     }
 
+    this._history.push(mutableMove);
+
     this.handleBoardChange(piece);
 
-    return move;
-  }
-
-  private getPieceToCapture(piece: MutablePiece, endPosition: MutablePosition) {
-    const capturePosition = this.getCapturePosition(piece, endPosition);
-    return this._getPieceAt(capturePosition) ?? null;
+    return {
+      success: true,
+      ...this.makeMoveReadonly(mutableMove),
+    };
   }
 
   private getCapturePosition(
@@ -552,8 +548,8 @@ export class CustomBoard {
 
     const move: MutableMoveT = {
       type: MoveType.Move,
-      startPosition: piece.position,
-      endPosition: endPosition,
+      startPosition: new MutablePosition(piece.position),
+      endPosition: new MutablePosition(endPosition),
     };
 
     const { castlingRook, castlingRookNewPosition } = this.getCastlingRook(
@@ -572,8 +568,8 @@ export class CustomBoard {
       return {
         ...move,
         type: MoveType.Castling,
-        castlingRookStartPosition: castlingRook.position,
-        castlingRookEndPosition: castlingRookNewPosition,
+        castlingRookStartPosition: new MutablePosition(castlingRook.position),
+        castlingRookEndPosition: new MutablePosition(castlingRookNewPosition),
       };
     }
 
@@ -582,24 +578,26 @@ export class CustomBoard {
       return undefined;
     }
 
-    const target = this._getPieceAt(endPosition);
+    const capturePosition = this.getCapturePosition(piece, endPosition);
+    const target = this._getPieceAt(capturePosition);
     const isTargetEnemy = target?.color === piece.oppositeColor;
     if (target && !isTargetEnemy) {
       return undefined;
     }
 
-    const isEnPassantPossible = this.isEnPassantPossible(
-      piece,
-      endPosition,
-      this._lastMovedPiece,
-    );
-
     const canPieceMove = piece.canMove(
       endPosition,
-      isTargetEnemy || isEnPassantPossible,
+      isTargetEnemy,
       !!castlingRook,
     );
     if (canPieceMove && !this.willBeCheck(piece, endPosition)) {
+      if (isTargetEnemy) {
+        return {
+          ...move,
+          type: MoveType.Capture,
+          capturedPosition: new MutablePosition(capturePosition),
+        };
+      }
       return move;
     }
 
@@ -742,6 +740,7 @@ export class CustomBoard {
   private _pieces: Array<MutablePiece>;
   private _currentTurn: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
+  private _history: Array<MutableMoveT> = [];
 
   private getPromotionVariant: EventHandlerT["GetPromotionVariant"] | undefined;
   private onBoardChange: EventHandlerT["BoardChange"] | undefined;
@@ -755,7 +754,6 @@ export class CustomBoard {
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
 
-// TODO: history of moves
 // TODO: stalemate on move repetition
 // TODO: undone
 // TODO: list of captured pieces

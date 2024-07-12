@@ -1,5 +1,10 @@
-import type { EventHandlerT, MoveT, MoveType, PromotionTypeT } from "./board";
-import { Board, CustomBoard, Event } from "./board";
+import type {
+  EventHandlerT,
+  MoveReturnT,
+  MoveT,
+  PromotionTypeT,
+} from "./board";
+import { Board, CustomBoard, Event, MoveType } from "./board";
 import {
   Bishop,
   Color,
@@ -30,4 +35,11 @@ export {
   Rook,
   Type,
 };
-export type { EventHandlerT, MoveT, PointT, PositionInputT, PromotionTypeT };
+export type {
+  EventHandlerT,
+  MoveReturnT,
+  MoveT,
+  PointT,
+  PositionInputT,
+  PromotionTypeT,
+};

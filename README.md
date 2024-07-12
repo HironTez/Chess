@@ -194,7 +194,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
       - params:
         - `startPosition` PositionInput
         - `endPosition` PositionInput
-      - returns Promise<MoveT> - move result with details
+      - returns Promise<MoveReturnT> - move result with details
     - `on` - set event handler. Overrides previous handler for the same event
       - params:
         - `event` Event
@@ -269,12 +269,18 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `Castling`
     - `Promotion`
 
+- MoveReturnT
+
+  > A wrapper around the `MoveT` that helps handle successful and unsuccessful moves
+
+  - `success` boolean - whether the move succeeded
+  - ...`MoveT` - properties from `MoveT` (exist only if `success` is true)
+
 - MoveT
 
   > Details of a move
 
   - type: `object`
-  - `success` boolean - whether the move succeeded
   - `type` MoveType - type of the move
   - `startPosition` Position - initial position of the piece
   - `endPosition` Position - final position of the piece

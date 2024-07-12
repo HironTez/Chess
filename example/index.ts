@@ -37,6 +37,8 @@ const main = async () => {
       console.error("Invalid move! Try again.");
       continue;
     }
+
+    console.log(JSON.stringify(board.history));
   }
 };
 

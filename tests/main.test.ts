@@ -4,7 +4,9 @@ import {
   Color,
   CustomBoard,
   King,
+  MoveType,
   Pawn,
+  Position,
   Queen,
   Rook,
   Type,
@@ -308,4 +310,114 @@ test("Should detect stalemate with only two kings remaining", async () => {
   const stalemate = board.stalemate;
 
   expect(stalemate).toBeTrue();
+});
+
+test("Move should contain correct start and end positions", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("A8", Color.Black),
+    new Pawn("H1", Color.White),
+  ]);
+
+  const move = await board.move("H1", "H2");
+
+  expect(move).toHaveProperty("success", true);
+  expect(move).toHaveProperty("type", MoveType.Move);
+  if (move.success) {
+    expect(move.startPosition).toBeInstanceOf(Position);
+    expect(move.endPosition).toBeInstanceOf(Position);
+    expect(move.startPosition.notation).toBe("H1");
+    expect(move.endPosition.notation).toBe("H2");
+  }
+});
+
+test("Should contain correct capture position", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("A2", Color.White),
+    new Pawn("B4", Color.Black),
+  ]);
+
+  await board.move("A2", "A4");
+  const move = await board.move("B4", "A3");
+
+  expect(move).toHaveProperty("success", true);
+  expect(move).toHaveProperty("type", MoveType.Capture);
+  if (move.success && move.type === MoveType.Capture) {
+    expect(move.capturedPosition).toBeInstanceOf(Position);
+    expect(move.capturedPosition.notation).toBe("A4");
+  }
+});
+
+test("Should contain correct castling positions", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Rook("H1", Color.White),
+  ]);
+
+  const move = await board.move("E1", "G1");
+
+  expect(move).toHaveProperty("success", true);
+  expect(move).toHaveProperty("type", MoveType.Castling);
+  if (move.success && move.type === MoveType.Castling) {
+    expect(move.startPosition).toBeInstanceOf(Position);
+    expect(move.endPosition).toBeInstanceOf(Position);
+    expect(move.castlingRookStartPosition).toBeInstanceOf(Position);
+    expect(move.castlingRookEndPosition).toBeInstanceOf(Position);
+    expect(move.startPosition.notation).toBe("E1");
+    expect(move.endPosition.notation).toBe("G1");
+    expect(move.castlingRookStartPosition.notation).toBe("H1");
+    expect(move.castlingRookEndPosition.notation).toBe("F1");
+  }
+});
+
+test("Should contain correct promotion type", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("A7", Color.White),
+  ]);
+
+  const move = await board.move("A7", "A8");
+
+  expect(move).toHaveProperty("success", true);
+  expect(move).toHaveProperty("type", MoveType.Promotion);
+  if (move.success && move.type === MoveType.Promotion) {
+    expect(move.newPieceType).toBe(Type.Queen);
+  }
+});
+
+test("Should save moves to history", async () => {
+  const board = new CustomBoard([
+    new King("E1", Color.White),
+    new King("E8", Color.Black),
+    new Pawn("A2", Color.White),
+    new Pawn("B4", Color.Black),
+  ]);
+
+  const move1 = await board.move("A2", "A4");
+  const move2 = await board.move("B4", "A3");
+
+  expect(move1).toHaveProperty("success", true);
+  expect(move2).toHaveProperty("success", true);
+  expect(move1.success && move1.startPosition.notation).not.toBeUndefined();
+  expect(move2.success && move2.startPosition.notation).not.toBeUndefined();
+
+  if (
+    move1.success &&
+    move2.success &&
+    move1.startPosition.notation &&
+    move2.startPosition.notation
+  ) {
+    const history = board.history;
+    expect(history).toHaveLength(2);
+    expect(history.at(0)?.startPosition.notation).toBe(
+      move1.startPosition.notation,
+    );
+    expect(history.at(1)?.startPosition.notation).toBe(
+      move2.startPosition.notation,
+    );
+  }
 });

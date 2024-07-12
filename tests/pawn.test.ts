@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Color, CustomBoard, King, Pawn, Position, Type } from "../src";
 
-test("pawn possible positions", () => {
+test("Pawn possible positions", () => {
   const expectedPositions = [
     new Position("A3"),
     new Position("B3"),

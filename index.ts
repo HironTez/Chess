@@ -1,5 +1,6 @@
 import type {
   EventHandlerT,
+  MoveReturnT,
   MoveT,
   MoveType,
   PointT,
@@ -38,4 +39,11 @@ export {
   Rook,
   Type,
 };
-export type { EventHandlerT, MoveT, PointT, PositionInputT, PromotionTypeT };
+export type {
+  EventHandlerT,
+  MoveReturnT,
+  MoveT,
+  PointT,
+  PositionInputT,
+  PromotionTypeT,
+};
