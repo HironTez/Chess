@@ -33,15 +33,16 @@ export class Pawn extends MutablePiece {
     return this.justDoubleMoved;
   }
 
-  canMove(position: MutablePosition) {
+  canMove(position: MutablePosition, capture: boolean) {
     const distance = this.position.distanceTo(position);
     const movingVertically = areAlignedHorizontally(this.position, position);
-    const directionIsRight = this.directionIsRight(position);
+    const isDirectionRight = this.isDirectionRight(position);
     const canMove = distance === 1;
     const canDoubleMove = movingVertically && !this.isMoved && distance === 2;
-    const distanceIsRight = canMove || canDoubleMove;
+    const isDistanceRight = canMove || canDoubleMove;
+    const isActionRight = movingVertically !== capture;
 
-    return directionIsRight && distanceIsRight;
+    return isDirectionRight && isDistanceRight && isActionRight;
   }
 
   protected onMove(position: MutablePosition) {
@@ -56,7 +57,7 @@ export class Pawn extends MutablePiece {
     this.justDoubleMoved = false;
   }
 
-  private directionIsRight(position: MutablePosition) {
+  private isDirectionRight(position: MutablePosition) {
     const movingUp = isMovingUp(this.position, position);
     return this.color === Color.White ? movingUp : !movingUp;
   }

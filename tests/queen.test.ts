@@ -47,10 +47,10 @@ test("Queen basic movement", async () => {
     new Queen("D1", Color.White),
   ]);
 
-  const queenMoved = await board.move("D1", "H5");
+  const queenMove = await board.move("D1", "H5");
   const queenAtNewPosition = board.getPieceAt("H5");
 
-  expect(queenMoved).toBeTrue();
+  expect(queenMove).toHaveProperty("success", true);
   expect(queenAtNewPosition).toHaveProperty("type", Type.Queen);
 });
 
@@ -62,10 +62,10 @@ test("Queen capture piece", async () => {
     new Pawn("H5", Color.Black),
   ]);
 
-  const queenMoved = await board.move("D1", "H5");
+  const queenMove = await board.move("D1", "H5");
   const capturedPiece = board.getPieceAt("H5");
 
-  expect(queenMoved).toBeTrue();
+  expect(queenMove).toHaveProperty("success", true);
   expect(capturedPiece).toHaveProperty("type", Type.Queen);
   expect(capturedPiece).toHaveProperty("color", Color.White);
 });
@@ -77,10 +77,10 @@ test("Queen illegal move", async () => {
     new Queen("D1", Color.White),
   ]);
 
-  const queenMoved = await board.move("D1", "E3");
+  const queenMove = await board.move("D1", "E3");
   const queenAtNewPosition = board.getPieceAt("D1");
 
-  expect(queenMoved).toBeFalse();
+  expect(queenMove).toHaveProperty("success", false);
   expect(queenAtNewPosition).toHaveProperty("type", Type.Queen);
   expect(queenAtNewPosition).toHaveProperty("color", Color.White);
 });

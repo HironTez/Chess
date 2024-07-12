@@ -33,9 +33,9 @@ test("King basic movement", async () => {
     new Pawn("H8", Color.Black),
   ]);
 
-  const kingMoved = await board.move("E4", "E5");
+  const move = await board.move("E4", "E5");
 
-  expect(kingMoved).toBeTrue();
+  expect(move).toHaveProperty("success", true);
   expect(board.getPieceAt("E5")).toHaveProperty("type", Type.King);
 });
 
@@ -46,11 +46,11 @@ test("King can only move one square", async () => {
     new Pawn("H8", Color.Black),
   ]);
 
-  const movedTwoSquares = await board.move("E1", "D3");
-  const movedOneSquare = await board.move("E1", "F1");
+  const moveTwoSquares = await board.move("E1", "D3");
+  const moveOneSquare = await board.move("E1", "F1");
 
-  expect(movedTwoSquares).toBeFalse();
-  expect(movedOneSquare).toBeTrue();
+  expect(moveTwoSquares).toHaveProperty("success", false);
+  expect(moveOneSquare).toHaveProperty("success", true);
 });
 
 test("King capture attacking piece", async () => {
@@ -60,9 +60,9 @@ test("King capture attacking piece", async () => {
     new Pawn("D5", Color.Black),
   ]);
 
-  const kingMoved = await board.move("E4", "D5");
+  const move = await board.move("E4", "D5");
   const king = board.getPieceAt("D5");
 
-  expect(kingMoved).toBeTrue();
+  expect(move).toHaveProperty("success", true);
   expect(king).toHaveProperty("type", Type.King);
 });

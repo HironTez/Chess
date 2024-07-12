@@ -34,9 +34,9 @@ test("knight can move over other pieces", async () => {
     new Pawn("B2", Color.Black),
   ]);
 
-  const movedOverPiece = await board.move("C1", "B3");
+  const moveOverPiece = await board.move("C1", "B3");
 
-  expect(movedOverPiece).toBeTrue();
+  expect(moveOverPiece).toHaveProperty("success", true);
 });
 
 test("Knight capture movement", async () => {
@@ -47,10 +47,10 @@ test("Knight capture movement", async () => {
     new Pawn("C3", Color.Black),
   ]);
 
-  const knightMoved = await board.move("B1", "C3");
+  const knightMove = await board.move("B1", "C3");
   const capturedPiece = board.getPieceAt("C3");
 
-  expect(knightMoved).toBeTrue();
+  expect(knightMove).toHaveProperty("success", true);
   expect(capturedPiece).toHaveProperty("type", Type.Knight);
 });
 
@@ -61,9 +61,9 @@ test("Knight illegal move", async () => {
     new Knight("B1", Color.White),
   ]);
 
-  const knightMoved = await board.move("B1", "B4");
+  const knightMove = await board.move("B1", "B4");
 
-  expect(knightMoved).toBeFalse();
+  expect(knightMove).toHaveProperty("success", false);
   expect(board.getPieceAt("B1")).toHaveProperty("type", Type.Knight);
   expect(board.getPieceAt("B1")).toHaveProperty("color", Color.White);
 });

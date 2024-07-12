@@ -1,7 +1,7 @@
-import type { EventHandlerT, PromotionType } from "./board";
+import type { EventHandlerT, MoveT, MoveType, PromotionType } from "./board";
 import { CustomBoard, Event } from "./board";
 import { Board } from "./preparedBoard";
 
-export type { EventHandlerT, PromotionType };
+export type { EventHandlerT, MoveT, PromotionType };
 
-export { Board, CustomBoard, Event };
+export { Board, CustomBoard, Event, MoveType };

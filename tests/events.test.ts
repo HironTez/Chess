@@ -17,8 +17,8 @@ test("Should trigger 'boardChange' event when the board state changes", async ()
     },
   );
 
-  const moved = await board.move("E2", "E4");
-  expect(moved).toBeTrue();
+  const move = await board.move("E2", "E4");
+  expect(move).toHaveProperty("success", true);
 
   const boardChangeTriggered = await promise;
   expect(boardChangeTriggered).toBeTrue();
@@ -40,8 +40,8 @@ test("Should trigger 'check' event when a king is in check", async () => {
     },
   );
 
-  const moved = await board.move("F7", "F8");
-  expect(moved).toBeTrue();
+  const move = await board.move("F7", "F8");
+  expect(move).toHaveProperty("success", true);
 
   const checkColor = await promise;
   expect(checkColor).toBe(Color.Black);
@@ -64,8 +64,8 @@ test("Should trigger 'checkmate' event when a king is in checkmate", async () =>
     },
   );
 
-  const moved = await board.move("A1", "A8");
-  expect(moved).toBeTrue();
+  const move = await board.move("A1", "A8");
+  expect(move).toHaveProperty("success", true);
 
   const checkmateColor = await promise;
   expect(checkmateColor).toBe(Color.Black);
@@ -87,8 +87,8 @@ test("Should trigger 'stalemate' event when the game is in stalemate", async () 
     },
   );
 
-  const moved = await board.move("B1", "B6");
-  expect(moved).toBeTrue();
+  const move = await board.move("B1", "B6");
+  expect(move).toHaveProperty("success", true);
 
   const stalemateTriggered = await promise;
   expect(stalemateTriggered).toBeTrue();
@@ -112,8 +112,8 @@ test("Should trigger 'move' event when a piece moves", async () => {
     },
   );
 
-  const moved = await board.move("E2", "E4");
-  expect(moved).toBeTrue();
+  const move = await board.move("E2", "E4");
+  expect(move).toHaveProperty("success", true);
 
   const moveTriggered = await promise;
   expect(moveTriggered).toBeTrue();
@@ -140,10 +140,10 @@ test("Should trigger 'capture' event when a piece captures another piece", async
     },
   );
 
-  const moved1 = await board.move("A2", "A4");
-  const moved2 = await board.move("B4", "A3");
-  expect(moved1).toBeTrue();
-  expect(moved2).toBeTrue();
+  const move1 = await board.move("A2", "A4");
+  const move2 = await board.move("B4", "A3");
+  expect(move1).toHaveProperty("success", true);
+  expect(move2).toHaveProperty("success", true);
 
   const captureTriggered = await promise;
   expect(captureTriggered).toBeTrue();
@@ -166,8 +166,8 @@ test("Should trigger 'promotion' event when a pawn is promoted", async () => {
     },
   );
 
-  const moved = await board.move("F7", "F8");
-  expect(moved).toBeTrue();
+  const move = await board.move("F7", "F8");
+  expect(move).toHaveProperty("success", true);
 
   const promotionTriggered = await promise;
   expect(promotionTriggered).toBeTrue();
@@ -199,8 +199,8 @@ test("Should trigger 'castling' event when castling occurs", async () => {
     },
   );
 
-  const moved = await board.move("E1", "G1");
-  expect(moved).toBeTrue();
+  const move = await board.move("E1", "G1");
+  expect(move).toHaveProperty("success", true);
 
   const castlingTriggered = await promise;
   expect(castlingTriggered).toBeTrue();

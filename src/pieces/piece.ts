@@ -64,7 +64,11 @@ export abstract class PieceAbstract extends ReadonlyPieceAbstract {
 
   abstract getPossibleMoves(): MutablePosition[];
 
-  abstract canMove(position: MutablePosition): boolean;
+  abstract canMove(
+    position: MutablePosition,
+    capture: boolean,
+    castle: boolean,
+  ): boolean;
 }
 
 export abstract class MutablePiece extends PieceAbstract {

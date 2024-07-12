@@ -1,5 +1,7 @@
 import type {
   EventHandlerT,
+  MoveT,
+  MoveType,
   PointT,
   PositionInputT,
   PromotionType,
@@ -28,6 +30,7 @@ export {
   Event,
   King,
   Knight,
+  MoveType,
   Pawn,
   Piece,
   Position,
@@ -35,4 +38,4 @@ export {
   Rook,
   Type,
 };
-export type { EventHandlerT, PointT, PositionInputT, PromotionType };
+export type { EventHandlerT, MoveT, PointT, PositionInputT, PromotionType };

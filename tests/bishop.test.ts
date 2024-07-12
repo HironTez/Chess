@@ -42,9 +42,9 @@ test("Bishop movement", async () => {
     new Bishop("C1", Color.White),
   ]);
 
-  const bishopMoved = await board.move("C1", "G5");
+  const bishopMove = await board.move("C1", "G5");
 
-  expect(bishopMoved).toBeTrue();
+  expect(bishopMove).toHaveProperty("success", true);
 });
 
 test("Bishop capture", async () => {
@@ -55,10 +55,10 @@ test("Bishop capture", async () => {
     new Pawn("E3", Color.Black),
   ]);
 
-  const bishopMoved = await board.move("C1", "E3");
+  const bishopMove = await board.move("C1", "E3");
   const capturedPiece = board.getPieceAt("E3");
 
-  expect(bishopMoved).toBeTrue();
+  expect(bishopMove).toHaveProperty("success", true);
   expect(capturedPiece).toHaveProperty("type", Type.Bishop);
 });
 
@@ -68,9 +68,9 @@ test("Bishop illegal move", async () => {
     new King("E8", Color.Black),
   ]);
 
-  const bishopMoved = await board.move("C1", "C4");
+  const bishopMove = await board.move("C1", "C4");
 
-  expect(bishopMoved).toBeFalse();
+  expect(bishopMove).toHaveProperty("success", false);
   expect(board.getPieceAt("C1")).toHaveProperty("type", Type.Bishop);
   expect(board.getPieceAt("C1")).toHaveProperty("color", Color.White);
 });

@@ -17,11 +17,12 @@ export class King extends MutablePiece {
     ];
   }
 
-  canMove(position: MutablePosition) {
+  canMove(position: MutablePosition, _: unknown, castle: boolean) {
     const distance = this.position.distanceTo(position);
     const movingHorizontally = areAlignedVertically(this.position, position);
     const canMove = distance === 1;
-    const canCastle = !this.isMoved && movingHorizontally && distance === 2;
+    const canCastle =
+      castle && !this.isMoved && movingHorizontally && distance === 2;
 
     return canMove || canCastle;
   }

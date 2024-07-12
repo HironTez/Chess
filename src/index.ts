@@ -1,4 +1,4 @@
-import type { EventHandlerT, PromotionType } from "./board";
+import type { EventHandlerT, MoveT, MoveType, PromotionType } from "./board";
 import { Board, CustomBoard, Event } from "./board";
 import {
   Bishop,
@@ -22,6 +22,7 @@ export {
   Event,
   King,
   Knight,
+  MoveType,
   Pawn,
   Piece,
   Position,
@@ -29,4 +30,4 @@ export {
   Rook,
   Type,
 };
-export type { EventHandlerT, PointT, PositionInputT, PromotionType };
+export type { EventHandlerT, MoveT, PointT, PositionInputT, PromotionType };

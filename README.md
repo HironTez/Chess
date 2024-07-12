@@ -43,10 +43,10 @@ const board = new CustomBoard([
   new Pawn("B4", Color.Black),
 ]);
 
-const pawnDoubleMoved = await board.move("A2", "A4");
-// true
-const enPassantSuccess = await board.move("B4", "A3");
-// true
+const pawnDoubleMove = await board.move("A2", "A4");
+// { success: true, ...}
+const enPassant = await board.move("B4", "A3");
+// { success: true, ...}
 const blackPawn = board.getPieceAt("A3");
 // [instance of Piece]
 const whitePawn = board.getPieceAt("A4");
@@ -54,7 +54,7 @@ const whitePawn = board.getPieceAt("A4");
 const checkColor = board.check;
 // Color.White
 const checkmateColor = board.checkmate;
-// undefined
+// null
 const whiteKingPossibleMoves = board.getPossibleMoves("B2");
 // [array of Position instances]
 const isBlackPawnAtA3 = blackPawn?.isAt("A3");
@@ -194,7 +194,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
       - params:
         - `startPosition` PositionInput
         - `endPosition` PositionInput
-      - returns Promise<boolean> - move success status
+      - returns Promise<MoveT> - move result with details
     - `on` - set event handler. Overrides previous handler for the same event
       - params:
         - `event` Event
@@ -258,6 +258,30 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - `Promotion` - pawn promotion event handler
     - parameters:
       - `position` Position - position of the pawn
+
+- MoveType
+
+  > Enum that represents a type of a move
+
+  - members
+    - `Move`
+    - `Capture`
+    - `Castling`
+    - `Promotion`
+
+- MoveT
+
+  > Details of a move
+
+  - type: `object`
+  - `success` boolean - whether the move succeeded
+  - `type` MoveType - type of the move
+  - `startPosition` Position - initial position of the piece
+  - `endPosition` Position - final position of the piece
+  - `capturedPosition` Position | undefined (exists if `type` is `Capture`) - position of a captured piece. Differs from `endPosition` only on en-passant.
+  - `castlingRookStartPosition` Position | undefined (exists if `type` is `Castling`) - initial position of the castling rook
+  - `castlingRookEndPosition` Position | undefined (exists if `type` is `Castling`) - final position of the castling rook
+  - `newPieceType` Type | undefined (exists if `type` is `Promotion`) - the new piece type of the promoted pawn
 
 ## Limitations
 
