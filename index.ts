@@ -4,7 +4,7 @@ import type {
   MoveType,
   PointT,
   PositionInputT,
-  PromotionType,
+  PromotionTypeT,
 } from "./src";
 import {
   Bishop,
@@ -38,4 +38,4 @@ export {
   Rook,
   Type,
 };
-export type { EventHandlerT, MoveT, PointT, PositionInputT, PromotionType };
+export type { EventHandlerT, MoveT, PointT, PositionInputT, PromotionTypeT };

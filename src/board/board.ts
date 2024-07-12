@@ -57,10 +57,10 @@ export type MoveT =
           castlingRookStartPosition: Position;
           castlingRookEndPosition: Position;
         }
-      | { type: MoveType.Promotion; newPieceType: PromotionType }
+      | { type: MoveType.Promotion; newPieceType: PromotionTypeT }
     ));
 
-export type PromotionType = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
+export type PromotionTypeT = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
 
 export enum Event {
   BoardChange = "boardChange",
@@ -77,7 +77,7 @@ export enum Event {
 export type EventHandlerT = {
   GetPromotionVariant: (
     piecePosition: Position,
-  ) => PromotionType | Promise<PromotionType>;
+  ) => PromotionTypeT | Promise<PromotionTypeT>;
   BoardChange: (pieces: Piece[]) => void;
   Check: (color: Color) => void;
   Checkmate: (color: Color) => void;
@@ -95,7 +95,7 @@ export type EventHandlerT = {
     rookStartPosition: Position,
     rookEndPosition: Position,
   ) => void;
-  Promotion: (piecePosition: Position, newPieceType: PromotionType) => void;
+  Promotion: (piecePosition: Position, newPieceType: PromotionTypeT) => void;
 };
 
 enum Status {
@@ -756,5 +756,6 @@ export class CustomBoard {
 }
 
 // TODO: history of moves
+// TODO: stalemate on move repetition
 // TODO: undone
 // TODO: list of captured pieces
