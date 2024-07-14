@@ -58,8 +58,10 @@ export enum Event {
   BoardChange = "boardChange",
   Check = "check",
   Checkmate = "checkmate",
-  CheckResolve = "checkResolve",
   Draw = "draw",
+  CheckResolve = "checkResolve",
+  CheckmateResolve = "checkmateResolve",
+  DrawResolve = "drawResolve",
   Move = "move",
   Capture = "capture",
   Castling = "castling",
@@ -73,8 +75,10 @@ export type EventHandlerT = {
   BoardChange: (pieces: Piece[]) => void;
   Check: (color: Color) => void;
   Checkmate: (color: Color) => void;
-  CheckResolve: () => void;
   Draw: () => void;
+  CheckResolve: () => void;
+  CheckmateResolve: () => void;
+  DrawResolve: () => void;
   Move: (startPosition: Position, endPosition: Position) => void;
   Capture: (
     startPosition: Position,
@@ -96,13 +100,21 @@ enum Status {
   Draw = "draw",
 }
 
+type MoveValidationOptions = {
+  ignoreTurn?: boolean;
+  ignoreCheckmate?: boolean;
+  ignoreDraw?: boolean;
+};
+
 export type BoardOptionsT = {
   getPromotionVariant?: EventHandlerT["GetPromotionVariant"];
   onBoardChange?: EventHandlerT["BoardChange"];
   onCheck?: EventHandlerT["Check"];
-  onCheckMate?: EventHandlerT["Checkmate"];
-  onCheckResolve?: EventHandlerT["CheckResolve"];
+  onCheckmate?: EventHandlerT["Checkmate"];
   onDraw?: EventHandlerT["Draw"];
+  onCheckResolve?: EventHandlerT["CheckResolve"];
+  onCheckmateResolve?: EventHandlerT["CheckResolve"];
+  onDrawResolve?: EventHandlerT["CheckResolve"];
   onMove?: EventHandlerT["Move"];
   onCapture?: EventHandlerT["Capture"];
   onCastling?: EventHandlerT["Castling"];
@@ -116,9 +128,11 @@ export type BoardOptionsT = {
  * @param {EventHandlerT["GetPromotionVariant"]} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
  * @param {EventHandlerT["BoardChange"]} [options.onBoardChange] - Callback function triggered when the board state changes.
  * @param {EventHandlerT["Check"]} [options.onCheck] - Callback function triggered when a king is in check.
- * @param {EventHandlerT["Checkmate"]} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
- * @param {EventHandlerT["CheckResolve"]} [options.onCheckResolve] - Callback function triggered when a check is resolved.
+ * @param {EventHandlerT["Checkmate"]} [options.onCheckmate] - Callback function triggered when a king is in checkmate.
  * @param {EventHandlerT["Draw"]} [options.onDraw] - Callback function triggered when the game is in draw.
+ * @param {EventHandlerT["CheckResolve"]} [options.onCheckResolve] - Callback function triggered when a check is resolved.
+ * @param {EventHandlerT["CheckmateResolve"]} [options.onCheckmateResolve] - Callback function triggered when a checkmate is resolved (with .undo()).
+ * @param {EventHandlerT["DrawResolve"]} [options.onDrawResolve] - Callback function triggered when a draw is resolved (with .undo()).
  * @param {EventHandlerT["Move"]} [options.onMove] - Callback function triggered when a piece moves.
  * @param {EventHandlerT["Capture"]} [options.onCapture] - Callback function triggered when a piece captures another piece.
  * @param {EventHandlerT["Castling"]} [options.onCastling] - Callback function triggered when castling occurs.
@@ -131,9 +145,11 @@ export class CustomBoard {
 
     this.getPromotionVariant = options?.getPromotionVariant;
     this.onCheck = options?.onCheck;
-    this.onCheckMate = options?.onCheckMate;
-    this.onCheckResolve = options?.onCheckResolve;
+    this.onCheckmate = options?.onCheckmate;
     this.onDraw = options?.onDraw;
+    this.onCheckResolve = options?.onCheckResolve;
+    this.onCheckmateResolve = options?.onCheckmateResolve;
+    this.onDrawResolve = options?.onDrawResolve;
     this.onBoardChange = options?.onBoardChange;
     this.onMove = options?.onMove;
     this.onCapture = options?.onCapture;
@@ -189,13 +205,20 @@ export class CustomBoard {
         this.onCheck = eventHandlerT as typeof this.onCheck;
         break;
       case Event.Checkmate:
-        this.onCheckMate = eventHandlerT as typeof this.onCheckMate;
+        this.onCheckmate = eventHandlerT as typeof this.onCheckmate;
+        break;
+      case Event.Draw:
+        this.onDraw = eventHandlerT as typeof this.onDraw;
         break;
       case Event.CheckResolve:
         this.onCheckResolve = eventHandlerT as typeof this.onCheckResolve;
         break;
-      case Event.Draw:
-        this.onDraw = eventHandlerT as typeof this.onDraw;
+      case Event.CheckmateResolve:
+        this.onCheckmateResolve =
+          eventHandlerT as typeof this.onCheckmateResolve;
+        break;
+      case Event.DrawResolve:
+        this.onDrawResolve = eventHandlerT as typeof this.onDrawResolve;
         break;
       case Event.BoardChange:
         this.onBoardChange = eventHandlerT as typeof this.onBoardChange;
@@ -250,6 +273,44 @@ export class CustomBoard {
     return await this.movePiece(startPosition, endPosition);
   }
 
+  undo() {
+    if (this._history.length < 1) return false;
+
+    const lastMove = this._history.pop();
+    if (!lastMove) return false;
+
+    const lastMovedPiece = this._getPieceAt(lastMove.endPosition);
+    if (!lastMovedPiece) return false;
+
+    lastMovedPiece.position.set(lastMove.startPosition);
+
+    if (lastMove.type === MoveType.Capture) {
+      const capturedPiece = this._capturedPieces.pop();
+      if (!capturedPiece) return false;
+
+      this._pieces.push(capturedPiece);
+    } else if (lastMove.type === MoveType.Castling) {
+      const rook = this._getPieceAt(lastMove.castlingRookEndPosition);
+      if (!rook) return false;
+
+      rook.position.set(lastMove.castlingRookStartPosition);
+    } else if (lastMove.type === MoveType.Promotion) {
+      const pawn = this._promotedPawns.pop();
+      if (!pawn) return false;
+
+      pawn.position.set(lastMove.startPosition);
+      this._pieces.push(pawn);
+    }
+
+    const previousMove = this._history.at(-1);
+    const previousMovedPiece =
+      (previousMove && this._getPieceAt(previousMove.endPosition)) ?? null;
+
+    this.handleBoardChange(previousMovedPiece);
+
+    return true;
+  }
+
   private _getPieceAt(positionInput: PositionInputT) {
     const position = new MutablePosition(positionInput);
     if (!position) return undefined;
@@ -266,9 +327,14 @@ export class CustomBoard {
     return positions.filter((position) => this.isMoveValid(piece, position));
   }
 
-  private hasPieceLegalMoves(piece: MutablePiece) {
+  private hasPieceLegalMoves(
+    piece: MutablePiece,
+    options?: MoveValidationOptions,
+  ) {
     const positions = piece.getPossibleMoves();
-    return positions.some((position) => this.isMoveValid(piece, position));
+    return positions.some((position) =>
+      this.isMoveValid(piece, position, options),
+    );
   }
 
   private makeMoveReadonly(mutableMove: MutableMoveT) {
@@ -293,7 +359,7 @@ export class CustomBoard {
     const piece = this._getPieceAt(startPosition);
     if (!piece) return unsuccessfulMove;
 
-    let mutableMove = this.checkMove(piece, endPosition);
+    let mutableMove = this.validateMove(piece, endPosition);
     if (!mutableMove) return unsuccessfulMove;
 
     if (mutableMove.type === MoveType.Castling) {
@@ -396,6 +462,7 @@ export class CustomBoard {
     const pieceType = pieceTypeInput ?? Type.Queen;
     const pieceClass = getPieceClassByTypename(pieceType);
 
+    this._promotedPawns.push(piece);
     this.removePiece(piece);
     this._pieces.push(new pieceClass(piece.position, piece.color));
 
@@ -523,37 +590,52 @@ export class CustomBoard {
     }
 
     const status = this.getStatus(king);
-    const isInCheck = status === Status.Check;
-    const isInCheckmate = status === Status.Checkmate;
-    const isInDraw = status === Status.Draw;
+    const isCheck = status === Status.Check;
+    const isCheckmate = status === Status.Checkmate;
+    const isDraw = status === Status.Draw;
 
-    if (isInCheck) {
+    if (isCheck) {
       this._checkColor = king.color;
       this.onCheck?.(king.color);
+    } else if (this._checkColor === king.color) {
+      this._checkColor = null;
+      this.onCheckResolve?.();
     }
-    if (isInCheckmate) {
+    if (isCheckmate) {
       this._checkmateColor = king.color;
       this._checkColor = king.color;
-      this.onCheckMate?.(king.color);
+      this.onCheckmate?.(king.color);
+    } else if (this._checkmateColor === king.color) {
+      this._checkmateColor = null;
+      this._checkColor = null;
+      this.onCheckmateResolve?.();
     }
-    if (isInDraw) {
+    if (isDraw) {
       this._isDraw = true;
       this.onDraw?.();
+    } else {
+      this._isDraw = false;
+      this.onDrawResolve?.();
     }
   }
 
-  private isMoveValid(...args: Parameters<typeof this.checkMove>) {
-    return !!this.checkMove(...args);
+  private isMoveValid(...args: Parameters<typeof this.validateMove>) {
+    return !!this.validateMove(...args);
   }
 
-  private checkMove(
+  private validateMove(
     piece: MutablePiece,
     endPosition: MutablePosition,
-    ignoreTurn?: "ignoreTurn",
+    options?: MoveValidationOptions,
   ): MutableMoveT | undefined {
-    if (this._checkmateColor || this._isDraw) return undefined;
+    if (
+      (this._checkmateColor && !options?.ignoreCheckmate) ||
+      (this._isDraw && !options?.ignoreDraw)
+    )
+      return undefined;
 
-    const isTurnRight = !!ignoreTurn || piece.color === this._currentTurnColor;
+    const isTurnRight =
+      options?.ignoreTurn || piece.color === this._currentTurnColor;
     if (!isTurnRight) return undefined;
 
     const isMoving = !!piece.position.distanceTo(endPosition);
@@ -692,7 +774,10 @@ export class CustomBoard {
 
     const teamPieces = this._getPiecesByColor(king.color);
     for (const piece of teamPieces) {
-      const hasLegalMoves = this.hasPieceLegalMoves(piece);
+      const hasLegalMoves = this.hasPieceLegalMoves(piece, {
+        ignoreDraw: true,
+        ignoreCheckmate: true,
+      });
       if (hasLegalMoves) {
         return undefined;
       }
@@ -701,8 +786,8 @@ export class CustomBoard {
     return Status.Draw;
   }
 
-  private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {
-    return this.piecesCheckingKing(king, ignorePiece).length > 0;
+  private isKingInCheck(...args: Parameters<typeof this.piecesCheckingKing>) {
+    return this.piecesCheckingKing(...args).length > 0;
   }
 
   private piecesCheckingKing(
@@ -712,7 +797,7 @@ export class CustomBoard {
     const enemies = this._getPiecesByColor(king.oppositeColor);
     return enemies.filter(
       (enemy) =>
-        this.isMoveValid(enemy, king.position, "ignoreTurn") &&
+        this.isMoveValid(enemy, king.position, { ignoreTurn: true }) &&
         enemy !== ignorePiece,
     );
   }
@@ -776,13 +861,16 @@ export class CustomBoard {
   private _lastMovedPiece: MutablePiece | null = null;
   private _history: Array<MutableMoveT> = [];
   private _capturedPieces: Array<MutablePiece> = [];
+  private _promotedPawns: Array<MutablePiece> = [];
 
   private getPromotionVariant: EventHandlerT["GetPromotionVariant"] | undefined;
   private onBoardChange: EventHandlerT["BoardChange"] | undefined;
   private onCheck: EventHandlerT["Check"] | undefined;
-  private onCheckMate: EventHandlerT["Checkmate"] | undefined;
-  private onCheckResolve: EventHandlerT["CheckResolve"] | undefined;
+  private onCheckmate: EventHandlerT["Checkmate"] | undefined;
   private onDraw: EventHandlerT["Draw"] | undefined;
+  private onCheckResolve: EventHandlerT["CheckResolve"] | undefined;
+  private onCheckmateResolve: EventHandlerT["CheckResolve"] | undefined;
+  private onDrawResolve: EventHandlerT["DrawResolve"] | undefined;
   private onMove: EventHandlerT["Move"] | undefined;
   private onCapture: EventHandlerT["Capture"] | undefined;
   private onCastling: EventHandlerT["Castling"] | undefined;
@@ -790,4 +878,3 @@ export class CustomBoard {
 }
 
 // FIXME: threefold repetition
-// TODO: undone

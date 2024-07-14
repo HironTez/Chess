@@ -58,7 +58,7 @@ test("Should trigger 'checkmate' event when a king is in checkmate", async () =>
       new Rook("H7", Color.White),
     ],
     {
-      onCheckMate: (color) => {
+      onCheckmate: (color) => {
         resolve(color);
       },
     },
@@ -204,4 +204,108 @@ test("Should trigger 'castling' event when castling occurs", async () => {
 
   const castlingTriggered = await promise;
   expect(castlingTriggered).toBeTrue();
+});
+
+test("Should trigger 'check resolve' event when check is resolved", async () => {
+  const { promise, resolve } = Promise.withResolvers<Color | undefined>();
+  const { promise: promise2, resolve: resolve2 } =
+    Promise.withResolvers<boolean>();
+
+  const board = new CustomBoard(
+    [
+      new King("E1", Color.White),
+      new King("E8", Color.Black),
+      new Rook("F7", Color.White),
+    ],
+    {
+      onCheck: (color) => {
+        resolve(color);
+      },
+      onCheckResolve: () => {
+        resolve2(true);
+      },
+    },
+  );
+
+  const move = await board.move("F7", "F8");
+  expect(move).toHaveProperty("success", true);
+
+  const checkColor = await promise;
+  expect(checkColor).toBe(Color.Black);
+
+  const move2 = await board.move("E8", "F8");
+  expect(move2).toHaveProperty("success", true);
+
+  const checkResolveTriggered = await promise2;
+  expect(checkResolveTriggered).toBeTrue();
+  expect(board.checkColor).toBeNull();
+});
+
+test("Should trigger 'checkmate resolve' event when checkmate is undone", async () => {
+  const { promise, resolve } = Promise.withResolvers<Color | undefined>();
+  const { promise: promise2, resolve: resolve2 } =
+    Promise.withResolvers<boolean>();
+
+  const board = new CustomBoard(
+    [
+      new King("E1", Color.White),
+      new King("E8", Color.Black),
+      new Rook("A1", Color.White),
+      new Rook("H7", Color.White),
+    ],
+    {
+      onCheckmate: (color) => {
+        resolve(color);
+      },
+      onCheckmateResolve: () => {
+        resolve2(true);
+      },
+    },
+  );
+
+  const move = await board.move("A1", "A8");
+  expect(move).toHaveProperty("success", true);
+
+  const checkmateColor = await promise;
+  expect(checkmateColor).toBe(Color.Black);
+
+  const undone = board.undo();
+  expect(undone).toBe(true);
+  const checkmateResolveTriggered = await promise2;
+  expect(checkmateResolveTriggered).toBeTrue();
+  expect(board.checkmateColor).toBeNull();
+});
+
+test("Should trigger 'draw resolve' event when draw is undone", async () => {
+  const { promise, resolve } = Promise.withResolvers<boolean>();
+  const { promise: promise2, resolve: resolve2 } =
+    Promise.withResolvers<boolean>();
+
+  const board = new CustomBoard(
+    [
+      new King("E1", Color.White),
+      new King("A8", Color.Black),
+      new Queen("B1", Color.White),
+    ],
+    {
+      onDraw: () => {
+        resolve(true);
+      },
+      onDrawResolve: () => {
+        resolve2(true);
+      },
+    },
+  );
+
+  const move = await board.move("B1", "B6");
+  expect(move).toHaveProperty("success", true);
+
+  const drawTriggered = await promise;
+  expect(drawTriggered).toBeTrue();
+
+  const undone = board.undo();
+  expect(undone).toBe(true);
+  const drawResolveTriggered = await promise2;
+  expect(drawResolveTriggered).toBe(true);
+  expect(board.isDraw).toBe(false);
 });

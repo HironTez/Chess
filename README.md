@@ -166,8 +166,10 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `options.onBoardChange` EventHandler["BoardChange"] (optional)
     - `options.onCheck` EventHandler["Check"] (optional)
     - `options.onCheckmate` EventHandler["Checkmate"] (optional)
-    - `options.onCheckResolve` EventHandler["CheckResolve"] (optional)
     - `options.onDraw` EventHandler["Draw"] (optional)
+    - `options.onCheckResolve` EventHandler["CheckResolve"] (optional)
+    - `options.onCheckmateResolve` EventHandler["CheckmateResolve"] (optional) (triggers only on undo)
+    - `options.onDrawResolve` EventHandler["DrawResolve"] (optional) (triggers only on undo)
     - `options.onMove` EventHandler["Move"] (optional)
     - `options.onCapture` EventHandler["Capture"] (optional)
     - `options.onCastling` EventHandler["Castling"] (optional)
@@ -176,12 +178,23 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `checkColor` Color | null - color team in check
     - `checkmateColor` Color | null - color team in checkmate
     - `isDraw` boolean - did game ended with a draw
-    - `winnerColor` Color - color of winner team
+    - `winnerColor` Color - color of a winner team
     - `currentTurnColor` Color - color of a team to make the next move
     - `pieces` Array<Piece> - the current set of pieces
     - `capturedPieces` Array<Piece> - the set of captured pieces
     - `history` Array<MoveT> - the list of moves
   - methods:
+    - `move` - move a piece from and to a specified position
+      - params:
+        - `startPosition` PositionInput
+        - `endPosition` PositionInput
+      - returns Promise<MoveReturnT> - move result with details
+    - `undo` - undo the latest move
+      - returns boolean
+    - `on` - set event handler. Overrides previous handler for the same event
+      - params:
+        - `event` Event
+        - `eventHandler` EventHandler
     - `getPieceAt` - get a piece at the specified position
       - params:
         - `position` PositionInputT
@@ -198,15 +211,6 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
       - params:
         - `position` PositionInput
       - returns Array<Position> - positions for valid moves
-    - `move` - move a piece from and to a specified position
-      - params:
-        - `startPosition` PositionInput
-        - `endPosition` PositionInput
-      - returns Promise<MoveReturnT> - move result with details
-    - `on` - set event handler. Overrides previous handler for the same event
-      - params:
-        - `event` Event
-        - `eventHandler` EventHandler
 
 - Board (extends CustomBoard)
 
@@ -248,8 +252,10 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - `Checkmate` - checkmate event handler
     - parameters:
       - `color` Color - the color of the team that's in checkmate
-  - `CheckResolve` - check resolve event handler
   - `Draw` - draw event handler
+  - `CheckResolve` - check resolve event handler
+  - `CheckmateResolve` - checkmate resolve event handler. (Triggers only on undo after a checkmate)
+  - `DrawResolve` - draw resolve event handler. (Triggers only on undo after a draw)
   - `Move` - piece movement event handler
     - parameters:
       - `startPosition` Position - piece start position
