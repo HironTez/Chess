@@ -173,17 +173,24 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `options.onCastling` EventHandler["Castling"] (optional)
     - `options.onPromotion` EventHandler["Promotion"] (optional)
   - properties:
-    - `check` Color | null - color team in check
-    - `checkmate` Color | null - color team in checkmate
-    - `draw` boolean - color team in draw
+    - `checkColor` Color | null - color team in check
+    - `checkmateColor` Color | null - color team in checkmate
+    - `isDraw` boolean - did game ended with a draw
+    - `winnerColor` Color - color of winner team
+    - `currentTurnColor` Color - color of a team to make the next move
     - `pieces` Array<Piece> - the current set of pieces
-    - `currentTurn` Color - color of the team to make next move
+    - `capturedPieces` Array<Piece> - the set of captured pieces
+    - `history` Array<MoveT> - the list of moves
   - methods:
     - `getPieceAt` - get a piece at the specified position
       - params:
         - `position` PositionInputT
       - returns Piece | undefined
     - `getPiecesByColor` - get all the pieces of a specified team
+      - params:
+        - `color` Color
+      - returns Array<Piece>
+    - `getCapturedPiecesByColor` - get all the captured pieces of a specified team
       - params:
         - `color` Color
       - returns Array<Piece>
@@ -270,13 +277,6 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `Castling`
     - `Promotion`
 
-- MoveReturnT
-
-  > A wrapper around the `MoveT` that helps handle successful and unsuccessful moves
-
-  - `success` boolean - whether the move succeeded
-  - ...`MoveT` - properties from `MoveT` (exist only if `success` is true)
-
 - MoveT
 
   > Details of a move
@@ -290,6 +290,13 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - `castlingRookEndPosition` Position | undefined (exists if `type` is `Castling`) - final position of the castling rook
   - `newPieceType` Type | undefined (exists if `type` is `Promotion`) - the new piece type of the promoted pawn
   - `pieceId` string - id of the moved piece
+
+- MoveReturnT
+
+  > A wrapper around the `MoveT` that helps to handle successful and unsuccessful moves
+
+  - `success` boolean - whether the move succeeded
+  - ...`MoveT` - properties from `MoveT` (exist only if `success` is true)
 
 ## Limitations
 

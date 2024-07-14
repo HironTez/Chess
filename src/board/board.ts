@@ -16,6 +16,7 @@ import {
   areAlignedVertically,
 } from "../position";
 
+import { invertColor } from "src/pieces/piece";
 import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
 
@@ -142,23 +143,29 @@ export class CustomBoard {
     this.handleBoardChange(null);
   }
 
-  get check() {
-    return this._check;
+  get checkColor() {
+    return this._checkColor;
   }
-  get checkmate() {
-    return this._checkmate;
+  get checkmateColor() {
+    return this._checkmateColor;
   }
-  get draw() {
-    return this._draw;
+  get isDraw() {
+    return this._isDraw;
+  }
+  get winnerColor() {
+    return this._checkmateColor && invertColor(this._checkmateColor);
   }
   get pieces() {
     return this._pieces.map((piece) => new Piece(piece));
   }
-  get currentTurn() {
-    return this._currentTurn;
+  get currentTurnColor() {
+    return this._currentTurnColor;
   }
   get history() {
     return this._history.map(this.makeMoveReadonly);
+  }
+  get capturedPieces() {
+    return this._capturedPieces.map((piece) => new Piece(piece));
   }
 
   on(
@@ -216,6 +223,12 @@ export class CustomBoard {
   getPiecesByColor(color: Color) {
     const pieces = this._getPiecesByColor(color);
     return pieces.map((piece) => new Piece(piece));
+  }
+
+  getCapturedPiecesByColor(color: Color) {
+    return this._capturedPieces
+      .filter((piece) => piece.color === color)
+      .map((piece) => new Piece(piece));
   }
 
   getPossibleMoves(positionInput: PositionInputT) {
@@ -356,7 +369,8 @@ export class CustomBoard {
     const readonlyPieceEndPosition = new Position(endPosition);
 
     if (pieceToCapture) {
-      this.removePieceAt(pieceToCapture.position);
+      this._capturedPieces.push(pieceToCapture);
+      this.removePiece(pieceToCapture);
     }
 
     piece.move(endPosition);
@@ -382,7 +396,7 @@ export class CustomBoard {
     const pieceType = pieceTypeInput ?? Type.Queen;
     const pieceClass = getPieceClassByTypename(pieceType);
 
-    this.removePieceAt(piece.position);
+    this.removePiece(piece);
     this._pieces.push(new pieceClass(piece.position, piece.color));
 
     this.onPromotion?.(readonlyPiecePosition, pieceType);
@@ -460,7 +474,7 @@ export class CustomBoard {
     if (
       piece instanceof King &&
       piece.isMoved === false &&
-      this._check === null
+      this._checkColor === null
     ) {
       const { xDiff, yDiff } = getDiff(piece.position, endPosition);
       const isKingMovingTwoSquaresHorizontally =
@@ -490,10 +504,11 @@ export class CustomBoard {
   }
 
   private handleBoardChange(lastMovedPiece: MutablePiece | null) {
-    this._currentTurn = lastMovedPiece?.oppositeColor ?? this._currentTurn;
+    this._currentTurnColor =
+      lastMovedPiece?.oppositeColor ?? this._currentTurnColor;
     this._lastMovedPiece = lastMovedPiece;
 
-    const king = this.getKing(this._currentTurn);
+    const king = this.getKing(this._currentTurnColor);
     if (!king) return;
 
     this.updateStatus(king);
@@ -502,8 +517,8 @@ export class CustomBoard {
   }
 
   private updateStatus(king: King) {
-    if (this._check === king.oppositeColor) {
-      this._check = null;
+    if (this._checkColor === king.oppositeColor) {
+      this._checkColor = null;
       this.onCheckResolve?.();
     }
 
@@ -513,16 +528,16 @@ export class CustomBoard {
     const isInDraw = status === Status.Draw;
 
     if (isInCheck) {
-      this._check = king.color;
+      this._checkColor = king.color;
       this.onCheck?.(king.color);
     }
     if (isInCheckmate) {
-      this._checkmate = king.color;
-      this._check = king.color;
+      this._checkmateColor = king.color;
+      this._checkColor = king.color;
       this.onCheckMate?.(king.color);
     }
     if (isInDraw) {
-      this._draw = true;
+      this._isDraw = true;
       this.onDraw?.();
     }
   }
@@ -536,9 +551,9 @@ export class CustomBoard {
     endPosition: MutablePosition,
     ignoreTurn?: "ignoreTurn",
   ): MutableMoveT | undefined {
-    if (this._checkmate || this._draw) return undefined;
+    if (this._checkmateColor || this._isDraw) return undefined;
 
-    const isTurnRight = !!ignoreTurn || piece.color === this._currentTurn;
+    const isTurnRight = !!ignoreTurn || piece.color === this._currentTurnColor;
     if (!isTurnRight) return undefined;
 
     const isMoving = !!piece.position.distanceTo(endPosition);
@@ -659,21 +674,21 @@ export class CustomBoard {
       return Status.Draw;
     }
 
-    const lastMovedPiece = this._lastMovedPiece;
-    if (lastMovedPiece) {
-      const lastMovedPiecePosition = lastMovedPiece.position;
-      const lastMovedPieceId = lastMovedPiece.id;
+    // const lastMovedPiece = this._lastMovedPiece;
+    // if (lastMovedPiece) {
+    //   const lastMovedPiecePosition = lastMovedPiece.position;
+    //   const lastMovedPieceId = lastMovedPiece.id;
 
-      const repeatedMoves = this._history.filter(
-        (move) =>
-          move.pieceId === lastMovedPieceId &&
-          move.endPosition.distanceTo(lastMovedPiecePosition) === 0,
-      );
+    //   const repeatedMoves = this._history.filter(
+    //     (move) =>
+    //       move.pieceId === lastMovedPieceId &&
+    //       move.endPosition.distanceTo(lastMovedPiecePosition) === 0,
+    //   );
 
-      if (repeatedMoves.length >= 3) {
-        return Status.Draw;
-      }
-    }
+    //   if (repeatedMoves.length >= 3) {
+    //     return Status.Draw;
+    //   }
+    // }
 
     const teamPieces = this._getPiecesByColor(king.color);
     for (const piece of teamPieces) {
@@ -748,17 +763,19 @@ export class CustomBoard {
     return isInCheck;
   }
 
-  private removePieceAt(position: MutablePosition) {
-    this._pieces = this._pieces.filter((piece) => !piece.isAt(position));
+  private removePiece(piece: MutablePiece) {
+    const i = this._pieces.indexOf(piece);
+    this._pieces.splice(i, 1);
   }
 
-  private _check: Color | null = null;
-  private _checkmate: Color | null = null;
-  private _draw: boolean = false;
+  private _checkColor: Color | null = null;
+  private _checkmateColor: Color | null = null;
+  private _isDraw: boolean = false;
   private _pieces: Array<MutablePiece>;
-  private _currentTurn: Color = Color.White;
+  private _currentTurnColor: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
   private _history: Array<MutableMoveT> = [];
+  private _capturedPieces: Array<MutablePiece> = [];
 
   private getPromotionVariant: EventHandlerT["GetPromotionVariant"] | undefined;
   private onBoardChange: EventHandlerT["BoardChange"] | undefined;
@@ -772,5 +789,5 @@ export class CustomBoard {
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
 
+// FIXME: threefold repetition
 // TODO: undone
-// TODO: list of captured pieces

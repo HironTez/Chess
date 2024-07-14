@@ -19,6 +19,10 @@ export enum Type {
   King = "king",
 }
 
+export const invertColor = (color: Color) => {
+  return color === Color.White ? Color.Black : Color.White;
+};
+
 export abstract class PieceAbstract {
   constructor(
     positionInput: PositionInputT,
@@ -29,7 +33,7 @@ export abstract class PieceAbstract {
 
     this._position = position;
     this.color = color;
-    this.oppositeColor = this.color === Color.White ? Color.Black : Color.White;
+    this.oppositeColor = invertColor(this.color);
     this.id = id ?? Math.random().toString(16).slice(2);
   }
 
