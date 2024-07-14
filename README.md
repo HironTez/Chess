@@ -167,7 +167,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `options.onCheck` EventHandler["Check"] (optional)
     - `options.onCheckmate` EventHandler["Checkmate"] (optional)
     - `options.onCheckResolve` EventHandler["CheckResolve"] (optional)
-    - `options.onStalemate` EventHandler["Stalemate"] (optional)
+    - `options.onDraw` EventHandler["Draw"] (optional)
     - `options.onMove` EventHandler["Move"] (optional)
     - `options.onCapture` EventHandler["Capture"] (optional)
     - `options.onCastling` EventHandler["Castling"] (optional)
@@ -175,7 +175,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - properties:
     - `check` Color | null - color team in check
     - `checkmate` Color | null - color team in checkmate
-    - `stalemate` boolean - color team in stalemate
+    - `draw` boolean - color team in draw
     - `pieces` Array<Piece> - the current set of pieces
     - `currentTurn` Color - color of the team to make next move
   - methods:
@@ -217,7 +217,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `Check`
     - `Checkmate`
     - `CheckResolve`
-    - `Stalemate`
+    - `Draw`
     - `Move`
     - `Capture`
     - `Castling`
@@ -242,7 +242,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - parameters:
       - `color` Color - the color of the team that's in checkmate
   - `CheckResolve` - check resolve event handler
-  - `Stalemate` - stalemate event handler
+  - `Draw` - draw event handler
   - `Move` - piece movement event handler
     - parameters:
       - `startPosition` Position - piece start position

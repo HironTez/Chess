@@ -71,7 +71,7 @@ test("Should trigger 'checkmate' event when a king is in checkmate", async () =>
   expect(checkmateColor).toBe(Color.Black);
 });
 
-test("Should trigger 'stalemate' event when the game is in stalemate", async () => {
+test("Should trigger 'draw' event when the game is in draw", async () => {
   const { promise, resolve } = Promise.withResolvers<boolean>();
 
   const board = new CustomBoard(
@@ -81,7 +81,7 @@ test("Should trigger 'stalemate' event when the game is in stalemate", async () 
       new Queen("B1", Color.White),
     ],
     {
-      onStalemate: () => {
+      onDraw: () => {
         resolve(true);
       },
     },
@@ -90,8 +90,8 @@ test("Should trigger 'stalemate' event when the game is in stalemate", async () 
   const move = await board.move("B1", "B6");
   expect(move).toHaveProperty("success", true);
 
-  const stalemateTriggered = await promise;
-  expect(stalemateTriggered).toBeTrue();
+  const drawTriggered = await promise;
+  expect(drawTriggered).toBeTrue();
 });
 
 test("Should trigger 'move' event when a piece moves", async () => {

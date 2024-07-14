@@ -243,7 +243,7 @@ test("Should detect checkmate", async () => {
   expect(board.checkmate).toBe(Color.Black);
 });
 
-test("Should detect stalemate", async () => {
+test("Should detect draw", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("A8", Color.Black),
@@ -255,7 +255,7 @@ test("Should detect stalemate", async () => {
   expect(queenMove).toHaveProperty("success", true);
   expect(board.check).toBeNull();
   expect(board.checkmate).toBeNull();
-  expect(board.stalemate).toBe(true);
+  expect(board.draw).toBe(true);
 });
 
 test("Castling when Rook has move", async () => {
@@ -302,15 +302,15 @@ test("King cannot stay in check", async () => {
   expect(board.getPieceAt("E4")).toHaveProperty("color", Color.White);
 });
 
-test("Should detect stalemate with only two kings remaining", async () => {
+test("Should detect draw with only two kings remaining", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
     new King("E8", Color.Black),
   ]);
 
-  const stalemate = board.stalemate;
+  const draw = board.draw;
 
-  expect(stalemate).toBeTrue();
+  expect(draw).toBeTrue();
 });
 
 test("Move should contain correct start and end positions", async () => {
@@ -440,7 +440,7 @@ test("Id of a piece should stay the same", async () => {
   }
 });
 
-test("Should be stalemate when a move repeats 3 times", async () => {
+test("Should be draw when a move repeats 3 times", async () => {
   const board = new CustomBoard([
     new King("A1", Color.White),
     new King("A8", Color.Black),
@@ -458,5 +458,5 @@ test("Should be stalemate when a move repeats 3 times", async () => {
   await board.move("G6", "H8");
   await board.move("H1", "G3");
 
-  expect(board.stalemate).toBeTrue();
+  expect(board.draw).toBeTrue();
 });

@@ -15,8 +15,8 @@ const main = async () => {
     onCheckResolve: () => {
       console.log("Check resolved");
     },
-    onStalemate: () => {
-      console.log(`Stalemate!`);
+    onDraw: () => {
+      console.log(`Draw!`);
     },
     onBoardChange: (pieces) => {
       console.log(`\n${stringifyBoard(pieces)}\n`);

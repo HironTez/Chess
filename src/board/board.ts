@@ -58,7 +58,7 @@ export enum Event {
   Check = "check",
   Checkmate = "checkmate",
   CheckResolve = "checkResolve",
-  Stalemate = "stalemate",
+  Draw = "draw",
   Move = "move",
   Capture = "capture",
   Castling = "castling",
@@ -73,7 +73,7 @@ export type EventHandlerT = {
   Check: (color: Color) => void;
   Checkmate: (color: Color) => void;
   CheckResolve: () => void;
-  Stalemate: () => void;
+  Draw: () => void;
   Move: (startPosition: Position, endPosition: Position) => void;
   Capture: (
     startPosition: Position,
@@ -89,16 +89,10 @@ export type EventHandlerT = {
   Promotion: (piecePosition: Position, newPieceType: PromotionTypeT) => void;
 };
 
-enum KingStatus {
-  Normal = "normal",
-  Check = "check",
-  Checkmate = "checkmate",
-}
-
 enum Status {
   Check = "check",
   Checkmate = "checkmate",
-  Stalemate = "stalemate",
+  Draw = "draw",
 }
 
 export type BoardOptionsT = {
@@ -107,7 +101,7 @@ export type BoardOptionsT = {
   onCheck?: EventHandlerT["Check"];
   onCheckMate?: EventHandlerT["Checkmate"];
   onCheckResolve?: EventHandlerT["CheckResolve"];
-  onStalemate?: EventHandlerT["Stalemate"];
+  onDraw?: EventHandlerT["Draw"];
   onMove?: EventHandlerT["Move"];
   onCapture?: EventHandlerT["Capture"];
   onCastling?: EventHandlerT["Castling"];
@@ -123,7 +117,7 @@ export type BoardOptionsT = {
  * @param {EventHandlerT["Check"]} [options.onCheck] - Callback function triggered when a king is in check.
  * @param {EventHandlerT["Checkmate"]} [options.onCheckMate] - Callback function triggered when a king is in checkmate.
  * @param {EventHandlerT["CheckResolve"]} [options.onCheckResolve] - Callback function triggered when a check is resolved.
- * @param {EventHandlerT["Stalemate"]} [options.onStalemate] - Callback function triggered when the game is in stalemate.
+ * @param {EventHandlerT["Draw"]} [options.onDraw] - Callback function triggered when the game is in draw.
  * @param {EventHandlerT["Move"]} [options.onMove] - Callback function triggered when a piece moves.
  * @param {EventHandlerT["Capture"]} [options.onCapture] - Callback function triggered when a piece captures another piece.
  * @param {EventHandlerT["Castling"]} [options.onCastling] - Callback function triggered when castling occurs.
@@ -138,7 +132,7 @@ export class CustomBoard {
     this.onCheck = options?.onCheck;
     this.onCheckMate = options?.onCheckMate;
     this.onCheckResolve = options?.onCheckResolve;
-    this.onStalemate = options?.onStalemate;
+    this.onDraw = options?.onDraw;
     this.onBoardChange = options?.onBoardChange;
     this.onMove = options?.onMove;
     this.onCapture = options?.onCapture;
@@ -154,8 +148,8 @@ export class CustomBoard {
   get checkmate() {
     return this._checkmate;
   }
-  get stalemate() {
-    return this._stalemate;
+  get draw() {
+    return this._draw;
   }
   get pieces() {
     return this._pieces.map((piece) => new Piece(piece));
@@ -177,7 +171,7 @@ export class CustomBoard {
     event: Event.CheckResolve,
     eventHandlerT: EventHandlerT["CheckResolve"],
   ): void;
-  on(event: Event.Stalemate, eventHandlerT: EventHandlerT["Stalemate"]): void;
+  on(event: Event.Draw, eventHandlerT: EventHandlerT["Draw"]): void;
   on(event: Event.Move, eventHandlerT: EventHandlerT["Move"]): void;
   on(event: Event.Capture, eventHandlerT: EventHandlerT["Capture"]): void;
   on(event: Event.Castling, eventHandlerT: EventHandlerT["Castling"]): void;
@@ -193,8 +187,8 @@ export class CustomBoard {
       case Event.CheckResolve:
         this.onCheckResolve = eventHandlerT as typeof this.onCheckResolve;
         break;
-      case Event.Stalemate:
-        this.onStalemate = eventHandlerT as typeof this.onStalemate;
+      case Event.Draw:
+        this.onDraw = eventHandlerT as typeof this.onDraw;
         break;
       case Event.BoardChange:
         this.onBoardChange = eventHandlerT as typeof this.onBoardChange;
@@ -516,7 +510,7 @@ export class CustomBoard {
     const status = this.getStatus(king);
     const isInCheck = status === Status.Check;
     const isInCheckmate = status === Status.Checkmate;
-    const isInStalemate = status === Status.Stalemate;
+    const isInDraw = status === Status.Draw;
 
     if (isInCheck) {
       this._check = king.color;
@@ -527,9 +521,9 @@ export class CustomBoard {
       this._check = king.color;
       this.onCheckMate?.(king.color);
     }
-    if (isInStalemate) {
-      this._stalemate = true;
-      this.onStalemate?.();
+    if (isInDraw) {
+      this._draw = true;
+      this.onDraw?.();
     }
   }
 
@@ -542,7 +536,7 @@ export class CustomBoard {
     endPosition: MutablePosition,
     ignoreTurn?: "ignoreTurn",
   ): MutableMoveT | undefined {
-    if (this._checkmate || this._stalemate) return undefined;
+    if (this._checkmate || this._draw) return undefined;
 
     const isTurnRight = !!ignoreTurn || piece.color === this._currentTurn;
     if (!isTurnRight) return undefined;
@@ -662,7 +656,7 @@ export class CustomBoard {
       (piece) => piece.type !== Type.King,
     );
     if (piecesExceptKings.length === 0) {
-      return Status.Stalemate;
+      return Status.Draw;
     }
 
     const lastMovedPiece = this._lastMovedPiece;
@@ -677,7 +671,7 @@ export class CustomBoard {
       );
 
       if (repeatedMoves.length >= 3) {
-        return Status.Stalemate;
+        return Status.Draw;
       }
     }
 
@@ -689,7 +683,7 @@ export class CustomBoard {
       }
     }
 
-    return Status.Stalemate;
+    return Status.Draw;
   }
 
   private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {
@@ -760,7 +754,7 @@ export class CustomBoard {
 
   private _check: Color | null = null;
   private _checkmate: Color | null = null;
-  private _stalemate: boolean = false;
+  private _draw: boolean = false;
   private _pieces: Array<MutablePiece>;
   private _currentTurn: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
@@ -771,7 +765,7 @@ export class CustomBoard {
   private onCheck: EventHandlerT["Check"] | undefined;
   private onCheckMate: EventHandlerT["Checkmate"] | undefined;
   private onCheckResolve: EventHandlerT["CheckResolve"] | undefined;
-  private onStalemate: EventHandlerT["Stalemate"] | undefined;
+  private onDraw: EventHandlerT["Draw"] | undefined;
   private onMove: EventHandlerT["Move"] | undefined;
   private onCapture: EventHandlerT["Capture"] | undefined;
   private onCastling: EventHandlerT["Castling"] | undefined;
