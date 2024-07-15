@@ -51,9 +51,9 @@ const blackPawn = board.getPieceAt("A3");
 // [instance of Piece]
 const whitePawn = board.getPieceAt("A4");
 // undefined
-const checkColor = board.check;
+const checkColor = board.checkColor;
 // Color.White
-const checkmateColor = board.checkmate;
+const checkmateColor = board.checkmateColor;
 // null
 const whiteKingPossibleMoves = board.getPossibleMoves("B2");
 // [array of Position instances]
