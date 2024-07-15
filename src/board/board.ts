@@ -19,6 +19,7 @@ import {
 import { invertColor } from "src/pieces/piece";
 import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
+import { hashPositions } from "./helpers";
 
 export enum MoveType {
   Move = "move",
@@ -156,6 +157,8 @@ export class CustomBoard {
     this.onCastling = options?.onCastling;
     this.onPromotion = options?.onPromotion;
 
+    this.hashPositions();
+
     this.handleBoardChange(null);
   }
 
@@ -178,7 +181,7 @@ export class CustomBoard {
     return this._currentTurnColor;
   }
   get history() {
-    return this._history.map(this.makeMoveReadonly);
+    return this._historyMoves.map(this.makeMoveReadonly);
   }
   get capturedPieces() {
     return this._capturedPieces.map((piece) => new Piece(piece));
@@ -274,9 +277,9 @@ export class CustomBoard {
   }
 
   undo() {
-    if (this._history.length < 1) return false;
+    if (this._historyMoves.length < 1) return false;
 
-    const lastMove = this._history.pop();
+    const lastMove = this._historyMoves.pop();
     if (!lastMove) return false;
 
     const lastMovedPiece = this._getPieceAt(lastMove.endPosition);
@@ -302,7 +305,7 @@ export class CustomBoard {
       this._pieces.push(pawn);
     }
 
-    const previousMove = this._history.at(-1);
+    const previousMove = this._historyMoves.at(-1);
     const previousMovedPiece =
       (previousMove && this._getPieceAt(previousMove.endPosition)) ?? null;
 
@@ -362,6 +365,11 @@ export class CustomBoard {
     let mutableMove = this.validateMove(piece, endPosition);
     if (!mutableMove) return unsuccessfulMove;
 
+    const isIrreversibleMove =
+      ((piece.type === Type.King || piece.type === Type.Rook) &&
+        !piece.isMoved) ||
+      piece.type === Type.Pawn;
+
     if (mutableMove.type === MoveType.Castling) {
       this.handleCastle(
         piece,
@@ -401,7 +409,10 @@ export class CustomBoard {
       }
     }
 
-    this._history.push(mutableMove);
+    this._historyMoves.push(mutableMove);
+
+    if (isIrreversibleMove) this._positionHashes.length = 0;
+    this.hashPositions();
 
     this.handleBoardChange(piece);
 
@@ -756,21 +767,8 @@ export class CustomBoard {
       return Status.Draw;
     }
 
-    // const lastMovedPiece = this._lastMovedPiece;
-    // if (lastMovedPiece) {
-    //   const lastMovedPiecePosition = lastMovedPiece.position;
-    //   const lastMovedPieceId = lastMovedPiece.id;
-
-    //   const repeatedMoves = this._history.filter(
-    //     (move) =>
-    //       move.pieceId === lastMovedPieceId &&
-    //       move.endPosition.distanceTo(lastMovedPiecePosition) === 0,
-    //   );
-
-    //   if (repeatedMoves.length >= 3) {
-    //     return Status.Draw;
-    //   }
-    // }
+    const isThreefoldRepetitionDraw = this.checkThreefoldRepetitionDraw();
+    if (isThreefoldRepetitionDraw) return Status.Draw;
 
     const teamPieces = this._getPiecesByColor(king.color);
     for (const piece of teamPieces) {
@@ -784,6 +782,35 @@ export class CustomBoard {
     }
 
     return Status.Draw;
+  }
+
+  private checkThreefoldRepetitionDraw() {
+    const lastMovedPiece = this._lastMovedPiece;
+    if (lastMovedPiece) {
+      const lastMovedPiecePosition = lastMovedPiece.position;
+      const lastMovedPieceId = lastMovedPiece.id;
+
+      if (this._positionHashes.length >= 10) {
+        const repeatedMoves = this._historyMoves.filter(
+          (move) =>
+            move.pieceId === lastMovedPieceId &&
+            move.endPosition.distanceTo(lastMovedPiecePosition) === 0,
+        );
+
+        if (repeatedMoves.length >= 3) {
+          const latestPostionHash = this._positionHashes.at(-1)!;
+          const repeatedPositions = this._positionHashes.filter(
+            (positionHash) => positionHash === latestPostionHash,
+          );
+
+          if (repeatedPositions.length >= 3) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   private isKingInCheck(...args: Parameters<typeof this.piecesCheckingKing>) {
@@ -853,15 +880,21 @@ export class CustomBoard {
     this._pieces.splice(i, 1);
   }
 
+  private hashPositions() {
+    const positionsHash = hashPositions(this._pieces);
+    this._positionHashes.push(positionsHash);
+  }
+
   private _checkColor: Color | null = null;
   private _checkmateColor: Color | null = null;
   private _isDraw: boolean = false;
   private _pieces: Array<MutablePiece>;
   private _currentTurnColor: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
-  private _history: Array<MutableMoveT> = [];
+  private _historyMoves: Array<MutableMoveT> = [];
   private _capturedPieces: Array<MutablePiece> = [];
   private _promotedPawns: Array<MutablePiece> = [];
+  private _positionHashes: Array<string> = [];
 
   private getPromotionVariant: EventHandlerT["GetPromotionVariant"] | undefined;
   private onBoardChange: EventHandlerT["BoardChange"] | undefined;
@@ -878,3 +911,4 @@ export class CustomBoard {
 }
 
 // FIXME: threefold repetition
+// TODO: clear positions hash history when a non-reversible event happens

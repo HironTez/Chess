@@ -4,6 +4,7 @@ import {
   Color,
   CustomBoard,
   King,
+  Knight,
   MoveType,
   Pawn,
   Position,
@@ -439,28 +440,68 @@ test("ID of a piece should stay the same", async () => {
   }
 });
 
-// test("Should be draw when a move repeats 3 times", async () => {
-//   const board = new CustomBoard([
-//     new King("A1", Color.White),
-//     new King("A8", Color.Black),
-//     new Knight("H1", Color.White),
-//     new Knight("H8", Color.Black),
-//   ]);
+test("Should be a draw when a position repeats 3 times (threefold repetition)", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("A8", Color.Black),
+    new Knight("H1", Color.White),
+    new Knight("H8", Color.Black),
+  ]);
 
-//   await board.move("H1", "G3");
-//   await board.move("H8", "G6");
-//   await board.move("G3", "H1");
-//   await board.move("G6", "H8");
-//   await board.move("H1", "G3");
-//   await board.move("H8", "G6");
-//   await board.move("G3", "H1");
-//   await board.move("G6", "H8");
-//   await board.move("H1", "G3");
+  await board.move("H1", "G3");
+  await board.move("H8", "G6");
+  await board.move("G3", "H1");
+  await board.move("G6", "H8");
+  await board.move("H1", "G3");
+  await board.move("H8", "G6");
+  await board.move("G3", "H1");
+  await board.move("G6", "H8");
+  await board.move("H1", "G3");
 
-//   expect(board.isDraw).toBeTrue();
-// });
+  expect(board.isDraw).toBeTrue();
+});
 
-// test undo move
+test("Should not be a draw when a position repeats 3 times but an irreversible move happens: king moves for the first time making castling impossible", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("A8", Color.Black),
+    new Knight("H1", Color.White),
+  ]);
+
+  await board.move("H1", "G3");
+  await board.move("A8", "B8");
+  await board.move("G3", "H1");
+  await board.move("B8", "A8");
+  await board.move("H1", "G3");
+  await board.move("A8", "B8");
+  await board.move("G3", "H1");
+  await board.move("B8", "A8");
+  await board.move("H1", "G3");
+
+  expect(board.isDraw).toBeFalse();
+});
+
+test("Should not be a draw when a position repeats 3 times but an irreversible move happens: rook moves for the first time making castling impossible on this side", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("A8", Color.Black),
+    new Knight("H1", Color.White),
+    new Rook("H8", Color.Black),
+  ]);
+
+  await board.move("H1", "G3");
+  await board.move("H8", "H7");
+  await board.move("G3", "H1");
+  await board.move("H7", "H8");
+  await board.move("H1", "G3");
+  await board.move("H8", "H7");
+  await board.move("G3", "H1");
+  await board.move("H7", "H8");
+  await board.move("H1", "G3");
+
+  expect(board.isDraw).toBeFalse();
+});
+
 test("Should undo move", async () => {
   const board = new CustomBoard([
     new King("E1", Color.White),
