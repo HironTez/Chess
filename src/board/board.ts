@@ -624,7 +624,7 @@ export class CustomBoard {
     if (isDraw) {
       this._isDraw = true;
       this.onDraw?.();
-    } else {
+    } else if (this._isDraw === true) {
       this._isDraw = false;
       this.onDrawResolve?.();
     }
