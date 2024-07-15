@@ -881,7 +881,7 @@ export class CustomBoard {
   }
 
   private hashPositions() {
-    const positionsHash = hashPositions(this._pieces);
+    const positionsHash = hashPositions(this._pieces.toSorted());
     this._positionHashes.push(positionsHash);
   }
 
@@ -909,6 +909,3 @@ export class CustomBoard {
   private onCastling: EventHandlerT["Castling"] | undefined;
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
-
-// FIXME: threefold repetition
-// TODO: clear positions hash history when a non-reversible event happens
