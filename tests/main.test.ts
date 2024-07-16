@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import {
+  Bishop,
   Board,
   Color,
   CustomBoard,
@@ -530,4 +531,19 @@ test("Should undo move", async () => {
   expect(pawnOnEndPosition).toBeUndefined();
   expect(restoredPiece).toHaveProperty("type", Type.Pawn);
   expect(restoredPiece).toHaveProperty("color", Color.White);
+});
+
+test("Pieces can cover king from check", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("H8", Color.Black),
+    new Bishop("G5", Color.White),
+    new Pawn("G8", Color.Black),
+    new Pawn("H7", Color.Black),
+  ]);
+
+  await board.move("G5", "F6");
+
+  expect(board.checkColor).toBe(Color.Black);
+  expect(board.checkmateColor).toBeNull();
 });

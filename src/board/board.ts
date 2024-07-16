@@ -878,8 +878,6 @@ export class CustomBoard {
         if (willBeCheck) {
           return false;
         }
-      } else {
-        return false;
       }
 
       const enemyPath = getPath(enemy.position, king.position);
@@ -976,13 +974,6 @@ export class CustomBoard {
     let max = -Infinity;
     for (const piece of this._getPiecesByColor(this._currentTurnColor)) {
       for (const position of this._getLegalMovesOf(piece)) {
-        // if (this.checkmateColor) {
-        //   console.log(`\n${stringifyBoard(this.pieces)}\n`);
-        //   console.log(this._getLegalMovesOf(this._getPieceAt("D8")!));
-
-        //   console.log(this.checkmateColor);
-        // }
-
         await this.movePiece(piece.position, position, {
           silent: true,
         });
