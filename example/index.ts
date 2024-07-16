@@ -1,4 +1,4 @@
-import { Board, Color } from "../src";
+import { Board, Color, Status } from "../src";
 import { capitalize, input, parseMoveInput, stringifyBoard } from "./helpers";
 
 const main = async () => {
@@ -24,50 +24,58 @@ const main = async () => {
     onDrawResolve: () => {
       console.log("Draw undone");
     },
-    onBoardChange: async () => {},
+    onBoardChange: (pieces) => {
+      console.log(`\n${stringifyBoard(pieces)}\n`);
+    },
   });
 
   while (true) {
-    console.log(`\n${stringifyBoard(board.pieces)}\n`);
+    await evaluateBoard(board);
 
-    const positionValue = await board.evaluate(2);
-    console.log(
-      `Positions value ${board.colorToMove === Color.White ? positionValue : -positionValue}`,
-    );
+    const shouldAutoMove =
+      board.colorToMove === Color.Black && board.status === Status.Active;
 
-    const moveInput =
-      board.colorToMove === Color.White || board.winnerColor
-        ? await input("Enter your move: ")
-        : "auto";
+    const movePrompt = shouldAutoMove
+      ? "auto"
+      : await input("Enter your move: ");
 
-    if (moveInput === "undo") {
+    if (movePrompt === "undo") {
       board.undo();
-    } else if (moveInput === "auto") {
-      const move = await board.autoMove(3);
-      if (!move.success) {
-        console.error("Error while performing an auto move");
-        continue;
-      }
-
-      const piece = board.getPieceAt(move.endPosition)!;
-      console.log(
-        `Moved ${piece.color} ${piece.type} from ${move.startPosition.notation} to ${move.endPosition.notation}`,
-      );
+    } else if (movePrompt === "auto") {
+      await autoMove(board);
     } else {
-      const { startPosition, endPosition } = parseMoveInput(moveInput);
-
-      if (!startPosition?.isValid || !endPosition?.isValid) {
-        console.error("Invalid input! Try again.");
-        continue;
-      }
-
-      const move = await board.move(startPosition, endPosition);
-      if (!move.success) {
-        console.error("Invalid move! Try again.");
-        continue;
-      }
+      move(board, movePrompt);
     }
   }
+};
+
+const evaluateBoard = async (board: Board) => {
+  const positionValue = await board.evaluate(2);
+  const positionValueAbsolute =
+    board.colorToMove === Color.White ? positionValue : -positionValue;
+  console.log(`Positions value ${positionValueAbsolute}`);
+};
+
+const move = async (board: Board, movePrompt: string) => {
+  const { startPosition, endPosition } = parseMoveInput(movePrompt);
+
+  if (!startPosition?.isValid || !endPosition?.isValid)
+    return console.error("Invalid input! Try again.");
+
+  const move = await board.move(startPosition, endPosition);
+  if (!move.success) return console.error("Invalid move! Try again.");
+};
+
+const autoMove = async (board: Board) => {
+  const move = await board.autoMove(3);
+  if (!move.success) {
+    return console.error("Error while performing an auto move");
+  }
+
+  const piece = board.getPieceAt(move.endPosition)!;
+  console.log(
+    `Moved ${piece.color} ${piece.type} from ${move.startPosition.notation} to ${move.endPosition.notation}`,
+  );
 };
 
 main();

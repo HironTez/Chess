@@ -11,13 +11,13 @@
     "build": "bun build --target=node ./src/index.ts --outfile=./dist/index.js && bun run build:declaration",
     "build:declaration": "tsc --emitDeclarationOnly --project ./tsconfig.types.json",
     "duplications-report": "bunx jscpd src --format=typescript --mode=strict --reporters=html --ignore=index.ts",
-    "release": "bun run build && npm version patch && npm publish",
-    "release:minor": "bun run build && npm version minor && npm publish",
-    "release:major": "bun run build && npm version major && npm publish"
+    "release": "bun test && bun run build && npm version patch && npm publish",
+    "release:minor": "bun test && bun run build && npm version minor && npm publish",
+    "release:major": "bun test && bun run build && npm version major && npm publish"
   },
   "devDependencies": {
-    "bun-types": "^1.1.18",
-    "prettier": "^3.3.2",
+    "bun-types": "^1.1.20",
+    "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.0.0",
     "typescript": "^5.5.3"
   },

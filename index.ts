@@ -6,6 +6,7 @@ import type {
   PointT,
   PositionInputT,
   PromotionTypeT,
+  Status,
 } from "./src";
 import {
   Bishop,
@@ -37,6 +38,7 @@ export {
   Position,
   Queen,
   Rook,
+  Status,
   Type,
 };
 export type {

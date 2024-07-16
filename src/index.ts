@@ -4,7 +4,7 @@ import type {
   MoveT,
   PromotionTypeT,
 } from "./board";
-import { Board, CustomBoard, Event, MoveType } from "./board";
+import { Board, CustomBoard, Event, MoveType, Status } from "./board";
 import {
   Bishop,
   Color,
@@ -33,6 +33,7 @@ export {
   Position,
   Queen,
   Rook,
+  Status,
   Type,
 };
 export type {

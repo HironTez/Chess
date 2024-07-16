@@ -101,7 +101,8 @@ export type EventHandlerT = {
   Promotion: (piecePosition: Position, newPieceType: PromotionTypeT) => void;
 };
 
-enum Status {
+export enum Status {
+  Active = "active",
   Check = "check",
   Checkmate = "checkmate",
   Draw = "draw",
@@ -136,6 +137,7 @@ export type BoardOptionsT = {
  * Chess board with a custom set of pieces
  * @param {MutablePiece[]} pieces - A set of mutable chess pieces to initialize the board.
  * @param {BoardOptionsT} [options] - Board options to customize behavior.
+ * @param {Color} [colorToMove] - Color of the team that makes the first move.
  * @param {EventHandlerT["GetPromotionVariant"]} [options.getPromotionVariant] - A function to determine the promotion piece type for a pawn.
  * @param {EventHandlerT["BoardChange"]} [options.onBoardChange] - Callback function triggered when the board state changes.
  * @param {EventHandlerT["Check"]} [options.onCheck] - Callback function triggered when a king is in check.
@@ -174,6 +176,9 @@ export class CustomBoard {
     this.handleBoardChange(null, false, false);
   }
 
+  get status() {
+    return this._status;
+  }
   get checkColor() {
     return this._checkColor;
   }
@@ -694,6 +699,8 @@ export class CustomBoard {
 
   private updateStatus(king: King, silent: boolean | undefined) {
     const status = this.getStatus(king);
+    this._status = status;
+
     const isCheck = status === Status.Check;
     const isCheckmate = status === Status.Checkmate;
     const isDraw = status === Status.Draw;
@@ -865,7 +872,7 @@ export class CustomBoard {
         ignoreDraw: true,
       });
       if (hasLegalMoves) {
-        return undefined;
+        return Status.Active;
       }
     }
 
@@ -1084,6 +1091,7 @@ export class CustomBoard {
     );
   }
 
+  private _status = Status.Active;
   private _checkColor: Color | null = null;
   private _checkmateColor: Color | null = null;
   private _isDraw: boolean = false;

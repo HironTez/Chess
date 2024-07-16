@@ -4,9 +4,9 @@ import type {
   MoveT,
   PromotionTypeT,
 } from "./board";
-import { CustomBoard, Event, MoveType } from "./board";
+import { CustomBoard, Event, MoveType, Status } from "./board";
 import { Board } from "./preparedBoard";
 
 export type { EventHandlerT, MoveReturnT, MoveT, PromotionTypeT };
 
-export { Board, CustomBoard, Event, MoveType };
+export { Board, CustomBoard, Event, MoveType, Status };

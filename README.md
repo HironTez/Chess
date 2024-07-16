@@ -177,11 +177,12 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `options.onCastling` EventHandler["Castling"] (optional)
     - `options.onPromotion` EventHandler["Promotion"] (optional)
   - properties:
-    - `checkColor` Color | null - color team in check
-    - `checkmateColor` Color | null - color team in checkmate
+    - `status` Status - status of the game
+    - `checkColor` Color | null - color of the team in check
+    - `checkmateColor` Color | null - color of the team in checkmate
     - `isDraw` boolean - did game ended with a draw
-    - `winnerColor` Color - color of a winner team
-    - `colorToMove` Color - color of a team to make the next move
+    - `winnerColor` Color - color of the winner team
+    - `colorToMove` Color - color of the team that makes the next move
     - `pieces` Array<Piece> - the current set of pieces
     - `capturedPieces` Array<Piece> - the set of captured pieces
     - `history` Array<MoveT> - the list of moves
@@ -228,6 +229,16 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - parameters:
     - `options` - same as in CustomBoard
+
+- Status
+
+  > Enum that represents the current status of the game
+
+  - members:
+    - `Active`
+    - `Check`
+    - `Checkmate`
+    - `Draw`
 
 - Event
 
