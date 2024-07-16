@@ -1,4 +1,4 @@
-import { Board } from "../src";
+import { Board, Color } from "../src";
 import { capitalize, input, parseMoveInput, stringifyBoard } from "./helpers";
 
 const main = async () => {
@@ -30,6 +30,11 @@ const main = async () => {
   });
 
   while (true) {
+    const positionValue = await board.evaluate(2);
+    console.log(
+      `Positions value ${board.currentTurnColor === Color.White ? positionValue : -positionValue}`,
+    );
+
     const moveInput = await input("Enter your move: ");
     if (moveInput === "undo") {
       board.undo();
@@ -41,8 +46,8 @@ const main = async () => {
         continue;
       }
 
-      const moved = await board.move(startPosition, endPosition);
-      if (!moved) {
+      const move = await board.move(startPosition, endPosition);
+      if (!move.success) {
         console.error("Invalid move! Try again.");
         continue;
       }

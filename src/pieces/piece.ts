@@ -60,6 +60,16 @@ export abstract class PieceAbstract {
   readonly id: string;
 }
 
+export class Piece extends PieceAbstract {
+  constructor(piece: MutablePiece) {
+    super(new Position(piece.position), piece.color, piece.id);
+
+    this.type = piece.type;
+  }
+
+  readonly type: Type;
+}
+
 export abstract class MutablePieceAbstract extends PieceAbstract {
   constructor(positionInput: PositionInputT, color: Color) {
     super(positionInput, color, undefined);
@@ -86,24 +96,10 @@ export abstract class MutablePiece extends MutablePieceAbstract {
     super(positionInput, color);
   }
 
-  move(position: MutablePosition) {
-    this.onMove(position);
-
-    this._position.set(position);
-    this._isMoved = true;
-  }
-
   get position() {
     return this._position;
   }
-}
-
-export class Piece extends PieceAbstract {
-  constructor(piece: MutablePiece) {
-    super(new Position(piece.position), piece.color, piece.id);
-
-    this.type = piece.type;
+  setIsMoved(isMoved: boolean) {
+    this._isMoved = isMoved;
   }
-
-  readonly type: Type;
 }

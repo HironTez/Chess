@@ -14,3 +14,20 @@ export const hashPositions = (pieces: MutablePiece[]) => {
     "",
   );
 };
+
+export const evaluatePiece = (pieceType: Type) => {
+  switch (pieceType) {
+    case Type.King:
+      return 200;
+    case Type.Queen:
+      return 9;
+    case Type.Rook:
+      return 5;
+    case Type.Bishop:
+      return 3;
+    case Type.Knight:
+      return 3;
+    case Type.Pawn:
+      return 1;
+  }
+};

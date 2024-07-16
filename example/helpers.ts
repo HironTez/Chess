@@ -15,19 +15,20 @@ export const input = (text: any) => {
 };
 
 const getPieceCharacter = (piece: Piece) => {
+  const isWhite = piece.color === Color.White;
   switch (piece.type) {
     case Type.King:
-      return piece.color === Color.White ? "\u2654" : "\u265A";
+      return isWhite ? "\u2654" : "\u265A";
     case Type.Queen:
-      return piece.color === Color.White ? "\u2655" : "\u265B";
+      return isWhite ? "\u2655" : "\u265B";
     case Type.Rook:
-      return piece.color === Color.White ? "\u2656" : "\u265C";
+      return isWhite ? "\u2656" : "\u265C";
     case Type.Bishop:
-      return piece.color === Color.White ? "\u2657" : "\u265D";
+      return isWhite ? "\u2657" : "\u265D";
     case Type.Knight:
-      return piece.color === Color.White ? "\u2658" : "\u265E";
+      return isWhite ? "\u2658" : "\u265E";
     case Type.Pawn:
-      return piece.color === Color.White ? "\u2659" : "\u265F";
+      return isWhite ? "\u2659" : "\u265F";
   }
 };
 

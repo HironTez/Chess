@@ -19,7 +19,7 @@ import {
 import { invertColor } from "src/pieces/piece";
 import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
-import { hashPositions } from "./helpers";
+import { evaluatePiece, hashPositions } from "./helpers";
 
 export enum MoveType {
   Move = "move",
@@ -32,6 +32,7 @@ type DynamicMoveT<T extends Position> = {
   startPosition: T;
   endPosition: T;
   pieceId: string;
+  isPieceFirstMove: boolean;
 } & (
   | {
       type: MoveType.Move;
@@ -101,6 +102,9 @@ enum Status {
   Draw = "draw",
 }
 
+type MoveOptions = {
+  silent: boolean;
+};
 type MoveValidationOptions = {
   ignoreTurn?: boolean;
   ignoreCheckmate?: boolean;
@@ -159,7 +163,7 @@ export class CustomBoard {
 
     this.hashPositions();
 
-    this.handleBoardChange(null);
+    this.handleBoardChange(null, false);
   }
 
   get checkColor() {
@@ -277,6 +281,10 @@ export class CustomBoard {
   }
 
   undo() {
+    return this._undo();
+  }
+
+  private _undo(options?: MoveOptions) {
     if (this._historyMoves.length < 1) return false;
 
     const lastMove = this._historyMoves.pop();
@@ -305,11 +313,15 @@ export class CustomBoard {
       this._pieces.push(pawn);
     }
 
+    if (lastMove.isPieceFirstMove) {
+      lastMovedPiece.setIsMoved(false);
+    }
+
     const previousMove = this._historyMoves.at(-1);
     const previousMovedPiece =
       (previousMove && this._getPieceAt(previousMove.endPosition)) ?? null;
 
-    this.handleBoardChange(previousMovedPiece);
+    this.handleBoardChange(previousMovedPiece, options?.silent);
 
     return true;
   }
@@ -325,9 +337,14 @@ export class CustomBoard {
     return this._pieces.filter((piece) => piece.color === color);
   }
 
-  private _getLegalMovesOf(piece: MutablePiece) {
+  private _getLegalMovesOf(
+    piece: MutablePiece,
+    options?: MoveValidationOptions,
+  ) {
     const positions = piece.getPossibleMoves();
-    return positions.filter((position) => this.isMoveValid(piece, position));
+    return positions.filter((position) =>
+      this.isMoveValid(piece, position, options),
+    );
   }
 
   private hasPieceLegalMoves(
@@ -356,6 +373,7 @@ export class CustomBoard {
   private async movePiece(
     startPosition: MutablePosition,
     endPosition: MutablePosition,
+    options?: MoveOptions,
   ): Promise<MoveReturnT> {
     const unsuccessfulMove: MoveReturnT = { success: false };
 
@@ -376,6 +394,7 @@ export class CustomBoard {
         mutableMove.endPosition,
         mutableMove.castlingRookStartPosition,
         mutableMove.castlingRookEndPosition,
+        options?.silent,
       );
 
       mutableMove = {
@@ -390,10 +409,15 @@ export class CustomBoard {
           ? this._getPieceAt(mutableMove.capturedPosition) ?? null
           : null;
 
-      this.handleMovePiece(piece, mutableMove.endPosition, pieceToCapture);
+      this.handleMovePiece(
+        piece,
+        mutableMove.endPosition,
+        pieceToCapture,
+        options?.silent,
+      );
 
       if (this.isPromotionPossible(piece)) {
-        const pieceType = await this.handlePromotePawn(piece);
+        const pieceType = await this.handlePromotePawn(piece, options?.silent);
 
         mutableMove = {
           ...mutableMove,
@@ -414,7 +438,7 @@ export class CustomBoard {
     if (isIrreversibleMove) this._positionHashes.length = 0;
     this.hashPositions();
 
-    this.handleBoardChange(piece);
+    this.handleBoardChange(piece, options?.silent);
 
     return {
       success: true,
@@ -441,6 +465,7 @@ export class CustomBoard {
     piece: MutablePiece,
     endPosition: MutablePosition,
     pieceToCapture: MutablePiece | null,
+    silent: boolean | undefined,
   ) {
     const readonlyPieceStartPosition = new Position(piece.position);
     const readonlyPieceEndPosition = new Position(endPosition);
@@ -452,24 +477,29 @@ export class CustomBoard {
 
     piece.move(endPosition);
 
-    if (pieceToCapture) {
-      const readonlyCapturePosition = new Position(pieceToCapture.position);
-      this.onCapture?.(
-        readonlyPieceStartPosition,
-        readonlyPieceEndPosition,
-        readonlyCapturePosition,
-      );
-    } else {
-      this.onMove?.(readonlyPieceStartPosition, readonlyPieceEndPosition);
+    if (!silent) {
+      if (pieceToCapture) {
+        const readonlyCapturePosition = new Position(pieceToCapture.position);
+        this.onCapture?.(
+          readonlyPieceStartPosition,
+          readonlyPieceEndPosition,
+          readonlyCapturePosition,
+        );
+      } else {
+        this.onMove?.(readonlyPieceStartPosition, readonlyPieceEndPosition);
+      }
     }
   }
 
-  private async handlePromotePawn(piece: MutablePiece) {
+  private async handlePromotePawn(
+    piece: MutablePiece,
+    silent: boolean | undefined,
+  ) {
     const readonlyPiecePosition = new Position(piece.position);
 
-    const pieceTypeInput = await this.getPromotionVariant?.(
-      readonlyPiecePosition,
-    );
+    const pieceTypeInput = !silent
+      ? await this.getPromotionVariant?.(readonlyPiecePosition)
+      : undefined;
     const pieceType = pieceTypeInput ?? Type.Queen;
     const pieceClass = getPieceClassByTypename(pieceType);
 
@@ -477,7 +507,9 @@ export class CustomBoard {
     this.removePiece(piece);
     this._pieces.push(new pieceClass(piece.position, piece.color));
 
-    this.onPromotion?.(readonlyPiecePosition, pieceType);
+    if (!silent) {
+      this.onPromotion?.(readonlyPiecePosition, pieceType);
+    }
 
     return pieceType;
   }
@@ -487,6 +519,7 @@ export class CustomBoard {
     kingEndPosition: MutablePosition,
     rookStartPosition: MutablePosition,
     rookEndPosition: MutablePosition,
+    silent: boolean | undefined,
   ) {
     const readonlyKingStartPosition = new Position(king.position);
     const readonlyKingEndPosition = new Position(kingEndPosition);
@@ -498,12 +531,14 @@ export class CustomBoard {
     king.move(kingEndPosition);
     rook?.move(rookEndPosition);
 
-    this.onCastling?.(
-      readonlyKingStartPosition,
-      readonlyKingEndPosition,
-      readonlyRookStartPosition,
-      readonlyRookEndPosition,
-    );
+    if (!silent) {
+      this.onCastling?.(
+        readonlyKingStartPosition,
+        readonlyKingEndPosition,
+        readonlyRookStartPosition,
+        readonlyRookEndPosition,
+      );
+    }
   }
 
   private isEnPassantPossible(
@@ -581,23 +616,27 @@ export class CustomBoard {
     return {};
   }
 
-  private handleBoardChange(lastMovedPiece: MutablePiece | null) {
-    this._currentTurnColor =
-      lastMovedPiece?.oppositeColor ?? this._currentTurnColor;
+  private handleBoardChange(
+    lastMovedPiece: MutablePiece | null,
+    silent: boolean | undefined,
+  ) {
+    this._currentTurnColor = lastMovedPiece?.oppositeColor ?? Color.White;
     this._lastMovedPiece = lastMovedPiece;
 
     const king = this.getKing(this._currentTurnColor);
     if (!king) return;
 
-    this.updateStatus(king);
+    this.updateStatus(king, silent);
 
-    this.onBoardChange?.(this.pieces);
+    if (!silent) {
+      this.onBoardChange?.(this.pieces);
+    }
   }
 
-  private updateStatus(king: King) {
+  private updateStatus(king: King, silent: boolean | undefined) {
     if (this._checkColor === king.oppositeColor) {
       this._checkColor = null;
-      this.onCheckResolve?.();
+      if (!silent) this.onCheckResolve?.();
     }
 
     const status = this.getStatus(king);
@@ -607,26 +646,23 @@ export class CustomBoard {
 
     if (isCheck) {
       this._checkColor = king.color;
-      this.onCheck?.(king.color);
-    } else if (this._checkColor === king.color) {
-      this._checkColor = null;
-      this.onCheckResolve?.();
+      if (!silent) this.onCheck?.(king.color);
     }
     if (isCheckmate) {
       this._checkmateColor = king.color;
       this._checkColor = king.color;
-      this.onCheckmate?.(king.color);
-    } else if (this._checkmateColor === king.color) {
+      if (!silent) this.onCheckmate?.(king.color);
+    } else if (this.checkmateColor) {
       this._checkmateColor = null;
       this._checkColor = null;
-      this.onCheckmateResolve?.();
+      if (!silent) this.onCheckmateResolve?.();
     }
     if (isDraw) {
       this._isDraw = true;
-      this.onDraw?.();
+      if (!silent) this.onDraw?.();
     } else if (this._isDraw === true) {
       this._isDraw = false;
-      this.onDrawResolve?.();
+      if (!silent) this.onDrawResolve?.();
     }
   }
 
@@ -660,6 +696,7 @@ export class CustomBoard {
       startPosition: new MutablePosition(piece.position),
       endPosition: new MutablePosition(endPosition),
       pieceId: piece.id,
+      isPieceFirstMove: !piece.isMoved,
     };
 
     const { castlingRook, castlingRookNewPosition } = this.getCastlingRook(
@@ -881,8 +918,85 @@ export class CustomBoard {
   }
 
   private hashPositions() {
-    const positionsHash = hashPositions(this._pieces.toSorted());
+    const positionsHash = hashPositions(
+      this._pieces.toSorted(
+        (a, b) => evaluatePiece(b.type) - evaluatePiece(a.type),
+      ),
+    );
     this._positionHashes.push(positionsHash);
+  }
+
+  private evaluatePositions() {
+    if (this._checkmateColor === this._currentTurnColor) return -Infinity;
+    if (this._isDraw) return 0;
+
+    const materialWeight = 10;
+    const mobilityWeight = 1;
+
+    const currentTeamScore = this.evaluateTeam(
+      this.currentTurnColor,
+      materialWeight,
+      mobilityWeight,
+    );
+    const opponentTeamScore = this.evaluateTeam(
+      invertColor(this.currentTurnColor),
+      materialWeight,
+      mobilityWeight,
+    );
+
+    return currentTeamScore - opponentTeamScore;
+  }
+
+  private evaluateTeam(
+    color: Color,
+    materialWeight: number,
+    mobilityWeight: number,
+  ) {
+    const teamPieces = this._getPiecesByColor(color);
+    const teamMaterialScore = teamPieces.reduce(
+      (score, piece) => score + evaluatePiece(piece.type),
+      0,
+    );
+    const teamMobilityScore = teamPieces.reduce(
+      (score, piece) =>
+        score + this._getLegalMovesOf(piece, { ignoreTurn: true }).length,
+      0,
+    );
+
+    return (
+      teamMaterialScore * materialWeight + teamMobilityScore * mobilityWeight
+    );
+  }
+
+  async evaluate(depth: number) {
+    if (depth === 0 || this._checkmateColor || this._isDraw) {
+      return this.evaluatePositions();
+    }
+
+    let max = -Infinity;
+    for (const piece of this._getPiecesByColor(this._currentTurnColor)) {
+      for (const position of this._getLegalMovesOf(piece)) {
+        // if (this.checkmateColor) {
+        //   console.log(`\n${stringifyBoard(this.pieces)}\n`);
+        //   console.log(this._getLegalMovesOf(this._getPieceAt("D8")!));
+
+        //   console.log(this.checkmateColor);
+        // }
+
+        await this.movePiece(piece.position, position, {
+          silent: true,
+        });
+
+        const score = -(await this.evaluate(depth - 1));
+        if (score > max) {
+          max = score;
+        }
+
+        this._undo({ silent: true });
+      }
+    }
+
+    return max;
   }
 
   private _checkColor: Color | null = null;
@@ -909,3 +1023,5 @@ export class CustomBoard {
   private onCastling: EventHandlerT["Castling"] | undefined;
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
+
+// TODO: automatic moves
