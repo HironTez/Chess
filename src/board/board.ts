@@ -19,7 +19,12 @@ import {
 import { invertColor } from "src/pieces/piece";
 import { isInLimit } from "../helpers";
 import { getDiff, getPath, getSurroundingPositions } from "../position";
-import { evaluatePiece, hashPositions } from "./helpers";
+import {
+  dedupePositionsList,
+  evaluatePiece,
+  hashPositions,
+  sortPiecesByPower,
+} from "./helpers";
 
 export enum MoveType {
   Move = "move",
@@ -112,6 +117,7 @@ type MoveValidationOptions = {
 };
 
 export type BoardOptionsT = {
+  colorToMove?: Color;
   getPromotionVariant?: EventHandlerT["GetPromotionVariant"];
   onBoardChange?: EventHandlerT["BoardChange"];
   onCheck?: EventHandlerT["Check"];
@@ -148,6 +154,8 @@ export class CustomBoard {
   constructor(pieces: MutablePiece[], options?: BoardOptionsT) {
     this._pieces = pieces;
 
+    if (options?.colorToMove) this._colorToMove = options.colorToMove;
+
     this.getPromotionVariant = options?.getPromotionVariant;
     this.onCheck = options?.onCheck;
     this.onCheckmate = options?.onCheckmate;
@@ -163,7 +171,7 @@ export class CustomBoard {
 
     this.hashPositions();
 
-    this.handleBoardChange(null, false);
+    this.handleBoardChange(null, false, false);
   }
 
   get checkColor() {
@@ -181,8 +189,8 @@ export class CustomBoard {
   get pieces() {
     return this._pieces.map((piece) => new Piece(piece));
   }
-  get currentTurnColor() {
-    return this._currentTurnColor;
+  get colorToMove() {
+    return this._colorToMove;
   }
   get history() {
     return this._historyMoves.map(this.makeMoveReadonly);
@@ -284,6 +292,44 @@ export class CustomBoard {
     return this._undo();
   }
 
+  async evaluate(depth: number = 2) {
+    return await this.alphaBeta(depth, true);
+  }
+
+  async autoMove(depth: number = 2): Promise<MoveReturnT> {
+    const unsuccessfulMove: MoveReturnT = { success: false };
+
+    let maxScore = -Infinity;
+    let startPosition: MutablePosition | null = null;
+    let endPosition: MutablePosition | null = null;
+
+    const teamPieces = this._getPiecesByColor(this._colorToMove);
+    for (const piece of sortPiecesByPower(teamPieces)) {
+      for (const position of this._getLegalMovesOf(piece)) {
+        const move = await this.movePiece(piece.position, position, {
+          silent: true,
+        });
+        if (!move.success) return unsuccessfulMove;
+
+        const score = await this.alphaBeta(depth - 1, false);
+        if (score >= maxScore) {
+          maxScore = score;
+          startPosition = piece.position;
+          endPosition = position;
+        }
+
+        const undone = this._undo({ silent: true });
+        if (!undone) return unsuccessfulMove;
+      }
+    }
+
+    if (startPosition && endPosition) {
+      return await this.movePiece(startPosition, endPosition);
+    }
+
+    return unsuccessfulMove;
+  }
+
   private _undo(options?: MoveOptions) {
     if (this._historyMoves.length < 1) return false;
 
@@ -320,6 +366,18 @@ export class CustomBoard {
     const previousMove = this._historyMoves.at(-1);
     const previousMovedPiece =
       (previousMove && this._getPieceAt(previousMove.endPosition)) ?? null;
+
+    if (this.checkmateColor) {
+      this._checkmateColor = null;
+      this._checkColor = null;
+      if (!options?.silent) this.onCheckmateResolve?.();
+    } else if (this._checkColor) {
+      this._checkColor = null;
+      if (!options?.silent) this.onCheckResolve?.();
+    } else if (this._isDraw === true) {
+      this._isDraw = false;
+      if (!options?.silent) this.onDrawResolve?.();
+    }
 
     this.handleBoardChange(previousMovedPiece, options?.silent);
 
@@ -619,11 +677,12 @@ export class CustomBoard {
   private handleBoardChange(
     lastMovedPiece: MutablePiece | null,
     silent: boolean | undefined,
+    changeColorToMove = true,
   ) {
-    this._currentTurnColor = lastMovedPiece?.oppositeColor ?? Color.White;
+    if (changeColorToMove) this._colorToMove = invertColor(this._colorToMove);
     this._lastMovedPiece = lastMovedPiece;
 
-    const king = this.getKing(this._currentTurnColor);
+    const king = this.getKing(this._colorToMove);
     if (!king) return;
 
     this.updateStatus(king, silent);
@@ -634,11 +693,6 @@ export class CustomBoard {
   }
 
   private updateStatus(king: King, silent: boolean | undefined) {
-    if (this._checkColor === king.oppositeColor) {
-      this._checkColor = null;
-      if (!silent) this.onCheckResolve?.();
-    }
-
     const status = this.getStatus(king);
     const isCheck = status === Status.Check;
     const isCheckmate = status === Status.Checkmate;
@@ -647,22 +701,18 @@ export class CustomBoard {
     if (isCheck) {
       this._checkColor = king.color;
       if (!silent) this.onCheck?.(king.color);
+    } else if (this._checkColor) {
+      this._checkColor = null;
+      if (!silent) this.onCheckResolve?.();
     }
     if (isCheckmate) {
       this._checkmateColor = king.color;
       this._checkColor = king.color;
       if (!silent) this.onCheckmate?.(king.color);
-    } else if (this.checkmateColor) {
-      this._checkmateColor = null;
-      this._checkColor = null;
-      if (!silent) this.onCheckmateResolve?.();
     }
     if (isDraw) {
       this._isDraw = true;
       if (!silent) this.onDraw?.();
-    } else if (this._isDraw === true) {
-      this._isDraw = false;
-      if (!silent) this.onDrawResolve?.();
     }
   }
 
@@ -682,7 +732,7 @@ export class CustomBoard {
       return undefined;
 
     const isTurnRight =
-      options?.ignoreTurn || piece.color === this._currentTurnColor;
+      options?.ignoreTurn || piece.color === this._colorToMove;
     if (!isTurnRight) return undefined;
 
     const isMoving = !!piece.position.distanceTo(endPosition);
@@ -737,7 +787,10 @@ export class CustomBoard {
       isTargetEnemy,
       !!castlingRook,
     );
-    if (canPieceMove && !this.willBeCheck(piece, endPosition)) {
+    if (
+      canPieceMove &&
+      (options?.ignoreCheckmate || !this.willBeCheck(piece, endPosition))
+    ) {
       if (isTargetEnemy) {
         return {
           ...move,
@@ -774,22 +827,22 @@ export class CustomBoard {
   }
 
   private getStatus(king: King) {
+    const teamPieces = this._getPiecesByColor(king.color);
+
     const isInCheck = this.isKingInCheck(king, undefined);
     if (isInCheck) {
-      const team = this._getPiecesByColor(king.color);
-      for (const teammate of team) {
-        if (teammate === king) continue;
-
-        const canDefendKing = this.canPieceDefendKing(teammate);
-        if (canDefendKing) {
-          return Status.Check;
-        }
-      }
-
       const surroundingPositions = getSurroundingPositions(king.position);
       for (const position of surroundingPositions) {
         const canEscape = this.isMoveValid(king, position);
         if (canEscape) {
+          return Status.Check;
+        }
+      }
+
+      for (const piece of sortPiecesByPower(teamPieces)) {
+        if (piece === king) continue;
+        const canDefendKing = this.canPieceDefendKing(piece);
+        if (canDefendKing) {
           return Status.Check;
         }
       }
@@ -807,11 +860,9 @@ export class CustomBoard {
     const isThreefoldRepetitionDraw = this.checkThreefoldRepetitionDraw();
     if (isThreefoldRepetitionDraw) return Status.Draw;
 
-    const teamPieces = this._getPiecesByColor(king.color);
     for (const piece of teamPieces) {
       const hasLegalMoves = this.hasPieceLegalMoves(piece, {
         ignoreDraw: true,
-        ignoreCheckmate: true,
       });
       if (hasLegalMoves) {
         return undefined;
@@ -850,8 +901,16 @@ export class CustomBoard {
     return false;
   }
 
-  private isKingInCheck(...args: Parameters<typeof this.piecesCheckingKing>) {
-    return this.piecesCheckingKing(...args).length > 0;
+  private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {
+    const enemies = this._getPiecesByColor(king.oppositeColor);
+    return sortPiecesByPower(enemies).some(
+      (enemy) =>
+        this.isMoveValid(enemy, king.position, {
+          ignoreTurn: true,
+          ignoreCheckmate: true,
+          ignoreDraw: true,
+        }) && enemy !== ignorePiece,
+    );
   }
 
   private piecesCheckingKing(
@@ -859,10 +918,13 @@ export class CustomBoard {
     ignorePiece: MutablePiece | undefined,
   ) {
     const enemies = this._getPiecesByColor(king.oppositeColor);
-    return enemies.filter(
+    return sortPiecesByPower(enemies).filter(
       (enemy) =>
-        this.isMoveValid(enemy, king.position, { ignoreTurn: true }) &&
-        enemy !== ignorePiece,
+        this.isMoveValid(enemy, king.position, {
+          ignoreTurn: true,
+          ignoreCheckmate: true,
+          ignoreDraw: true,
+        }) && enemy !== ignorePiece,
     );
   }
 
@@ -875,8 +937,8 @@ export class CustomBoard {
       const canCaptureEnemy = this.isMoveValid(piece, enemy.position);
       if (canCaptureEnemy) {
         const willBeCheck = this.willBeCheck(piece, enemy.position);
-        if (willBeCheck) {
-          return false;
+        if (!willBeCheck) {
+          return true;
         }
       }
 
@@ -885,13 +947,13 @@ export class CustomBoard {
         const canCover = this.isMoveValid(piece, position);
         const willCancelCheck = this.willBeCheck(piece, position);
 
-        if (canCover && willCancelCheck) {
-          return false;
+        if (canCover && !willCancelCheck) {
+          return true;
         }
       }
     }
 
-    return true;
+    return false;
   }
 
   private willBeCheck(
@@ -904,7 +966,6 @@ export class CustomBoard {
     piece.position.set(endPosition);
     const king = this.getKing(piece.color);
     const isInCheck = !!king && this.isKingInCheck(king, target);
-
     piece.position.set(previousPosition);
 
     return isInCheck;
@@ -924,22 +985,62 @@ export class CustomBoard {
     this._positionHashes.push(positionsHash);
   }
 
+  private async alphaBeta(
+    depth: number,
+    isMax: boolean,
+    max: number = -Infinity,
+    min: number = Infinity,
+  ) {
+    if (depth === 0 || this._checkmateColor || this._isDraw) {
+      const value = this.evaluatePositions();
+      return isMax ? value : -value;
+    }
+
+    const teamPieces = this._getPiecesByColor(this._colorToMove);
+    for (const piece of sortPiecesByPower(teamPieces)) {
+      for (const position of this._getLegalMovesOf(piece)) {
+        await this.movePiece(piece.position, position, {
+          silent: true,
+        });
+
+        const score = await this.alphaBeta(depth - 1, !isMax, max, min);
+
+        this._undo({ silent: true });
+
+        if (isMax) {
+          if (score >= min) return min;
+          if (score > max) max = score;
+        } else {
+          if (score <= max) return max;
+          if (score < min) min = score;
+        }
+      }
+    }
+
+    return isMax ? max : min;
+  }
+
   private evaluatePositions() {
-    if (this._checkmateColor === this._currentTurnColor) return -Infinity;
+    if (this._checkmateColor === this._colorToMove) return -Infinity;
+    if (this._checkmateColor === invertColor(this._colorToMove))
+      return Infinity;
     if (this._isDraw) return 0;
 
-    const materialWeight = 10;
+    const materialWeight = 15;
     const mobilityWeight = 1;
+    const positioningWeight = 3;
 
     const currentTeamScore = this.evaluateTeam(
-      this.currentTurnColor,
+      this._colorToMove,
       materialWeight,
       mobilityWeight,
+      positioningWeight,
     );
     const opponentTeamScore = this.evaluateTeam(
-      invertColor(this.currentTurnColor),
+      invertColor(this._colorToMove),
       materialWeight,
       mobilityWeight,
+      positioningWeight,
     );
 
     return currentTeamScore - opponentTeamScore;
@@ -949,52 +1050,45 @@ export class CustomBoard {
     color: Color,
     materialWeight: number,
     mobilityWeight: number,
+    positioningWeight: number,
   ) {
+    const enemyKing = this.getKing(invertColor(color));
+
     const teamPieces = this._getPiecesByColor(color);
     const teamMaterialScore = teamPieces.reduce(
       (score, piece) => score + evaluatePiece(piece.type),
       0,
     );
-    const teamMobilityScore = teamPieces.reduce(
-      (score, piece) =>
-        score + this._getLegalMovesOf(piece, { ignoreTurn: true }).length,
-      0,
+    const teamLegalMoves = teamPieces.reduce<MutablePosition[]>(
+      (positions, piece) => {
+        const pieceLegalMoves = this._getLegalMovesOf(piece, {
+          ignoreTurn: true,
+        });
+        return dedupePositionsList(positions.concat(pieceLegalMoves));
+      },
+      [],
     );
+    const teamMobilityScore = teamLegalMoves.length;
+    const teamPositioningScore = teamLegalMoves.reduce((score, position, i) => {
+      const distanceToEnemyKing = enemyKing
+        ? position.distanceTo(enemyKing.position)
+        : 0;
+      const distanceToCenter = position.distanceTo({ x: 3.5, y: 3.5 }) - 0.5;
+      return score + (8 - distanceToEnemyKing) + (3 - distanceToCenter);
+    }, 0);
 
     return (
-      teamMaterialScore * materialWeight + teamMobilityScore * mobilityWeight
+      teamMaterialScore * materialWeight +
+      teamMobilityScore * mobilityWeight +
+      teamPositioningScore * positioningWeight
     );
-  }
-
-  async evaluate(depth: number) {
-    if (depth === 0 || this._checkmateColor || this._isDraw) {
-      return this.evaluatePositions();
-    }
-
-    let max = -Infinity;
-    for (const piece of this._getPiecesByColor(this._currentTurnColor)) {
-      for (const position of this._getLegalMovesOf(piece)) {
-        await this.movePiece(piece.position, position, {
-          silent: true,
-        });
-
-        const score = -(await this.evaluate(depth - 1));
-        if (score > max) {
-          max = score;
-        }
-
-        this._undo({ silent: true });
-      }
-    }
-
-    return max;
   }
 
   private _checkColor: Color | null = null;
   private _checkmateColor: Color | null = null;
   private _isDraw: boolean = false;
   private _pieces: Array<MutablePiece>;
-  private _currentTurnColor: Color = Color.White;
+  private _colorToMove: Color = Color.White;
   private _lastMovedPiece: MutablePiece | null = null;
   private _historyMoves: Array<MutableMoveT> = [];
   private _capturedPieces: Array<MutablePiece> = [];
@@ -1014,5 +1108,3 @@ export class CustomBoard {
   private onCastling: EventHandlerT["Castling"] | undefined;
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
-
-// TODO: automatic moves

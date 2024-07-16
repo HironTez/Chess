@@ -3,7 +3,7 @@ import { capitalize, input, parseMoveInput, stringifyBoard } from "./helpers";
 
 const main = async () => {
   console.log("----------\nChess game\n----------\n");
-  console.log('Input example: "a2 a4" or "undo"');
+  console.log('Input example: "a2 a4" or "undo" or "auto"');
 
   const board = new Board({
     onCheck: (color) => {
@@ -24,20 +24,35 @@ const main = async () => {
     onDrawResolve: () => {
       console.log("Draw undone");
     },
-    onBoardChange: (pieces) => {
-      console.log(`\n${stringifyBoard(pieces)}\n`);
-    },
+    onBoardChange: async () => {},
   });
 
   while (true) {
+    console.log(`\n${stringifyBoard(board.pieces)}\n`);
+
     const positionValue = await board.evaluate(2);
     console.log(
-      `Positions value ${board.currentTurnColor === Color.White ? positionValue : -positionValue}`,
+      `Positions value ${board.colorToMove === Color.White ? positionValue : -positionValue}`,
     );
 
-    const moveInput = await input("Enter your move: ");
+    const moveInput =
+      board.colorToMove === Color.White || board.winnerColor
+        ? await input("Enter your move: ")
+        : "auto";
+
     if (moveInput === "undo") {
       board.undo();
+    } else if (moveInput === "auto") {
+      const move = await board.autoMove(3);
+      if (!move.success) {
+        console.error("Error while performing an auto move");
+        continue;
+      }
+
+      const piece = board.getPieceAt(move.endPosition)!;
+      console.log(
+        `Moved ${piece.color} ${piece.type} from ${move.startPosition.notation} to ${move.endPosition.notation}`,
+      );
     } else {
       const { startPosition, endPosition } = parseMoveInput(moveInput);
 

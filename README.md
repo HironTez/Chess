@@ -28,6 +28,7 @@
 import { Board } from "@hiron-tez/chess";
 const board = new Board();
 await board.move("a2", "a4");
+await board.autoMove();
 ```
 
 ### Advanced
@@ -162,6 +163,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - parameters:
     - `pieces` Array<King | Queen | Rook | Bishop | Knight | Pawn> - the set of pieces
+    - `options.colorToMove` Color (optional) - which team should move first
     - `options.getPromotionVariant` EventHandler["GetPromotionVariant"] (optional)
     - `options.onBoardChange` EventHandler["BoardChange"] (optional)
     - `options.onCheck` EventHandler["Check"] (optional)
@@ -179,7 +181,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `checkmateColor` Color | null - color team in checkmate
     - `isDraw` boolean - did game ended with a draw
     - `winnerColor` Color - color of a winner team
-    - `currentTurnColor` Color - color of a team to make the next move
+    - `colorToMove` Color - color of a team to make the next move
     - `pieces` Array<Piece> - the current set of pieces
     - `capturedPieces` Array<Piece> - the set of captured pieces
     - `history` Array<MoveT> - the list of moves
@@ -211,6 +213,14 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
       - params:
         - `position` PositionInput
       - returns Array<Position> - positions for valid moves
+    - `evaluate` - evaluate current positions from the perspective of the current team to move
+      - params:
+        - `depth` number (optional) (default: 2) - the depth of the forecast
+      - returns number - number in range from -Infinity (defeat) to Infinity (win)
+    - `autoMove` - move automatically
+      - params:
+        - `depth` number (optional) (default: 2) - the depth of the forecast
+      - returns Promise<MoveReturnT> - move result with details
 
 - Board (extends CustomBoard)
 
@@ -227,8 +237,10 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `BoardChange`
     - `Check`
     - `Checkmate`
-    - `CheckResolve`
     - `Draw`
+    - `CheckResolve`
+    - `CheckmateResolve`
+    - `DrawResolve`
     - `Move`
     - `Capture`
     - `Castling`
@@ -295,7 +307,8 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - `castlingRookStartPosition` Position | undefined (exists if `type` is `Castling`) - initial position of the castling rook
   - `castlingRookEndPosition` Position | undefined (exists if `type` is `Castling`) - final position of the castling rook
   - `newPieceType` Type | undefined (exists if `type` is `Promotion`) - the new piece type of the promoted pawn
-  - `pieceId` string - id of the moved piece
+  - `pieceId` string - id of the moved piece. Id of a promoted pawn changes
+  - `isPieceFirstMove` boolean - indicates whether the piece moved for the first time
 
 - MoveReturnT
 
@@ -303,8 +316,3 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - `success` boolean - whether the move succeeded
   - ...`MoveT` - properties from `MoveT` (exist only if `success` is true)
-
-## Limitations
-
-- No evaluation
-- No automatic moves

@@ -547,3 +547,44 @@ test("Pieces can cover king from check", async () => {
   expect(board.checkColor).toBe(Color.Black);
   expect(board.checkmateColor).toBeNull();
 });
+
+test("King cannot check another king", async () => {
+  const board = new CustomBoard([
+    new King("A1", Color.White),
+    new King("A3", Color.Black),
+    new Pawn("H7", Color.Black),
+  ]);
+
+  const move = await board.move("A1", "A2");
+  expect(move).toHaveProperty("success", false);
+
+  expect(board.checkColor).toBeNull();
+  expect(board.checkmateColor).toBeNull();
+});
+
+test("Checkmate canceled on undo", async () => {
+  const board = new CustomBoard(
+    [
+      new King("d5", Color.White),
+      new King("b6", Color.Black),
+      new Queen("c2", Color.Black),
+      new Knight("c6", Color.Black),
+      new Pawn("c7", Color.Black),
+      new Pawn("d7", Color.Black),
+      new Pawn("e7", Color.Black),
+    ],
+    { colorToMove: Color.Black },
+  );
+
+  const move = await board.move("C2", "D3");
+  expect(move).toHaveProperty("success", true);
+  expect(board.checkColor).toBe(Color.White);
+  expect(board.checkmateColor).toBe(Color.White);
+  expect(board.isDraw).toBeFalse();
+
+  const undone = board.undo();
+  expect(undone).toBeTrue();
+  expect(board.checkColor).toBeNull();
+  expect(board.checkmateColor).toBeNull();
+  expect(board.isDraw).toBeFalse();
+});
