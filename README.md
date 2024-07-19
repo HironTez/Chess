@@ -29,6 +29,7 @@ import { Board } from "@hiron-tez/chess";
 const board = new Board();
 await board.move("a2", "a4");
 await board.autoMove();
+await board.undo();
 ```
 
 ### Advanced
@@ -162,7 +163,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   > Chess game controller
 
   - parameters:
-    - `pieces` Array<King | Queen | Rook | Bishop | Knight | Pawn> - the set of pieces
+    - `pieces` Array\<King | Queen | Rook | Bishop | Knight | Pawn> - the set of pieces
     - `options.colorToMove` Color (optional) - which team should move first
     - `options.getPromotionVariant` EventHandler["GetPromotionVariant"] (optional)
     - `options.onBoardChange` EventHandler["BoardChange"] (optional)
@@ -183,15 +184,15 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `isDraw` boolean - did game ended with a draw
     - `winnerColor` Color - color of the winner team
     - `colorToMove` Color - color of the team that makes the next move
-    - `pieces` Array<Piece> - the current set of pieces
-    - `capturedPieces` Array<Piece> - the set of captured pieces
-    - `history` Array<MoveT> - the list of moves
+    - `pieces` Array\<Piece> - the current set of pieces
+    - `capturedPieces` Array\<Piece> - the set of captured pieces
+    - `history` Array\<MoveT> - the list of moves
   - methods:
     - `move` - move a piece from and to a specified position
       - params:
         - `startPosition` PositionInput
         - `endPosition` PositionInput
-      - returns Promise<MoveReturnT> - move result with details
+      - returns Promise\<MoveReturnT> - move result with details
     - `undo` - undo the latest move
       - returns boolean
     - `on` - set event handler. Overrides previous handler for the same event
@@ -205,15 +206,15 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `getPiecesByColor` - get all the pieces of a specified team
       - params:
         - `color` Color
-      - returns Array<Piece>
+      - returns Array\<Piece>
     - `getCapturedPiecesByColor` - get all the captured pieces of a specified team
       - params:
         - `color` Color
-      - returns Array<Piece>
+      - returns Array\<Piece>
     - `getPossibleMoves` - get all possible moves of a specified piece
       - params:
         - `position` PositionInput
-      - returns Array<Position> - positions for valid moves
+      - returns Array\<Position> - positions for valid moves
     - `evaluate` - evaluate current positions from the perspective of the current team to move
       - params:
         - `depth` number (optional) (default: 2) - the depth of the forecast
@@ -221,7 +222,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `autoMove` - move automatically
       - params:
         - `depth` number (optional) (default: 2) - the depth of the forecast
-      - returns Promise<MoveReturnT> - move result with details
+      - returns Promise\<MoveReturnT> - move result with details
 
 - Board (extends CustomBoard)
 
@@ -265,10 +266,10 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
   - `GetPromotionVariant` - get the promotion variant for a pawn
     - parameters:
       - `position` Position - the position of the pawn
-    - returns Type | Promise<Type>
+    - returns Type | Promise\<Type>
   - `BoardChange` - board change event handler
     - parameters:
-      - `pieces` Array<Piece> - the current piece set
+      - `pieces` Array\<Piece> - the current piece set
   - `Check` - check event handler
     - parameters:
       - `color` Color - the color of the team that's in check
