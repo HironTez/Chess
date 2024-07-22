@@ -451,8 +451,6 @@ export class CustomBoard {
     endPosition: MutablePosition,
     options?: MoveOptions,
   ): Promise<MoveReturnT> {
-    const startNotation = startPosition.notation;
-
     const piece = this._getPieceAt(startPosition);
     if (!piece)
       return unsuccess(`Could not find piece at ${startPosition.notation}`);
