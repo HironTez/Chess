@@ -57,7 +57,13 @@ type DynamicMoveT<T extends Position> = {
 export type MoveT = DynamicMoveT<Position>;
 type MutableMoveT = DynamicMoveT<MutablePosition>;
 
-export type MoveReturnT = { success: false } | ({ success: true } & MoveT);
+export type MoveReturnT =
+  | { success: false; reason: string }
+  | ({ success: true } & MoveT);
+
+export type UndoReturnT =
+  | { success: true }
+  | { success: false; reason: string };
 
 export type PromotionTypeT = Type.Queen | Type.Rook | Type.Bishop | Type.Knight;
 
@@ -132,6 +138,8 @@ export type BoardOptionsT = {
   onCastling?: EventHandlerT["Castling"];
   onPromotion?: EventHandlerT["Promotion"];
 };
+
+const unsuccess = (reason: string) => ({ success: false, reason }) as const;
 
 /**
  * Chess board with a custom set of pieces
@@ -288,7 +296,7 @@ export class CustomBoard {
   ): Promise<MoveReturnT> {
     const startPosition = new MutablePosition(startPositionInput);
     const endPosition = new MutablePosition(endPositionInput);
-    if (!startPosition || !endPosition) return { success: false };
+    if (!startPosition || !endPosition) return unsuccess("Invalid input");
 
     return await this.movePiece(startPosition, endPosition);
   }
@@ -302,8 +310,6 @@ export class CustomBoard {
   }
 
   async autoMove(depth: number = 2): Promise<MoveReturnT> {
-    const unsuccessfulMove: MoveReturnT = { success: false };
-
     let maxScore = -Infinity;
     let startPosition: MutablePosition | null = null;
     let endPosition: MutablePosition | null = null;
@@ -314,7 +320,7 @@ export class CustomBoard {
         const move = await this.movePiece(piece.position, position, {
           silent: true,
         });
-        if (!move.success) return unsuccessfulMove;
+        if (!move.success) return move;
 
         const score = await this.alphaBeta(depth - 1, false);
         if (score >= maxScore) {
@@ -323,8 +329,11 @@ export class CustomBoard {
           endPosition = position;
         }
 
-        const undone = this._undo({ silent: true });
-        if (!undone) return unsuccessfulMove;
+        const undo = this._undo({ silent: true });
+        if (!undo.success)
+          return unsuccess(
+            `Internal: Could not undo (move ${move.startPosition.notation}-${move.endPosition.notation}). Reason: ${undo.reason}`,
+          );
       }
     }
 
@@ -332,33 +341,33 @@ export class CustomBoard {
       return await this.movePiece(startPosition, endPosition);
     }
 
-    return unsuccessfulMove;
+    return unsuccess("Internal: Invalid positions");
   }
 
-  private _undo(options?: MoveOptions) {
-    if (this._historyMoves.length < 1) return false;
-
+  private _undo(options?: MoveOptions): UndoReturnT {
     const lastMove = this._historyMoves.pop();
-    if (!lastMove) return false;
+    if (!lastMove) return unsuccess("No moves to undo");
 
     const lastMovedPiece = this._getPieceAt(lastMove.endPosition);
-    if (!lastMovedPiece) return false;
+    if (!lastMovedPiece)
+      return unsuccess("Could not find the last moved piece");
 
     lastMovedPiece.position.set(lastMove.startPosition);
 
     if (lastMove.type === MoveType.Capture) {
       const capturedPiece = this._capturedPieces.pop();
-      if (!capturedPiece) return false;
+      if (!capturedPiece)
+        return unsuccess("Could not restore the captured piece");
 
       this._pieces.push(capturedPiece);
     } else if (lastMove.type === MoveType.Castling) {
       const rook = this._getPieceAt(lastMove.castlingRookEndPosition);
-      if (!rook) return false;
+      if (!rook) return unsuccess("Could not find the castling rook");
 
       rook.position.set(lastMove.castlingRookStartPosition);
     } else if (lastMove.type === MoveType.Promotion) {
       const pawn = this._promotedPawns.pop();
-      if (!pawn) return false;
+      if (!pawn) return unsuccess("Could not restore the promoted pawn");
 
       pawn.position.set(lastMove.startPosition);
       this._pieces.push(pawn);
@@ -386,7 +395,7 @@ export class CustomBoard {
 
     this.handleBoardChange(previousMovedPiece, options?.silent);
 
-    return true;
+    return { success: true };
   }
 
   private _getPieceAt(positionInput: PositionInputT) {
@@ -438,13 +447,15 @@ export class CustomBoard {
     endPosition: MutablePosition,
     options?: MoveOptions,
   ): Promise<MoveReturnT> {
-    const unsuccessfulMove: MoveReturnT = { success: false };
-
     const piece = this._getPieceAt(startPosition);
-    if (!piece) return unsuccessfulMove;
+    if (!piece)
+      return unsuccess(`Could not find piece at ${startPosition.notation}`);
 
     let mutableMove = this.validateMove(piece, endPosition);
-    if (!mutableMove) return unsuccessfulMove;
+    if (!mutableMove)
+      return unsuccess(
+        `Move is not valid (${startPosition.notation}-${endPosition.notation})`,
+      );
 
     const isIrreversibleMove =
       ((piece.type === Type.King || piece.type === Type.Rook) &&
@@ -469,7 +480,7 @@ export class CustomBoard {
     } else {
       const pieceToCapture =
         mutableMove.type === MoveType.Capture
-          ? this._getPieceAt(mutableMove.capturedPosition) ?? null
+          ? (this._getPieceAt(mutableMove.capturedPosition) ?? null)
           : null;
 
       this.handleMovePiece(

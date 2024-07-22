@@ -26,10 +26,10 @@ test("Should expect a turn from a different color after move", async () => {
   const whiteMoveSecond = await board.move("A2", "A3");
   const blackMoveSecond = await board.move("A8", "A7");
 
-  expect(blackMoveFirst).toHaveProperty("success", false);
-  expect(whiteMoveFirst).toHaveProperty("success", true);
-  expect(whiteMoveSecond).toHaveProperty("success", false);
-  expect(blackMoveSecond).toHaveProperty("success", true);
+  expect(blackMoveFirst.success).toBe(false);
+  expect(whiteMoveFirst.success).toBe(true);
+  expect(whiteMoveSecond.success).toBe(false);
+  expect(blackMoveSecond.success).toBe(true);
 });
 
 test("Should not move over other pieces", async () => {
@@ -42,7 +42,7 @@ test("Should not move over other pieces", async () => {
 
   const moveOverPiece = await board.move("A1", "A3");
 
-  expect(moveOverPiece).toHaveProperty("success", false);
+  expect(moveOverPiece.success).toBe(false);
 });
 
 test("Should not move outside the board", async () => {
@@ -54,7 +54,7 @@ test("Should not move outside the board", async () => {
 
   const moveOutOfBounds = await board.move("H1", "I9");
 
-  expect(moveOutOfBounds).toHaveProperty("success", false);
+  expect(moveOutOfBounds.success).toBe(false);
 });
 
 test("Should not move to square occupied by same color", async () => {
@@ -67,7 +67,7 @@ test("Should not move to square occupied by same color", async () => {
 
   const moveToOccupiedSquare = await board.move("A2", "B2");
 
-  expect(moveToOccupiedSquare).toHaveProperty("success", false);
+  expect(moveToOccupiedSquare.success).toBe(false);
 });
 
 test("King cannot be in check after move", async () => {
@@ -79,7 +79,7 @@ test("King cannot be in check after move", async () => {
 
   const moveToCheckedArea = await board.move("E1", "F1");
 
-  expect(moveToCheckedArea).toHaveProperty("success", false);
+  expect(moveToCheckedArea.success).toBe(false);
 });
 
 test("Castling kingside", async () => {
@@ -93,7 +93,7 @@ test("Castling kingside", async () => {
   const king = board.getPieceAt("G1");
   const rook = board.getPieceAt("F1");
 
-  expect(castlingMove).toHaveProperty("success", true);
+  expect(castlingMove.success).toBe(true);
   expect(king).toHaveProperty("type", Type.King);
   expect(rook).toHaveProperty("type", Type.Rook);
 });
@@ -109,7 +109,7 @@ test("Castling queenside", async () => {
   const kingPosition = board.getPieceAt("C1");
   const rookPosition = board.getPieceAt("D1");
 
-  expect(castlingMove).toHaveProperty("success", true);
+  expect(castlingMove.success).toBe(true);
   expect(kingPosition).toHaveProperty("type", Type.King);
   expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
@@ -126,7 +126,7 @@ test("Castling through check", async () => {
   const kingPosition = board.getPieceAt("E1");
   const rookPosition = board.getPieceAt("A1");
 
-  expect(castlingMove).toHaveProperty("success", false);
+  expect(castlingMove.success).toBe(false);
   expect(kingPosition).toHaveProperty("type", Type.King);
   expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
@@ -143,7 +143,7 @@ test("Castling to checked square", async () => {
   const kingPosition = board.getPieceAt("E1");
   const rookPosition = board.getPieceAt("A1");
 
-  expect(castlingMove).toHaveProperty("success", false);
+  expect(castlingMove.success).toBe(false);
   expect(kingPosition).toHaveProperty("type", Type.King);
   expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
@@ -161,9 +161,9 @@ test("Castling when check", async () => {
   const kingPosition = board.getPieceAt("E1");
   const rookPosition = board.getPieceAt("A1");
 
-  expect(checkMove).toHaveProperty("success", true);
+  expect(checkMove.success).toBe(true);
   expect(board.checkColor).toBe(Color.Black);
-  expect(castlingMove).toHaveProperty("success", false);
+  expect(castlingMove.success).toBe(false);
   expect(kingPosition).toHaveProperty("type", Type.King);
   expect(rookPosition).toHaveProperty("type", Type.Rook);
 });
@@ -224,7 +224,7 @@ test("Should detect check", async () => {
 
   const rookMove = await board.move("A1", "A8");
 
-  expect(rookMove).toHaveProperty("success", true);
+  expect(rookMove.success).toBe(true);
   expect(board.checkColor).toBe(Color.Black);
   expect(board.checkmateColor).toBeNull();
 });
@@ -239,7 +239,7 @@ test("Should detect checkmate", async () => {
 
   const rookMove = await board.move("A1", "A8");
 
-  expect(rookMove).toHaveProperty("success", true);
+  expect(rookMove.success).toBe(true);
   expect(board.checkColor).toBe(Color.Black);
   expect(board.checkmateColor).toBe(Color.Black);
 });
@@ -253,7 +253,7 @@ test("Should detect draw", async () => {
 
   const queenMove = await board.move("B1", "B6");
 
-  expect(queenMove).toHaveProperty("success", true);
+  expect(queenMove.success).toBe(true);
   expect(board.checkColor).toBeNull();
   expect(board.checkmateColor).toBeNull();
   expect(board.isDraw).toBe(true);
@@ -271,7 +271,7 @@ test("Castling when Rook has move", async () => {
 
   const castlingMove = await board.move("E1", "G1");
 
-  expect(castlingMove).toHaveProperty("success", false);
+  expect(castlingMove.success).toBe(false);
 });
 
 test("Castling when King has move", async () => {
@@ -286,7 +286,7 @@ test("Castling when King has move", async () => {
 
   const castlingMove = await board.move("E1", "G1");
 
-  expect(castlingMove).toHaveProperty("success", false);
+  expect(castlingMove.success).toBe(false);
 });
 
 test("King cannot stay in check", async () => {
@@ -298,7 +298,7 @@ test("King cannot stay in check", async () => {
 
   const kingMove = await board.move("E4", "E3");
 
-  expect(kingMove).toHaveProperty("success", false);
+  expect(kingMove.success).toBe(false);
   expect(board.getPieceAt("E4")).toHaveProperty("type", Type.King);
   expect(board.getPieceAt("E4")).toHaveProperty("color", Color.White);
 });
@@ -311,7 +311,7 @@ test("Should detect draw with only two kings remaining", async () => {
 
   const draw = board.isDraw;
 
-  expect(draw).toBeTrue();
+  expect(draw).toBe(true);
 });
 
 test("Move should contain correct start and end positions", async () => {
@@ -323,7 +323,7 @@ test("Move should contain correct start and end positions", async () => {
 
   const move = await board.move("H1", "H2");
 
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
   expect(move).toHaveProperty("type", MoveType.Move);
   if (move.success) {
     expect(move.startPosition).toBeInstanceOf(Position);
@@ -344,7 +344,7 @@ test("Should contain correct capture position", async () => {
   await board.move("A2", "A4");
   const move = await board.move("B4", "A3");
 
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
   expect(move).toHaveProperty("type", MoveType.Capture);
   if (move.success && move.type === MoveType.Capture) {
     expect(move.capturedPosition).toBeInstanceOf(Position);
@@ -361,7 +361,7 @@ test("Should contain correct castling positions", async () => {
 
   const move = await board.move("E1", "G1");
 
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
   expect(move).toHaveProperty("type", MoveType.Castling);
   if (move.success && move.type === MoveType.Castling) {
     expect(move.startPosition).toBeInstanceOf(Position);
@@ -384,7 +384,7 @@ test("Should contain correct promotion type", async () => {
 
   const move = await board.move("A7", "A8");
 
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
   expect(move).toHaveProperty("type", MoveType.Promotion);
   if (move.success && move.type === MoveType.Promotion) {
     expect(move.newPieceType).toBe(Type.Queen);
@@ -402,8 +402,8 @@ test("Should save moves to history", async () => {
   const move1 = await board.move("A2", "A4");
   const move2 = await board.move("B4", "A3");
 
-  expect(move1).toHaveProperty("success", true);
-  expect(move2).toHaveProperty("success", true);
+  expect(move1.success).toBe(true);
+  expect(move2.success).toBe(true);
   expect(move1.success && move1.startPosition.notation).not.toBeUndefined();
   expect(move2.success && move2.startPosition.notation).not.toBeUndefined();
 
@@ -435,7 +435,7 @@ test("ID of a piece should stay the same", async () => {
 
   const move = await board.move("A7", "A8");
 
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
   if (move.success) {
     expect(move.pieceId).toBe(pawn.id);
   }
@@ -459,7 +459,7 @@ test("Should be a draw when a position repeats 3 times (threefold repetition)", 
   await board.move("G6", "H8");
   await board.move("H1", "G3");
 
-  expect(board.isDraw).toBeTrue();
+  expect(board.isDraw).toBe(true);
 });
 
 test("Should not be a draw when a position repeats 3 times but an irreversible move happens: king moves for the first time making castling impossible", async () => {
@@ -479,7 +479,7 @@ test("Should not be a draw when a position repeats 3 times but an irreversible m
   await board.move("B8", "A8");
   await board.move("H1", "G3");
 
-  expect(board.isDraw).toBeFalse();
+  expect(board.isDraw).toBe(false);
 });
 
 test("Should not be a draw when a position repeats 3 times but an irreversible move happens: rook moves for the first time making castling impossible on this side", async () => {
@@ -500,7 +500,7 @@ test("Should not be a draw when a position repeats 3 times but an irreversible m
   await board.move("H7", "H8");
   await board.move("H1", "G3");
 
-  expect(board.isDraw).toBeFalse();
+  expect(board.isDraw).toBe(false);
 });
 
 test("Should undo move", async () => {
@@ -515,12 +515,12 @@ test("Should undo move", async () => {
   const enPassantMove = await board.move("B4", "A3");
   const capturedPiece = board.getPieceAt("A4");
 
-  expect(pawnDoubleMove).toHaveProperty("success", true);
-  expect(enPassantMove).toHaveProperty("success", true);
+  expect(pawnDoubleMove.success).toBe(true);
+  expect(enPassantMove.success).toBe(true);
   expect(capturedPiece).toBeUndefined();
 
-  const undone = board.undo();
-  expect(undone).toBeTrue();
+  const undo = board.undo();
+  expect(undo.success).toBe(true);
 
   const pawnOnStartPosition = board.getPieceAt("B4");
   const pawnOnEndPosition = board.getPieceAt("A3");
@@ -556,7 +556,7 @@ test("King cannot check another king", async () => {
   ]);
 
   const move = await board.move("A1", "A2");
-  expect(move).toHaveProperty("success", false);
+  expect(move.success).toBe(false);
 
   expect(board.checkColor).toBeNull();
   expect(board.checkmateColor).toBeNull();
@@ -577,14 +577,14 @@ test("Checkmate canceled on undo", async () => {
   );
 
   const move = await board.move("C2", "D3");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
   expect(board.checkColor).toBe(Color.White);
   expect(board.checkmateColor).toBe(Color.White);
-  expect(board.isDraw).toBeFalse();
+  expect(board.isDraw).toBe(false);
 
-  const undone = board.undo();
-  expect(undone).toBeTrue();
+  const undo = board.undo();
+  expect(undo.success).toBe(true);
   expect(board.checkColor).toBeNull();
   expect(board.checkmateColor).toBeNull();
-  expect(board.isDraw).toBeFalse();
+  expect(board.isDraw).toBe(false);
 });

@@ -44,7 +44,7 @@ test("Bishop movement", async () => {
 
   const bishopMove = await board.move("C1", "G5");
 
-  expect(bishopMove).toHaveProperty("success", true);
+  expect(bishopMove.success).toBe(true);
 });
 
 test("Bishop capture", async () => {
@@ -58,7 +58,7 @@ test("Bishop capture", async () => {
   const bishopMove = await board.move("C1", "E3");
   const capturedPiece = board.getPieceAt("E3");
 
-  expect(bishopMove).toHaveProperty("success", true);
+  expect(bishopMove.success).toBe(true);
   expect(capturedPiece).toHaveProperty("type", Type.Bishop);
 });
 
@@ -70,7 +70,7 @@ test("Bishop illegal move", async () => {
 
   const bishopMove = await board.move("C1", "C4");
 
-  expect(bishopMove).toHaveProperty("success", false);
+  expect(bishopMove.success).toBe(false);
   expect(board.getPieceAt("C1")).toHaveProperty("type", Type.Bishop);
   expect(board.getPieceAt("C1")).toHaveProperty("color", Color.White);
 });

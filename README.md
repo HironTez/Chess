@@ -182,7 +182,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `checkColor` Color | null - color of the team in check
     - `checkmateColor` Color | null - color of the team in checkmate
     - `isDraw` boolean - did game ended with a draw
-    - `winnerColor` Color - color of the winner team
+    - `winnerColor` Color | null - color of the winner team
     - `colorToMove` Color - color of the team that makes the next move
     - `pieces` Array\<Piece> - the current set of pieces
     - `capturedPieces` Array\<Piece> - the set of captured pieces
@@ -194,7 +194,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
         - `endPosition` PositionInput
       - returns Promise\<MoveReturnT> - move result with details
     - `undo` - undo the latest move
-      - returns boolean
+      - returns UndoReturnT
     - `on` - set event handler. Overrides previous handler for the same event
       - params:
         - `event` Event
@@ -328,3 +328,11 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 
   - `success` boolean - whether the move succeeded
   - ...`MoveT` - properties from `MoveT` (exist only if `success` is true)
+  - `reason` string - the reason for the failure (exists only if `success` is false)
+
+- UndoReturnT
+
+  > An object that helps to handle successful and unsuccessful undo events
+
+  - `success` boolean - whether the undo was successful
+  - `reason` string - the reason for the failure (exists only if `success` is false)

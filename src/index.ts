@@ -3,6 +3,7 @@ import type {
   MoveReturnT,
   MoveT,
   PromotionTypeT,
+  UndoReturnT,
 } from "./board";
 import { Board, CustomBoard, Event, MoveType, Status } from "./board";
 import {
@@ -43,4 +44,5 @@ export type {
   PointT,
   PositionInputT,
   PromotionTypeT,
+  UndoReturnT,
 };

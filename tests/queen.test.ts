@@ -50,7 +50,7 @@ test("Queen basic movement", async () => {
   const queenMove = await board.move("D1", "H5");
   const queenAtNewPosition = board.getPieceAt("H5");
 
-  expect(queenMove).toHaveProperty("success", true);
+  expect(queenMove.success).toBe(true);
   expect(queenAtNewPosition).toHaveProperty("type", Type.Queen);
 });
 
@@ -65,7 +65,7 @@ test("Queen capture piece", async () => {
   const queenMove = await board.move("D1", "H5");
   const capturedPiece = board.getPieceAt("H5");
 
-  expect(queenMove).toHaveProperty("success", true);
+  expect(queenMove.success).toBe(true);
   expect(capturedPiece).toHaveProperty("type", Type.Queen);
   expect(capturedPiece).toHaveProperty("color", Color.White);
 });
@@ -80,7 +80,7 @@ test("Queen illegal move", async () => {
   const queenMove = await board.move("D1", "E3");
   const queenAtNewPosition = board.getPieceAt("D1");
 
-  expect(queenMove).toHaveProperty("success", false);
+  expect(queenMove.success).toBe(false);
   expect(queenAtNewPosition).toHaveProperty("type", Type.Queen);
   expect(queenAtNewPosition).toHaveProperty("color", Color.White);
 });

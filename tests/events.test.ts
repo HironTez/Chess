@@ -18,10 +18,10 @@ test("Should trigger 'boardChange' event when the board state changes", async ()
   );
 
   const move = await board.move("E2", "E4");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const boardChangeTriggered = await promise;
-  expect(boardChangeTriggered).toBeTrue();
+  expect(boardChangeTriggered).toBe(true);
 });
 
 test("Should trigger 'check' event when a king is in check", async () => {
@@ -41,7 +41,7 @@ test("Should trigger 'check' event when a king is in check", async () => {
   );
 
   const move = await board.move("F7", "F8");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const checkColor = await promise;
   expect(checkColor).toBe(Color.Black);
@@ -65,7 +65,7 @@ test("Should trigger 'checkmate' event when a king is in checkmate", async () =>
   );
 
   const move = await board.move("A1", "A8");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const checkmateColor = await promise;
   expect(checkmateColor).toBe(Color.Black);
@@ -88,10 +88,10 @@ test("Should trigger 'draw' event when the game is in draw", async () => {
   );
 
   const move = await board.move("B1", "B6");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const drawTriggered = await promise;
-  expect(drawTriggered).toBeTrue();
+  expect(drawTriggered).toBe(true);
 });
 
 test("Should trigger 'move' event when a piece moves", async () => {
@@ -113,10 +113,10 @@ test("Should trigger 'move' event when a piece moves", async () => {
   );
 
   const move = await board.move("E2", "E4");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const moveTriggered = await promise;
-  expect(moveTriggered).toBeTrue();
+  expect(moveTriggered).toBe(true);
 });
 
 test("Should trigger 'capture' event when a piece captures another piece", async () => {
@@ -142,11 +142,11 @@ test("Should trigger 'capture' event when a piece captures another piece", async
 
   const move1 = await board.move("A2", "A4");
   const move2 = await board.move("B4", "A3");
-  expect(move1).toHaveProperty("success", true);
-  expect(move2).toHaveProperty("success", true);
+  expect(move1.success).toBe(true);
+  expect(move2.success).toBe(true);
 
   const captureTriggered = await promise;
-  expect(captureTriggered).toBeTrue();
+  expect(captureTriggered).toBe(true);
 });
 
 test("Should trigger 'promotion' event when a pawn is promoted", async () => {
@@ -167,10 +167,10 @@ test("Should trigger 'promotion' event when a pawn is promoted", async () => {
   );
 
   const move = await board.move("F7", "F8");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const promotionTriggered = await promise;
-  expect(promotionTriggered).toBeTrue();
+  expect(promotionTriggered).toBe(true);
 });
 
 test("Should trigger 'castling' event when castling occurs", async () => {
@@ -200,10 +200,10 @@ test("Should trigger 'castling' event when castling occurs", async () => {
   );
 
   const move = await board.move("E1", "G1");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const castlingTriggered = await promise;
-  expect(castlingTriggered).toBeTrue();
+  expect(castlingTriggered).toBe(true);
 });
 
 test("Should trigger 'check resolve' event when check is resolved", async () => {
@@ -228,16 +228,16 @@ test("Should trigger 'check resolve' event when check is resolved", async () => 
   );
 
   const move = await board.move("F7", "F8");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const checkColor = await promise;
   expect(checkColor).toBe(Color.Black);
 
   const move2 = await board.move("E8", "F8");
-  expect(move2).toHaveProperty("success", true);
+  expect(move2.success).toBe(true);
 
   const checkResolveTriggered = await promise2;
-  expect(checkResolveTriggered).toBeTrue();
+  expect(checkResolveTriggered).toBe(true);
   expect(board.checkColor).toBeNull();
 });
 
@@ -264,15 +264,15 @@ test("Should trigger 'checkmate resolve' event when checkmate is undone", async 
   );
 
   const move = await board.move("A1", "A8");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const checkmateColor = await promise;
   expect(checkmateColor).toBe(Color.Black);
 
-  const undone = board.undo();
-  expect(undone).toBe(true);
+  const undo = board.undo();
+  expect(undo.success).toBe(true);
   const checkmateResolveTriggered = await promise2;
-  expect(checkmateResolveTriggered).toBeTrue();
+  expect(checkmateResolveTriggered).toBe(true);
   expect(board.checkmateColor).toBeNull();
 });
 
@@ -298,13 +298,13 @@ test("Should trigger 'draw resolve' event when draw is undone", async () => {
   );
 
   const move = await board.move("B1", "B6");
-  expect(move).toHaveProperty("success", true);
+  expect(move.success).toBe(true);
 
   const drawTriggered = await promise;
-  expect(drawTriggered).toBeTrue();
+  expect(drawTriggered).toBe(true);
 
-  const undone = board.undo();
-  expect(undone).toBe(true);
+  const undo = board.undo();
+  expect(undo.success).toBe(true);
   const drawResolveTriggered = await promise2;
   expect(drawResolveTriggered).toBe(true);
   expect(board.isDraw).toBe(false);

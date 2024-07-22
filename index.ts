@@ -7,6 +7,7 @@ import type {
   PositionInputT,
   PromotionTypeT,
   Status,
+  UndoReturnT,
 } from "./src";
 import {
   Bishop,
@@ -48,4 +49,5 @@ export type {
   PointT,
   PositionInputT,
   PromotionTypeT,
+  UndoReturnT,
 };

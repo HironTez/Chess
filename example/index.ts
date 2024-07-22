@@ -30,7 +30,7 @@ const main = async () => {
   });
 
   while (true) {
-    await evaluateBoard(board);
+    // await evaluateBoard(board);
 
     const shouldAutoMove =
       board.colorToMove === Color.Black && board.status === Status.Active;
@@ -40,11 +40,11 @@ const main = async () => {
       : await input("Enter your move: ");
 
     if (movePrompt === "undo") {
-      board.undo();
+      undo(board);
     } else if (movePrompt === "auto") {
       await autoMove(board);
     } else {
-      move(board, movePrompt);
+      await move(board, movePrompt);
     }
   }
 };
@@ -63,19 +63,29 @@ const move = async (board: Board, movePrompt: string) => {
     return console.error("Invalid input! Try again.");
 
   const move = await board.move(startPosition, endPosition);
-  if (!move.success) return console.error("Invalid move! Try again.");
+  if (!move.success)
+    return console.error(`Invalid move! Try again. Reason: ${move.reason}`);
 };
 
 const autoMove = async (board: Board) => {
-  const move = await board.autoMove(3);
+  const move = await board.autoMove(2);
   if (!move.success) {
-    return console.error("Error while performing an auto move");
+    return console.error(
+      `Error while performing an auto move. Reason: ${move.reason}`,
+    );
   }
 
   const piece = board.getPieceAt(move.endPosition)!;
   console.log(
     `Moved ${piece.color} ${piece.type} from ${move.startPosition.notation} to ${move.endPosition.notation}`,
   );
+};
+
+const undo = (board: Board) => {
+  const undo = board.undo();
+  if (!undo.success) {
+    return console.error(`Error while undoing. Reason: ${undo.reason}`);
+  }
 };
 
 main();

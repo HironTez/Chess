@@ -36,7 +36,7 @@ test("Rook basic movement", async () => {
   const rookMove = await board.move("A1", "A4");
   const rookAtNewPosition = board.getPieceAt("A4");
 
-  expect(rookMove).toHaveProperty("success", true);
+  expect(rookMove.success).toBe(true);
   expect(rookAtNewPosition).toHaveProperty("type", Type.Rook);
   expect(rookAtNewPosition).toHaveProperty("color", Color.White);
 });
@@ -51,7 +51,7 @@ test("Rook horizontal movement", async () => {
   const rookMove = await board.move("A1", "D1");
   const rookAtNewPosition = board.getPieceAt("D1");
 
-  expect(rookMove).toHaveProperty("success", true);
+  expect(rookMove.success).toBe(true);
   expect(rookAtNewPosition).toHaveProperty("type", Type.Rook);
   expect(rookAtNewPosition).toHaveProperty("color", Color.White);
 });
@@ -66,7 +66,7 @@ test("Rook vertical movement", async () => {
   const rookMove = await board.move("A1", "A5");
   const rookAtNewPosition = board.getPieceAt("A5");
 
-  expect(rookMove).toHaveProperty("success", true);
+  expect(rookMove.success).toBe(true);
   expect(rookAtNewPosition).toHaveProperty("type", Type.Rook);
   expect(rookAtNewPosition).toHaveProperty("color", Color.White);
 });
@@ -82,7 +82,7 @@ test("Rook capture piece", async () => {
   const rookMove = await board.move("A1", "A8");
   const rookAtNewPosition = board.getPieceAt("A8");
 
-  expect(rookMove).toHaveProperty("success", true);
+  expect(rookMove.success).toBe(true);
   expect(rookAtNewPosition).toHaveProperty("type", Type.Rook);
   expect(rookAtNewPosition).toHaveProperty("color", Color.White);
 });
@@ -97,6 +97,6 @@ test("Rook illegal move", async () => {
   const rookMove = await board.move("A1", "B2");
   const rookAtNewPosition = board.getPieceAt("B2");
 
-  expect(rookMove).toHaveProperty("success", false);
+  expect(rookMove.success).toBe(false);
   expect(rookAtNewPosition).toBeUndefined();
 });

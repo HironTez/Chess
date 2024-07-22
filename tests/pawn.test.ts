@@ -30,7 +30,7 @@ test("Pawn basic move", async () => {
 
   const pawnMove = await board.move("E2", "E3");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(board.getPieceAt("E3")).toHaveProperty("type", Type.Pawn);
   expect(board.getPieceAt("E3")).toHaveProperty("color", Color.White);
 });
@@ -44,7 +44,7 @@ test("Pawn double move from initial position", async () => {
 
   const pawnMove = await board.move("E2", "E4");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(board.getPieceAt("E4")).toHaveProperty("type", Type.Pawn);
   expect(board.getPieceAt("E4")).toHaveProperty("color", Color.White);
 });
@@ -60,7 +60,7 @@ test("Pawn capture piece", async () => {
   const pawnMove = await board.move("E4", "D5");
   const capturedPiece = board.getPieceAt("D5");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(capturedPiece).toHaveProperty("type", Type.Pawn);
   expect(capturedPiece).toHaveProperty("color", Color.White);
 });
@@ -77,8 +77,8 @@ test("En passant", async () => {
   const enPassantMove = await board.move("B4", "A3");
   const capturedPiece = board.getPieceAt("A4");
 
-  expect(pawnDoubleMove).toHaveProperty("success", true);
-  expect(enPassantMove).toHaveProperty("success", true);
+  expect(pawnDoubleMove.success).toBe(true);
+  expect(enPassantMove.success).toBe(true);
   expect(capturedPiece).toBeUndefined();
 
   const board2 = new CustomBoard([
@@ -90,7 +90,7 @@ test("En passant", async () => {
 
   const enPassantWithoutDoubleMove = await board2.move("B4", "A3");
 
-  expect(enPassantWithoutDoubleMove).toHaveProperty("success", false);
+  expect(enPassantWithoutDoubleMove.success).toBe(false);
 });
 
 test("Pawn promotion on reaching last rank", async () => {
@@ -103,7 +103,7 @@ test("Pawn promotion on reaching last rank", async () => {
   const pawnMove = await board.move("A7", "A8");
   const promotedPiece = board.getPieceAt("A8");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(promotedPiece).toHaveProperty("type", Type.Queen);
 });
 
@@ -120,7 +120,7 @@ test("Pawn promotion to Knight on reaching last rank", async () => {
   const pawnMove = await board.move("A7", "A8");
   const promotedPiece = board.getPieceAt("A8");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(promotedPiece).toHaveProperty("type", Type.Knight);
 });
 
@@ -139,7 +139,7 @@ test("Pawn promotion to Rook on reaching last rank", async () => {
   const pawnMove = await board.move("A7", "A8");
   const promotedPiece = board.getPieceAt("A8");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(promotedPiece).toHaveProperty("type", Type.Rook);
 });
 
@@ -158,7 +158,7 @@ test("Pawn promotion to Bishop on reaching last rank", async () => {
   const pawnMove = await board.move("A7", "A8");
   const promotedPiece = board.getPieceAt("A8");
 
-  expect(pawnMove).toHaveProperty("success", true);
+  expect(pawnMove.success).toBe(true);
   expect(promotedPiece).toHaveProperty("type", Type.Bishop);
 });
 
@@ -171,7 +171,7 @@ test("Pawn illegal move backward", async () => {
 
   const pawnMove = await board.move("E3", "E2");
 
-  expect(pawnMove).toHaveProperty("success", false);
+  expect(pawnMove.success).toBe(false);
   expect(board.getPieceAt("E3")).toHaveProperty("type", Type.Pawn);
   expect(board.getPieceAt("E3")).toHaveProperty("color", Color.White);
 });
@@ -187,9 +187,9 @@ test("Pawn illegal double move not from initial position", async () => {
   const blackKingMove = await board.move("E8", "E7");
   const pawnDoubleMove = await board.move("E3", "E5");
 
-  expect(pawnMove).toHaveProperty("success", true);
-  expect(blackKingMove).toHaveProperty("success", true);
-  expect(pawnDoubleMove).toHaveProperty("success", false);
+  expect(pawnMove.success).toBe(true);
+  expect(blackKingMove.success).toBe(true);
+  expect(pawnDoubleMove.success).toBe(false);
   expect(board.getPieceAt("E3")).toHaveProperty("type", Type.Pawn);
   expect(board.getPieceAt("E3")).toHaveProperty("color", Color.White);
 });
@@ -206,7 +206,7 @@ test("Pawn illegal capture forward", async () => {
     board.getPossibleMoves("E4").find((position) => position.notation === "E5"),
   ).toBeUndefined();
   const pawnMove = await board.move("E4", "E5");
-  expect(pawnMove).toHaveProperty("success", false);
+  expect(pawnMove.success).toBe(false);
 
   expect(board.getPieceAt("E4")).toHaveProperty("type", Type.Pawn);
   expect(board.getPieceAt("E4")).toHaveProperty("color", Color.White);

@@ -36,7 +36,7 @@ test("knight can move over other pieces", async () => {
 
   const moveOverPiece = await board.move("C1", "B3");
 
-  expect(moveOverPiece).toHaveProperty("success", true);
+  expect(moveOverPiece.success).toBe(true);
 });
 
 test("Knight capture movement", async () => {
@@ -50,7 +50,7 @@ test("Knight capture movement", async () => {
   const knightMove = await board.move("B1", "C3");
   const capturedPiece = board.getPieceAt("C3");
 
-  expect(knightMove).toHaveProperty("success", true);
+  expect(knightMove.success).toBe(true);
   expect(capturedPiece).toHaveProperty("type", Type.Knight);
 });
 
@@ -63,7 +63,7 @@ test("Knight illegal move", async () => {
 
   const knightMove = await board.move("B1", "B4");
 
-  expect(knightMove).toHaveProperty("success", false);
+  expect(knightMove.success).toBe(false);
   expect(board.getPieceAt("B1")).toHaveProperty("type", Type.Knight);
   expect(board.getPieceAt("B1")).toHaveProperty("color", Color.White);
 });
