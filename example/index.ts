@@ -1,9 +1,9 @@
-import { Board, Color, Status } from "../src";
+import { Board, Color } from "../src";
 import { capitalize, input, parseMoveInput, stringifyBoard } from "./helpers";
 
 const main = async () => {
   console.log("----------\nChess game\n----------\n");
-  console.log('Input example: "a2 a4" or "undo" or "auto"');
+  console.log('Input example: "a2 a4" or "undo" or "auto" or "evaluate"');
 
   const board = new Board({
     onCheck: (color) => {
@@ -30,16 +30,16 @@ const main = async () => {
   });
 
   while (true) {
-    // await evaluateBoard(board);
-
     const shouldAutoMove =
-      board.colorToMove === Color.Black && board.status === Status.Active;
+      board.colorToMove === Color.Black && !board.winnerColor;
 
     const movePrompt = shouldAutoMove
       ? "auto"
       : await input("Enter your move: ");
 
-    if (movePrompt === "undo") {
+    if (movePrompt === "evaluate") {
+      await evaluateBoard(board);
+    } else if (movePrompt === "undo") {
       undo(board);
     } else if (movePrompt === "auto") {
       await autoMove(board);
@@ -50,7 +50,7 @@ const main = async () => {
 };
 
 const evaluateBoard = async (board: Board) => {
-  const positionValue = await board.evaluate(2);
+  const positionValue = await board.evaluate(3);
   const positionValueAbsolute =
     board.colorToMove === Color.White ? positionValue : -positionValue;
   console.log(`Positions value ${positionValueAbsolute}`);
@@ -68,7 +68,7 @@ const move = async (board: Board, movePrompt: string) => {
 };
 
 const autoMove = async (board: Board) => {
-  const move = await board.autoMove(2);
+  const move = await board.autoMove(3);
   if (!move.success) {
     return console.error(
       `Error while performing an auto move. Reason: ${move.reason}`,

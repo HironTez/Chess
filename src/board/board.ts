@@ -320,9 +320,11 @@ export class CustomBoard {
         const move = await this.movePiece(piece.position, position, {
           silent: true,
         });
+
         if (!move.success) return move;
 
         const score = await this.alphaBeta(depth - 1, false);
+
         if (score >= maxScore) {
           maxScore = score;
           startPosition = piece.position;
@@ -341,7 +343,9 @@ export class CustomBoard {
       return await this.movePiece(startPosition, endPosition);
     }
 
-    return unsuccess("Internal: Invalid positions");
+    return unsuccess(
+      `Internal: Invalid positions (${startPosition?.notation}-${endPosition?.notation})`,
+    );
   }
 
   private _undo(options?: MoveOptions): UndoReturnT {
@@ -447,6 +451,8 @@ export class CustomBoard {
     endPosition: MutablePosition,
     options?: MoveOptions,
   ): Promise<MoveReturnT> {
+    const startNotation = startPosition.notation;
+
     const piece = this._getPieceAt(startPosition);
     if (!piece)
       return unsuccess(`Could not find piece at ${startPosition.notation}`);
@@ -890,33 +896,21 @@ export class CustomBoard {
     return Status.Draw;
   }
 
+  private getRepeatedPositionsCount() {
+    const latestPostionHash = this._positionHashes.at(-1)!;
+    const repeatedPositions = this._positionHashes.filter(
+      (positionHash) => positionHash === latestPostionHash,
+    );
+
+    return repeatedPositions.length;
+  }
+
   private checkThreefoldRepetitionDraw() {
-    const lastMovedPiece = this._lastMovedPiece;
-    if (lastMovedPiece) {
-      const lastMovedPiecePosition = lastMovedPiece.position;
-      const lastMovedPieceId = lastMovedPiece.id;
-
-      if (this._positionHashes.length >= 10) {
-        const repeatedMoves = this._historyMoves.filter(
-          (move) =>
-            move.pieceId === lastMovedPieceId &&
-            move.endPosition.distanceTo(lastMovedPiecePosition) === 0,
-        );
-
-        if (repeatedMoves.length >= 3) {
-          const latestPostionHash = this._positionHashes.at(-1)!;
-          const repeatedPositions = this._positionHashes.filter(
-            (positionHash) => positionHash === latestPostionHash,
-          );
-
-          if (repeatedPositions.length >= 3) {
-            return true;
-          }
-        }
-      }
+    if (this._positionHashes.length >= 8) {
+      return this.getRepeatedPositionsCount() >= 3;
     }
 
-    return false;
+    return 0;
   }
 
   private isKingInCheck(king: King, ignorePiece: MutablePiece | undefined) {
@@ -1044,21 +1038,24 @@ export class CustomBoard {
       return Infinity;
     if (this._isDraw) return 0;
 
-    const materialWeight = 15;
-    const mobilityWeight = 1;
-    const positioningWeight = 3;
+    const materialWeight = 1;
+    const mobilityWeight = 0.001;
+    const positioningWeight = 0.001;
+    const repeatingPenalty = 4;
 
     const currentTeamScore = this.evaluateTeam(
       this._colorToMove,
       materialWeight,
       mobilityWeight,
       positioningWeight,
+      repeatingPenalty,
     );
     const opponentTeamScore = this.evaluateTeam(
       invertColor(this._colorToMove),
       materialWeight,
       mobilityWeight,
       positioningWeight,
+      repeatingPenalty,
     );
 
     return currentTeamScore - opponentTeamScore;
@@ -1069,6 +1066,7 @@ export class CustomBoard {
     materialWeight: number,
     mobilityWeight: number,
     positioningWeight: number,
+    repeatingPenalty: number,
   ) {
     const enemyKing = this.getKing(invertColor(color));
 
@@ -1087,7 +1085,7 @@ export class CustomBoard {
       [],
     );
     const teamMobilityScore = teamLegalMoves.length;
-    const teamPositioningScore = teamLegalMoves.reduce((score, position, i) => {
+    const teamPositioningScore = teamLegalMoves.reduce((score, position) => {
       const distanceToEnemyKing = enemyKing
         ? position.distanceTo(enemyKing.position)
         : 0;
@@ -1095,11 +1093,16 @@ export class CustomBoard {
       return score + (8 - distanceToEnemyKing) + (3 - distanceToCenter);
     }, 0);
 
-    return (
+    const repeatingCount = this.getRepeatedPositionsCount();
+
+    const score =
       teamMaterialScore * materialWeight +
       teamMobilityScore * mobilityWeight +
-      teamPositioningScore * positioningWeight
-    );
+      teamPositioningScore * positioningWeight;
+
+    const penalty = repeatingCount * repeatingPenalty;
+
+    return score - penalty;
   }
 
   private _status = Status.Active;

@@ -457,7 +457,6 @@ test("Should be a draw when a position repeats 3 times (threefold repetition)", 
   await board.move("H8", "G6");
   await board.move("G3", "H1");
   await board.move("G6", "H8");
-  await board.move("H1", "G3");
 
   expect(board.isDraw).toBe(true);
 });
@@ -467,17 +466,17 @@ test("Should not be a draw when a position repeats 3 times but an irreversible m
     new King("A1", Color.White),
     new King("A8", Color.Black),
     new Knight("H1", Color.White),
+    new Knight("H8", Color.Black),
   ]);
 
   await board.move("H1", "G3");
-  await board.move("A8", "B8");
+  await board.move("H8", "G6");
   await board.move("G3", "H1");
-  await board.move("B8", "A8");
+  await board.move("G6", "H8");
   await board.move("H1", "G3");
   await board.move("A8", "B8");
   await board.move("G3", "H1");
-  await board.move("B8", "A8");
-  await board.move("H1", "G3");
+  await board.move("G6", "H8");
 
   expect(board.isDraw).toBe(false);
 });
@@ -491,14 +490,13 @@ test("Should not be a draw when a position repeats 3 times but an irreversible m
   ]);
 
   await board.move("H1", "G3");
-  await board.move("H8", "H7");
+  await board.move("H8", "G6");
   await board.move("G3", "H1");
-  await board.move("H7", "H8");
+  await board.move("G6", "H8");
   await board.move("H1", "G3");
-  await board.move("H8", "H7");
+  await board.move("H8", "G6");
   await board.move("G3", "H1");
-  await board.move("H7", "H8");
-  await board.move("H1", "G3");
+  await board.move("G6", "H8");
 
   expect(board.isDraw).toBe(false);
 });

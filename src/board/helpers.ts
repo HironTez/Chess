@@ -19,7 +19,7 @@ export const hashPositions = (pieces: MutablePiece[]) => {
 export const evaluatePiece = (pieceType: Type) => {
   switch (pieceType) {
     case Type.King:
-      return 200;
+      return -1;
     case Type.Queen:
       return 9;
     case Type.Rook:
