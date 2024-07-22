@@ -82,9 +82,14 @@ const autoMove = async (board: Board) => {
 };
 
 const undo = (board: Board) => {
-  const undo = board.undo();
-  if (!undo.success) {
-    return console.error(`Error while undoing. Reason: ${undo.reason}`);
+  const undoBlack = board.undo();
+  const undoWhite = board.undo();
+
+  let errorReason;
+  if (!undoBlack.success) errorReason = undoBlack.reason;
+  if (!undoWhite.success) errorReason = undoWhite.reason;
+  if (!undoBlack.success || !undoWhite.success) {
+    return console.error(`Error while undoing. Reason: ${errorReason}`);
   }
 };
 
