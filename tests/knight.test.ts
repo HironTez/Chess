@@ -14,7 +14,7 @@ test("knight possible positions", () => {
   ];
 
   const knight = new Knight("C4", Color.White);
-  const possibleMoves = knight.getPossibleMoves();
+  const possibleMoves = knight.getPotentialMoves();
   expect(possibleMoves).not.toBeEmpty();
 
   for (const position of expectedPositions) {

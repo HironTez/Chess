@@ -3,7 +3,7 @@ import { Color, CustomBoard, King, Position, Rook, Type } from "../src";
 
 test("rook possible positions", () => {
   const rook = new Rook("D4", Color.White);
-  const possibleMoves = rook.getPossibleMoves();
+  const possibleMoves = rook.getPotentialMoves();
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = rook.position;
 

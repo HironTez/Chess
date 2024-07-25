@@ -9,7 +9,7 @@ import {
 } from "../position";
 
 export class Queen extends MutablePiece {
-  getPossibleMoves() {
+  getPotentialMoves() {
     const possibleMoves: MutablePosition[] = [];
 
     const { x, y } = this.position;

@@ -4,7 +4,7 @@ import { isInLimit } from "../helpers";
 import { MutablePosition, areAlignedDiagonally } from "../position";
 
 export class Bishop extends MutablePiece {
-  getPossibleMoves() {
+  getPotentialMoves() {
     const possibleMoves: MutablePosition[] = [];
 
     const { x, y } = this.position;

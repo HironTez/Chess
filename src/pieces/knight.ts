@@ -3,7 +3,7 @@ import { MutablePiece, Type } from "./piece";
 import { MutablePosition, getDiff } from "../position";
 
 export class Knight extends MutablePiece {
-  getPossibleMoves() {
+  getPotentialMoves() {
     const { x, y } = this.position;
     return [
       new MutablePosition({ x: x + 2, y: y + 1 }),

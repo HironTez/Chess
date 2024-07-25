@@ -82,7 +82,7 @@ export abstract class MutablePieceAbstract extends PieceAbstract {
     this._isMoved = true;
   }
 
-  abstract getPossibleMoves(): MutablePosition[];
+  abstract getPotentialMoves(): MutablePosition[];
 
   abstract canMove(
     position: MutablePosition,

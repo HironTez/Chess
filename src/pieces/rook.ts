@@ -4,7 +4,7 @@ import { MutablePiece, Type } from "./piece";
 import { MutablePosition, areAlignedHorizontally } from "../position";
 
 export class Rook extends MutablePiece {
-  getPossibleMoves() {
+  getPotentialMoves() {
     const possibleMoves: MutablePosition[] = [];
 
     const { x, y } = this.position;

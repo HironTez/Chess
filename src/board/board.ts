@@ -417,7 +417,7 @@ export class CustomBoard {
     piece: MutablePiece,
     options?: MoveValidationOptions,
   ) {
-    const positions = piece.getPossibleMoves();
+    const positions = piece.getPotentialMoves();
     return positions.filter((position) =>
       this.isMoveValid(piece, position, options),
     );
@@ -427,7 +427,7 @@ export class CustomBoard {
     piece: MutablePiece,
     options?: MoveValidationOptions,
   ) {
-    const positions = piece.getPossibleMoves();
+    const positions = piece.getPotentialMoves();
     return positions.some((position) =>
       this.isMoveValid(piece, position, options),
     );

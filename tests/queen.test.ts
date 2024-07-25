@@ -4,7 +4,7 @@ import { isInLimit } from "../src/helpers";
 
 test("queen possible positions", () => {
   const queen = new Queen("D4", Color.White);
-  const possibleMoves = queen.getPossibleMoves();
+  const possibleMoves = queen.getPotentialMoves();
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = queen.position;
 

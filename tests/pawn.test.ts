@@ -9,7 +9,7 @@ test("Pawn possible positions", () => {
   ];
 
   const pawn = new Pawn("B2", Color.White);
-  const possibleMoves = pawn.getPossibleMoves();
+  const possibleMoves = pawn.getPotentialMoves();
   expect(possibleMoves).not.toBeEmpty();
 
   for (const position of expectedPositions) {

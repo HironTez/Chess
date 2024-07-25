@@ -4,7 +4,7 @@ import { isInLimit } from "../src/helpers";
 
 test("bishop possible positions", () => {
   const bishop = new Bishop("D4", Color.White);
-  const possibleMoves = bishop.getPossibleMoves();
+  const possibleMoves = bishop.getPotentialMoves();
   expect(possibleMoves).not.toBeEmpty();
   const { x, y } = bishop.position;
 

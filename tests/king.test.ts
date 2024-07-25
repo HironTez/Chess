@@ -14,7 +14,7 @@ test("king possible positions", () => {
   ];
 
   const king = new King("E4", Color.White);
-  const possibleMoves = king.getPossibleMoves();
+  const possibleMoves = king.getPotentialMoves();
   expect(possibleMoves).not.toBeEmpty();
 
   for (const position of expectedPositions) {

@@ -4,7 +4,7 @@ import { Color, MutablePiece, Type } from "./piece";
 import { MutablePosition } from "../position";
 
 export class Pawn extends MutablePiece {
-  getPossibleMoves() {
+  getPotentialMoves() {
     const { x, y } = this.position;
     const possibleMoves: MutablePosition[] = [];
 
