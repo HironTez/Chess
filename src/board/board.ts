@@ -1128,3 +1128,8 @@ export class CustomBoard {
   private onCastling: EventHandlerT["Castling"] | undefined;
   private onPromotion: EventHandlerT["Promotion"] | undefined;
 }
+
+// TODO: FEN starting position input
+// TODO: possible move type (move, capture)
+// TODO: transposition hash
+// TODO: process unexpected errors handling (in autoMove and alphaBeta methods)
