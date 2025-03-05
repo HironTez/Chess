@@ -433,17 +433,16 @@ export class CustomBoard {
     );
   }
 
-  private makeMoveReadonly(mutableMove: MutableMoveT) {
-    const move: MoveT = { ...mutableMove };
+  private makeMoveReadonly<T extends MutableMoveT>(mutableMove: T): MoveT {
+    const move: Record<string, unknown> = { ...mutableMove };
     for (const keyName in move) {
-      const key = keyName as keyof typeof move;
-      const value = move[key];
-      if (value instanceof MutablePosition) {
-        (move as any)[key] = new Position(value);
+      const key = keyName;
+      if (move[key] instanceof MutablePosition) {
+        Object.assign(move, {[key]: new Position(move[key])});
       }
     }
 
-    return move;
+    return move as MoveT;
   }
 
   private async movePiece(

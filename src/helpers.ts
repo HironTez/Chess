@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 const isFunction = <F extends Function>(value: unknown | F): value is F =>
   typeof value === "function";
 

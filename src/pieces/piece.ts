@@ -49,6 +49,7 @@ export abstract class PieceAbstract {
     return this._position.x === point.x && this._position.y === point.y;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onMove(position: MutablePosition) {}
 
   abstract readonly type: Type;

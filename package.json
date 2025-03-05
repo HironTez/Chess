@@ -16,10 +16,14 @@
     "release:major": "bun test && bun run build && npm version major && npm publish"
   },
   "devDependencies": {
-    "bun-types": "^1.1.20",
-    "prettier": "^3.3.3",
-    "prettier-plugin-organize-imports": "^4.0.0",
-    "typescript": "^5.5.3"
+    "@eslint/js": "9.21.0",
+    "bun-types": "1.2.4",
+    "eslint": "9.21.0",
+    "globals": "16.0.0",
+    "prettier": "3.5.3",
+    "prettier-plugin-organize-imports": "4.1.0",
+    "typescript": "5.8.2",
+    "typescript-eslint": "8.26.0"
   },
   "repository": {
     "type": "git",
