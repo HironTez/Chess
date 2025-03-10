@@ -58,7 +58,7 @@ const checkColor = board.checkColor;
 const checkmateColor = board.checkmateColor;
 // null
 const whiteKingPossibleMoves = board.getPossibleMoves("B2");
-// [array of Position instances]
+// [array of MoveT]
 const isBlackPawnAtA3 = blackPawn?.isAt("A3");
 // true
 ```
@@ -214,7 +214,7 @@ const isBlackPawnAtA3 = blackPawn?.isAt("A3");
     - `getPossibleMoves` - get all possible moves of a specified piece
       - params:
         - `position` PositionInput
-      - returns Array\<Position> - positions for valid moves
+      - returns Array\<MoveT> - list of valid moves
     - `evaluate` - evaluate current positions from the perspective of the current team to move
       - params:
         - `depth` number (optional) (default: 2) - the depth of the forecast

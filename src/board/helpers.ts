@@ -64,3 +64,7 @@ export const dedupePositionsList = (
     return pos ? pos === position : false;
   });
 };
+
+export const predicateNullable = <T>(
+  entry: T,
+): entry is Exclude<T, null | undefined> => entry != null;

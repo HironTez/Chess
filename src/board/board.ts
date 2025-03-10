@@ -23,6 +23,7 @@ import {
   dedupePositionsList,
   evaluatePiece,
   hashPositions,
+  predicateNullable,
   sortPiecesByPower,
 } from "./helpers";
 
@@ -39,13 +40,8 @@ type DynamicMoveT<T extends Position> = {
   pieceId: string;
   isPieceFirstMove: boolean;
 } & (
-  | {
-      type: MoveType.Move;
-    }
-  | {
-      type: MoveType.Capture;
-      capturedPosition: T;
-    }
+  | { type: MoveType.Move }
+  | { type: MoveType.Capture; capturedPosition: T }
   | {
       type: MoveType.Castling;
       castlingRookStartPosition: T;
@@ -114,9 +110,7 @@ export enum Status {
   Draw = "draw",
 }
 
-type MoveOptions = {
-  silent: boolean;
-};
+type MoveOptions = { silent: boolean };
 type MoveValidationOptions = {
   ignoreTurn?: boolean;
   ignoreCheckmate?: boolean;
@@ -286,8 +280,8 @@ export class CustomBoard {
     const piece = this._getPieceAt(positionInput);
     if (!piece) return [];
 
-    const positions = this._getLegalMovesOf(piece);
-    return positions.map((position) => new Position(position));
+    const mutableMoves = this._getLegalMovesOf(piece);
+    return mutableMoves.map(this.makeMoveReadonly);
   }
 
   async move(
@@ -316,10 +310,12 @@ export class CustomBoard {
 
     const teamPieces = this._getPiecesByColor(this._colorToMove);
     for (const piece of sortPiecesByPower(teamPieces)) {
-      for (const position of this._getLegalMovesOf(piece)) {
-        const move = await this.movePiece(piece.position, position, {
-          silent: true,
-        });
+      for (const possibleMove of this._getLegalMovesOf(piece)) {
+        const move = await this.movePiece(
+          piece.position,
+          possibleMove.endPosition,
+          { silent: true },
+        );
 
         if (!move.success) return move;
 
@@ -328,7 +324,7 @@ export class CustomBoard {
         if (score >= maxScore) {
           maxScore = score;
           startPosition = piece.position;
-          endPosition = position;
+          endPosition = possibleMove.endPosition;
         }
 
         const undo = this._undo({ silent: true });
@@ -418,9 +414,9 @@ export class CustomBoard {
     options?: MoveValidationOptions,
   ) {
     const positions = piece.getPotentialMoves();
-    return positions.filter((position) =>
-      this.isMoveValid(piece, position, options),
-    );
+    return positions
+      .map((position) => this.validateMove(piece, position, options))
+      .filter(predicateNullable);
   }
 
   private hasPieceLegalMoves(
@@ -438,7 +434,7 @@ export class CustomBoard {
     for (const keyName in move) {
       const key = keyName;
       if (move[key] instanceof MutablePosition) {
-        Object.assign(move, {[key]: new Position(move[key])});
+        Object.assign(move, { [key]: new Position(move[key]) });
       }
     }
 
@@ -517,10 +513,7 @@ export class CustomBoard {
 
     this.handleBoardChange(piece, options?.silent);
 
-    return {
-      success: true,
-      ...this.makeMoveReadonly(mutableMove),
-    };
+    return { success: true, ...this.makeMoveReadonly(mutableMove) };
   }
 
   private getCapturePosition(
@@ -681,10 +674,7 @@ export class CustomBoard {
         ) {
           return {
             castlingRook: rook,
-            castlingRookNewPosition: new MutablePosition({
-              x: newRookPosX,
-              y,
-            }),
+            castlingRookNewPosition: new MutablePosition({ x: newRookPosX, y }),
           };
         }
       }
@@ -1007,8 +997,8 @@ export class CustomBoard {
 
     const teamPieces = this._getPiecesByColor(this._colorToMove);
     for (const piece of sortPiecesByPower(teamPieces)) {
-      for (const position of this._getLegalMovesOf(piece)) {
-        await this.movePiece(piece.position, position, {
+      for (const move of this._getLegalMovesOf(piece)) {
+        await this.movePiece(piece.position, move.endPosition, {
           silent: true,
         });
 
@@ -1077,7 +1067,10 @@ export class CustomBoard {
         const pieceLegalMoves = this._getLegalMovesOf(piece, {
           ignoreTurn: true,
         });
-        return dedupePositionsList(positions.concat(pieceLegalMoves));
+        const pieceLegalMovePositions = pieceLegalMoves.map(
+          (move) => move.endPosition,
+        );
+        return dedupePositionsList(positions.concat(pieceLegalMovePositions));
       },
       [],
     );
@@ -1129,6 +1122,6 @@ export class CustomBoard {
 }
 
 // TODO: FEN starting position input
-// TODO: possible move type (move, capture)
 // TODO: transposition hash
 // TODO: process unexpected errors handling (in autoMove and alphaBeta methods)
+// TODO: more informative results from undo method
